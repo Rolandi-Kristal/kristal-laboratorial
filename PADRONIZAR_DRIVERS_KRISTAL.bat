@@ -5,8 +5,8 @@ color 0A
 echo Padronizando pastas de drivers da KRISTAL...
 echo.
 
-set OLD1=C:\kristal_laboratorial\drivers\Mediarte
-set OLD2=C:\kristal_laboratorial\drivers\KRISTAL_LABORATORIAL\EQUIPAMENTOS\COMPLAB_ADVANCED_DLL
+set OLD1=C:\kristal_laboratorial\drivers\KRISTAL
+set OLD2=C:\kristal_laboratorial\drivers\KRISTAL_LABORATORIAL\EQUIPAMENTOS\KRISTAL_ADVANCED_DLL
 set NEW=C:\kristal_laboratorial\drivers\KRISTAL_LABORATORIAL\EQUIPAMENTOS\KRISTAL_ADVANCE_DLL
 
 if exist "%OLD1%" (

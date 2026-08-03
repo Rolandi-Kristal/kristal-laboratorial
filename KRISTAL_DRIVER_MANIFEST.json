@@ -4,11 +4,7 @@
   "version": "1.0.1",
   "driverRoot": "drivers/KRISTAL_LABORATORIAL/EQUIPAMENTOS",
   "folderPolicy": "Não usar nome de fornecedor nas pastas, equipamentos, drivers ou manifesto. Módulos avançados ficam em KRISTAL_ADVANCE_DLL.",
-  "forbiddenNames": [
-    "COMPLAB",
-    "COMPLAB_ADVANCED_DLL",
-    "Mediarte"
-  ],
+  "forbiddenNames": [],
   "communicationModes": [
     "TCP_IP",
     "SERIAL_USB",
@@ -247,5 +243,6 @@
       "sha256": "d6fece0aa5bc21e61eadc668568d97e28245c487101d6562331ef22cb9418536"
     }
   ],
-  "missingSourceFiles": []
+  "missingSourceFiles": [],
+  "identityPolicy": "Exibir somente identidade KRISTAL LABORATORIAL no sistema."
 }

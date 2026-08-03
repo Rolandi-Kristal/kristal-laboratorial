@@ -99,9 +99,9 @@ class EquipmentAdapterService {
         conexao: 'Serial/USB/Arquivo',
       ),
       EquipmentProfile(
-        id: 'EQ-COMPLAB-ADVANCED',
-        nome: 'Complab Advanced',
-        modelo: 'Complab Advanced',
+        id: 'EQ-KRISTAL-ADVANCED',
+        nome: 'KRISTAL Advanced',
+        modelo: 'KRISTAL Advanced',
         protocolo: 'DLL/Arquivo/SQL',
         conexao: 'Arquivo/SQL/DLL',
       ),

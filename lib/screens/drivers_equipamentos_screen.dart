@@ -21,7 +21,8 @@ class _DriversEquipamentosScreenState extends State<DriversEquipamentosScreen> {
 
   List<Map<String, dynamic>> drivers = <Map<String, dynamic>>[];
   bool loading = true;
-  String mensagem = 'Cadastre o caminho raiz onde os drivers estão armazenados.';
+  String mensagem =
+      'Cadastre o caminho raiz onde os drivers estão armazenados.';
 
   @override
   void initState() {
@@ -160,7 +161,7 @@ class _DriversEquipamentosScreenState extends State<DriversEquipamentosScreen> {
                       enabled: permitido,
                       decoration: const InputDecoration(
                         labelText: 'Caminho raiz dos drivers',
-                        hintText: r'D:\projeto lac\Mediarte',
+                        hintText: r'D:\kristal_laboratorial\drivers',
                         border: OutlineInputBorder(),
                       ),
                     ),

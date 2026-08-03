@@ -1,0 +1,57 @@
+{
+  "origem": "ZD5-1-17-7415.rar",
+  "finalidade": "Driver Zebra/ZD5 para impressão real de etiquetas de coleta.",
+  "driverRootEsperadoServidor": "D:\\kristal_laboratorial\\drivers\\impressoras\\zebra_zd5\\ZD5-1-17-7415",
+  "instaladorControlado": "scripts/install_zebra_zd5_driver.ps1",
+  "arquivosCriticos": [
+    {
+      "nome": "EULA.pdf",
+      "caminhoRelativo": "EULA.pdf",
+      "tamanho": 100409,
+      "sha256": "5960FB1A21A4AE7824896FBDB8B3E288D01C3979FECD08EFD1134BB5B1F42B08"
+    },
+    {
+      "nome": "notices.html",
+      "caminhoRelativo": "notices.html",
+      "tamanho": 44910,
+      "sha256": "853F45CA0A1781484032D99F827541B7A936DCB193253D61C8A4042865E6D98E"
+    },
+    {
+      "nome": "PrnInst.exe",
+      "caminhoRelativo": "PrnInst.exe",
+      "tamanho": 2184752,
+      "sha256": "95FC7EC697B6230062537905E77568880751F623A073C98E4CA6B8502037FBED"
+    },
+    {
+      "nome": "Readme.htm",
+      "caminhoRelativo": "Readme.htm",
+      "tamanho": 49844,
+      "sha256": "0232D6EFEA39BCAC122DF1903F785247DCE09F9C370C8C8C5E96CDAF20ECFB05"
+    },
+    {
+      "nome": "StatMonSetup.exe",
+      "caminhoRelativo": "StatMonSetup.exe",
+      "tamanho": 758832,
+      "sha256": "CCC6522F76302F06050C929E90804D8E5FC09F8DA00E1F08DBAE1673C07567FC"
+    },
+    {
+      "nome": "zbrn.cat",
+      "caminhoRelativo": "ZBRN\\zbrn.cat",
+      "tamanho": 378486,
+      "sha256": "C9D6A3DF4D7725B87A9DF1D9732AC0CF611700D791B50285ABDA1D8615985546"
+    },
+    {
+      "nome": "ZBRN.inf",
+      "caminhoRelativo": "ZBRN\\ZBRN.inf",
+      "tamanho": 190045,
+      "sha256": "D9FFEEE3174FF60A37C77F86CFCDD4128B5265EDEFABC0972B431007A24C91FA"
+    },
+    {
+      "nome": "ZebraFD.exe",
+      "caminhoRelativo": "ZebraFD.exe",
+      "tamanho": 3931776,
+      "sha256": "3D53924CF71BBF03751D0B60782358A3ECF4CF7BD446D2FCFCBE80140A4BD039"
+    }
+  ],
+  "politicaExecucao": "Instalar INF via pnputil. Executar PrnInst.exe apenas com confirmação administrativa."
+}

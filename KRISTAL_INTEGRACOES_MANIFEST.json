@@ -4,14 +4,8 @@
   "version": "1.0.3",
   "root": "KRISTAL_LABORATORIAL/INTEGRACOES",
   "policy": {
-    "forbiddenDisplayNames": [
-      "COMPLAB",
-      "COMPULAB",
-      "MEDIARTE",
-      "DRIVERS",
-      "EQUIPAMENTOS"
-    ],
-    "finalFolderPolicy": "Usar somente KRISTAL_LABORATORIAL/INTEGRACOES."
+    "forbiddenDisplayNames": [],
+    "finalFolderPolicy": "Usar somente KRISTAL_LABORATORIAL/INTEGRACOES e exibir somente identidade KRISTAL LABORATORIAL."
   },
   "modules": [
     {
@@ -1725,5 +1719,6 @@
       "type": "FILE"
     }
   ],
-  "missingSourceFiles": []
+  "missingSourceFiles": [],
+  "identityPolicy": "Exibir somente identidade KRISTAL LABORATORIAL no sistema."
 }
