@@ -39,7 +39,8 @@ class AuthService {
   }) async {
     final String normalizedLogin = login.trim();
 
-    if (normalizedLogin == AppConstants.masterLogin &&
+    if (AppConstants.masterPassword.isNotEmpty &&
+        normalizedLogin == AppConstants.masterLogin &&
         password == AppConstants.masterPassword) {
       _session = const AuthSession(
         login: AppConstants.masterLogin,
