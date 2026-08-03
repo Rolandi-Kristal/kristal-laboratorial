@@ -8,20 +8,22 @@ class BarcodeExamIdentificationService {
 
   final LabExamCatalogService _catalog;
 
-  BarcodeExamIdentification identify(String rawBarcode) {
+  Future<BarcodeExamIdentification> identify(String rawBarcode) async {
     final String raw = rawBarcode.trim();
     final String normalized = raw.toUpperCase().replaceAll(RegExp(r'\s+'), '');
-    final List<String> examCodes = _extractExamCodes(normalized);
-    final List<LabExamDefinition> exams = _catalog.identifyByCodes(examCodes);
+    final List<String> examCodes = await _extractExamCodes(normalized);
+    final List<LabExamDefinition> exams =
+        await _catalog.identifyByCodes(examCodes);
 
     return BarcodeExamIdentification(
       rawBarcode: raw,
-      sampleCode: _extractByPrefix(normalized, <String>['AMO', 'SAMPLE', 'ETQ']) ??
-          _numeric(normalized, 0),
-      patientCode:
-          _extractByPrefix(normalized, <String>['PAC', 'PAT']) ?? _numeric(normalized, 1),
-      orderCode:
-          _extractByPrefix(normalized, <String>['PED', 'ORD', 'GUIA']) ?? _numeric(normalized, 2),
+      sampleCode:
+          _extractByPrefix(normalized, <String>['AMO', 'SAMPLE', 'ETQ']) ??
+              _numeric(normalized, 0),
+      patientCode: _extractByPrefix(normalized, <String>['PAC', 'PAT']) ??
+          _numeric(normalized, 1),
+      orderCode: _extractByPrefix(normalized, <String>['PED', 'ORD', 'GUIA']) ??
+          _numeric(normalized, 2),
       tubeNumber: _inferTube(normalized, exams),
       examCodes: examCodes,
       detectedExams: exams,
@@ -38,7 +40,7 @@ class BarcodeExamIdentificationService {
     return 'Etiqueta KRISTAL';
   }
 
-  List<String> _extractExamCodes(String value) {
+  Future<List<String>> _extractExamCodes(String value) async {
     final Set<String> codes = <String>{};
 
     for (final RegExpMatch match in RegExp(
@@ -49,7 +51,7 @@ class BarcodeExamIdentificationService {
     }
 
     for (final String token in value.split(RegExp(r'[^A-Z0-9]+'))) {
-      if (LabExamCatalogService.instance.findByCode(token) != null) {
+      if (await _catalog.findByCode(token) != null) {
         codes.add(token);
       }
     }
@@ -86,13 +88,16 @@ class BarcodeExamIdentificationService {
     if (value.contains('URINA')) return 'URINA';
     if (value.contains('SORO')) return 'SORO';
 
-    if (exams.any((LabExamDefinition exam) => exam.sector.contains('Hematologia'))) {
+    if (exams
+        .any((LabExamDefinition exam) => exam.sector.contains('Hematologia'))) {
       return 'EDTA';
     }
-    if (exams.any((LabExamDefinition exam) => exam.sector.contains('Hemostasia'))) {
+    if (exams
+        .any((LabExamDefinition exam) => exam.sector.contains('Hemostasia'))) {
       return 'CITRATO';
     }
-    if (exams.any((LabExamDefinition exam) => exam.material.contains('Urina'))) {
+    if (exams
+        .any((LabExamDefinition exam) => exam.material.contains('Urina'))) {
       return 'URINA';
     }
 

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../models/professional_signature_model.dart';
 import '../services/professional_signature_service.dart';
+import '../widgets/military_rank_dropdown.dart';
 
 class ProfessionalSignatureScreen extends StatefulWidget {
   const ProfessionalSignatureScreen({super.key});
@@ -135,10 +136,9 @@ class _ProfessionalSignatureScreenState
                             icon: Icons.person_rounded,
                           ),
                           const SizedBox(height: 10),
-                          _field(
+                          MilitaryRankDropdown(
                             controller: _rankController,
-                            label: 'Posto / Graduação',
-                            icon: Icons.military_tech_rounded,
+                            onChanged: (_) => setState(() {}),
                           ),
                           const SizedBox(height: 10),
                           _field(

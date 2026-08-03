@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-
 import '../models/technical_responsible_model.dart';
 import '../services/technical_responsible_service.dart';
+import '../widgets/military_rank_dropdown.dart';
 
 class TechnicalResponsibleScreen extends StatefulWidget {
   const TechnicalResponsibleScreen({super.key});
@@ -21,7 +21,8 @@ class _TechnicalResponsibleScreenState
   final TextEditingController _rankController = TextEditingController();
   final TextEditingController _specialtyController = TextEditingController();
   final TextEditingController _councilController = TextEditingController();
-  final TextEditingController _councilNumberController = TextEditingController();
+  final TextEditingController _councilNumberController =
+      TextEditingController();
 
   bool _loading = true;
   String _status = 'Carregando responsável técnico...';
@@ -123,10 +124,8 @@ class _TechnicalResponsibleScreenState
                             onChanged: (_) => setState(() {}),
                           ),
                           const SizedBox(height: 10),
-                          _field(
+                          MilitaryRankDropdown(
                             controller: _rankController,
-                            label: 'Posto / Graduação',
-                            icon: Icons.military_tech_rounded,
                             onChanged: (_) => setState(() {}),
                           ),
                           const SizedBox(height: 10),
@@ -141,8 +140,7 @@ class _TechnicalResponsibleScreenState
                             controller: _councilController,
                             label: 'Conselho conforme especialidade',
                             icon: Icons.badge_rounded,
-                            hint:
-                                'Ex.: CRF-RJ, CRBM, CRM, COREN, CFF, CRO...',
+                            hint: 'Ex.: CRF-RJ, CRBM, CRM, COREN, CFF, CRO...',
                             onChanged: (_) => setState(() {}),
                           ),
                           const SizedBox(height: 10),

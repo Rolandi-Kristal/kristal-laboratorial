@@ -42,7 +42,25 @@ class _FinanceiroSireScreenState extends State<FinanceiroSireScreen> {
       TextEditingController();
 
   final Set<String> _selectedExamCodes = <String>{};
+  List<LabExamDefinition> _availableExams = <LabExamDefinition>[];
   String _status = 'Pronto para comunicação com o SIRE.';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCatalog();
+  }
+
+  Future<void> _loadCatalog() async {
+    final List<LabExamDefinition> exams =
+        await LabExamCatalogService.instance.load();
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _availableExams = exams;
+    });
+  }
 
   @override
   void dispose() {
@@ -61,10 +79,6 @@ class _FinanceiroSireScreenState extends State<FinanceiroSireScreen> {
     _subGrupoCbhpmController.dispose();
     _valorUnitarioController.dispose();
     super.dispose();
-  }
-
-  List<LabExamDefinition> get _availableExams {
-    return LabExamCatalogService.instance.all;
   }
 
   List<SireBillingItem> _buildItems() {

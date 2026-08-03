@@ -26,9 +26,14 @@ class _CodigoBarrasEtiquetasScreenState
     super.dispose();
   }
 
-  void _identify() {
+  Future<void> _identify() async {
+    final BarcodeExamIdentification identification =
+        await _service.identify(_barcodeController.text);
+    if (!mounted) {
+      return;
+    }
     setState(() {
-      _identification = _service.identify(_barcodeController.text);
+      _identification = identification;
     });
   }
 

@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
-
 import '../core/app_constants.dart';
 import '../models/kristal_operational_record.dart';
 import '../models/professional_signature_model.dart';
@@ -11,6 +10,7 @@ import '../models/technical_responsible_model.dart';
 import '../services/kristal_operational_store_service.dart';
 import '../services/professional_signature_service.dart';
 import '../services/technical_responsible_service.dart';
+import '../widgets/military_rank_dropdown.dart';
 
 class UsuariosScreen extends StatefulWidget {
   const UsuariosScreen({super.key});
@@ -47,8 +47,10 @@ class _UsuariosScreenState extends State<UsuariosScreen> {
   final TextEditingController _signaturePathController =
       TextEditingController();
 
-  final TextEditingController _technicalNameController = TextEditingController();
-  final TextEditingController _technicalRankController = TextEditingController();
+  final TextEditingController _technicalNameController =
+      TextEditingController();
+  final TextEditingController _technicalRankController =
+      TextEditingController();
   final TextEditingController _technicalSpecialtyController =
       TextEditingController();
   final TextEditingController _technicalCouncilController =
@@ -522,11 +524,7 @@ class _UsuariosScreenState extends State<UsuariosScreen> {
               icon: Icons.person_rounded,
             ),
             const SizedBox(height: 10),
-            _field(
-              controller: _professionalRankController,
-              label: 'Posto / Graduação',
-              icon: Icons.military_tech_rounded,
-            ),
+            MilitaryRankDropdown(controller: _professionalRankController),
             const SizedBox(height: 10),
             _field(
               controller: _professionalSpecialtyController,
@@ -590,11 +588,7 @@ class _UsuariosScreenState extends State<UsuariosScreen> {
               icon: Icons.person_rounded,
             ),
             const SizedBox(height: 10),
-            _field(
-              controller: _technicalRankController,
-              label: 'Posto / Graduação',
-              icon: Icons.military_tech_rounded,
-            ),
+            MilitaryRankDropdown(controller: _technicalRankController),
             const SizedBox(height: 10),
             _field(
               controller: _technicalSpecialtyController,
@@ -705,7 +699,9 @@ class _UsuariosScreenState extends State<UsuariosScreen> {
       child: Row(
         children: <Widget>[
           Icon(
-            archived ? Icons.archive_rounded : Icons.admin_panel_settings_rounded,
+            archived
+                ? Icons.archive_rounded
+                : Icons.admin_panel_settings_rounded,
             color: archived ? const Color(0xFFFFC857) : const Color(0xFF73D7FF),
           ),
           const SizedBox(width: 12),
