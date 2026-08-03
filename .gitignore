@@ -104,3 +104,4 @@ assets/external/
 # Arquivos temporários locais
 /tmp_*
 tmp_*
+/dist_update/

@@ -241,7 +241,7 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: const Color(0xFF142B42),
         elevation: 0,
         title: const Text(
-          AppConstants.appFullTitle,
+          AppConstants.developerCredit,
           style: TextStyle(
             fontWeight: FontWeight.w800,
             color: Colors.white,

@@ -26,7 +26,7 @@ class KristalShell extends StatelessWidget {
         backgroundColor: const Color(0xFF142B42),
         elevation: 0,
         title: const Text(
-          AppConstants.appFullTitle,
+          AppConstants.developerCredit,
           style: TextStyle(fontWeight: FontWeight.w700),
         ),
         actions: actions,
@@ -94,19 +94,6 @@ class KristalShell extends StatelessWidget {
             ),
           ),
           Expanded(child: child),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            color: const Color(0xFF06111D),
-            child: const Text(
-              AppConstants.developerCredit,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Color(0xFFFFC857),
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
         ],
       ),
     );
