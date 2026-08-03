@@ -1,0 +1,10 @@
+﻿{
+  "familia": "HEMATOLOGIA",
+  "origem_pacote": "driver hemato.rar",
+  "modelos": [
+    {"id":"HEMATO_5100","nome":"Analisador HematolÃ³gico 5100","fabricante":"CompatÃ­vel por perfil KRISTAL","modelo":"5100","setor":"Hematologia","protocolos":["ASTM","HL7","TXT","CSV","TCP_IP","SERIAL_COM","PASTA_MONITORADA"],"conexaoPadrao":{"tipo":"SERIAL_COM","portaCom":"COM1","baudRate":9600,"dataBits":8,"paridade":"N","stopBits":1,"ip":"192.168.0.150","portaTcp":5000},"ativo":true},
+    {"id":"HEMATO_5180","nome":"Analisador HematolÃ³gico 5180","fabricante":"CompatÃ­vel por perfil KRISTAL","modelo":"5180","setor":"Hematologia","protocolos":["ASTM","HL7","TXT","CSV","TCP_IP","SERIAL_COM","PASTA_MONITORADA"],"conexaoPadrao":{"tipo":"SERIAL_COM","portaCom":"COM1","baudRate":9600,"dataBits":8,"paridade":"N","stopBits":1,"ip":"192.168.0.151","portaTcp":5000},"ativo":true},
+    {"id":"HEMATO_5300","nome":"Analisador HematolÃ³gico 5300","fabricante":"CompatÃ­vel por perfil KRISTAL","modelo":"5300","setor":"Hematologia","protocolos":["ASTM","HL7","TXT","CSV","TCP_IP","SERIAL_COM","PASTA_MONITORADA"],"conexaoPadrao":{"tipo":"TCP_IP","portaCom":"COM1","baudRate":9600,"dataBits":8,"paridade":"N","stopBits":1,"ip":"192.168.0.152","portaTcp":5000},"ativo":true},
+    {"id":"HEMATO_5380","nome":"Analisador HematolÃ³gico 5380","fabricante":"CompatÃ­vel por perfil KRISTAL","modelo":"5380","setor":"Hematologia","protocolos":["ASTM","HL7","TXT","CSV","TCP_IP","SERIAL_COM","PASTA_MONITORADA"],"conexaoPadrao":{"tipo":"TCP_IP","portaCom":"COM1","baudRate":9600,"dataBits":8,"paridade":"N","stopBits":1,"ip":"192.168.0.153","portaTcp":5000},"ativo":true}
+  ]
+}

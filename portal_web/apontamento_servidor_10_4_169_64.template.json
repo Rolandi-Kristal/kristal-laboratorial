@@ -1,0 +1,10 @@
+{
+  "servidor_operacional_url": "http://10.4.169.64",
+  "kristal_laboratorial_url": "http://10.4.169.64:8787",
+  "portal_paciente_url": "http://10.4.169.64:8787",
+  "api_status_url": "http://10.4.169.64:8787/api/server/status",
+  "pasta_servidor_laboratorial": "D:\\kristal_laboratorial\\portal_web",
+  "porta_laboratorial": 8787,
+  "usa_mesmo_ip_kristal_operacional": true,
+  "segredos_sao_gerados_no_primeiro_start": true
+}

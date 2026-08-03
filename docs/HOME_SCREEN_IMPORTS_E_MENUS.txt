@@ -1,0 +1,15 @@
+Adicione estes imports no home_screen.dart:
+
+import 'etiqueta_exame_screen.dart';
+import 'leitura_etiqueta_screen.dart';
+import 'backup_screen.dart';
+import 'portal_paciente_config_screen.dart';
+import 'equipment_profiles_screen.dart';
+
+Menus sugeridos:
+
+MenuItem('Etiquetas por exame', Icons.qr_code_2, const EtiquetaExameScreen()),
+MenuItem('Leitura de etiqueta', Icons.qr_code_scanner, const LeituraEtiquetaScreen()),
+MenuItem('Backup', Icons.backup, const BackupScreen()),
+MenuItem('Portal do Paciente', Icons.public, const PortalPacienteConfigScreen()),
+MenuItem('Equipamentos', Icons.precision_manufacturing, const EquipmentProfilesScreen()),

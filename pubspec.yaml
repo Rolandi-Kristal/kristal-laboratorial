@@ -1,0 +1,50 @@
+name: kristal_laboratorial
+description: KRISTAL LABORATORIAL - SISTEMA ADAPTATIVO AVANÇADO
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  flutter_localizations:
+    sdk: flutter
+
+  crypto: ^3.0.6
+  cryptography: ^2.7.0
+  file_picker: ^10.3.3
+  intl: ^0.20.2
+  path: ^1.9.1
+  path_provider: ^2.1.5
+  pdf: ^3.11.3
+  printing: ^5.14.2
+  sqflite_common_ffi: ^2.3.6
+  window_manager: ^0.5.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/images/kristal_login_logo.png
+    - assets/images/hmr_brasao.png
+    - assets/images/hmr_brasao_login.png
+    - assets/images/hmr_brasao_menu.png
+    - assets/icons/hmr_brasao.ico
+    - assets/icons/kristal_sire.ico
+    - assets/external/sire/FaturamentoSIRE.exe
+    - assets/external/sire/FaturamentoSIRE_Externos.exe
+    - assets/external/hyper_terminal/HyperTerminal.rar
+    - assets/external/kristal_sire/nucleo/KRISTAL_SIRE_CORE.exe
+    - assets/external/kristal_sire/nucleo/KRISTAL_SIRE_EXTERNOS_CORE.exe

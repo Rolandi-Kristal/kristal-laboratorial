@@ -1,0 +1,485 @@
+:root {
+  --bg: #06111d;
+  --panel: #0d2033;
+  --primary: #4ea3ff;
+  --text: #f5f8ff;
+  --muted: #a7b6c9;
+  --danger: #ff6868;
+  --gold: #ffc857;
+  --cyan: #79d7ff;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  overflow: hidden;
+  background: radial-gradient(circle at top, #123e63, var(--bg) 58%);
+  color: var(--text);
+  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+}
+
+.page-shell {
+  height: 100vh;
+  max-width: 1220px;
+  margin: 0 auto;
+  padding: 18px 18px 14px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 16px 20px;
+}
+
+.admin-shell {
+  min-height: 100vh;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 18px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+.hero-panel {
+  min-height: 0;
+  padding: clamp(18px, 2.5vw, 28px);
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(78,163,255,.22), rgba(255,255,255,.04));
+  border: 1px solid rgba(255,255,255,.12);
+  display: grid;
+  place-items: center;
+}
+
+.hero-content-center {
+  width: min(100%, 780px);
+  margin: 0 auto;
+  text-align: center;
+}
+
+.admin-hero {
+  min-height: 235px;
+}
+
+.hospital-title {
+  width: 100%;
+  text-align: center;
+  white-space: nowrap;
+  font-size: clamp(30px, 3vw, 44px);
+  font-weight: 950;
+  letter-spacing: 1.2px;
+  line-height: 1.05;
+  color: #ffffff;
+  text-shadow: 0 10px 28px rgba(0,0,0,.42);
+  margin-bottom: 28px;
+}
+
+.brand-row {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr) 132px;
+  align-items: center;
+  gap: clamp(36px, 5vw, 64px);
+  width: 100%;
+}
+
+.brand-center {
+  text-align: center;
+  min-width: 0;
+}
+
+.system-title {
+  font-size: clamp(26px, 3.35vw, 40px);
+  font-weight: 950;
+  color: var(--primary);
+  letter-spacing: .7px;
+  line-height: 1.06;
+  text-shadow: 0 14px 30px rgba(0,0,0,.38);
+}
+
+.system-subtitle {
+  margin-top: 14px;
+  font-size: clamp(13px, 1.32vw, 18px);
+  font-weight: 900;
+  color: var(--cyan);
+  letter-spacing: 1.45px;
+  white-space: nowrap;
+}
+
+.admin-caption {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.top-logo {
+  width: 132px;
+  height: 132px;
+  object-fit: contain;
+  aspect-ratio: 1 / 1;
+  background: transparent;
+  border: 0;
+  filter: drop-shadow(0 16px 34px rgba(78, 163, 255, .28));
+}
+
+.login-panel {
+  align-self: stretch;
+  min-height: 0;
+}
+
+.exams-panel {
+  grid-column: 1 / -1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1.08fr .92fr;
+  gap: 24px;
+  max-width: 1220px;
+  margin: 0 auto;
+  padding: 42px 22px;
+}
+
+.admin {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 26px 18px;
+}
+
+.hero {
+  min-height: 380px;
+  padding: 34px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(78,163,255,.22), rgba(255,255,255,.04));
+  border: 1px solid rgba(255,255,255,.12);
+}
+
+.main-title-block,
+.admin-title-block {
+  text-align: center;
+  padding: 18px;
+  border-radius: 22px;
+}
+
+.admin-title-block {
+  margin-bottom: 24px;
+  background: rgba(13,32,51,.72);
+  border: 1px solid rgba(255,255,255,.1);
+}
+
+.main-title-block h1,
+.admin-title-block h1 {
+  margin: 0;
+  font-size: clamp(20px, 2.4vw, 32px);
+  font-weight: 950;
+  line-height: 1.02;
+  letter-spacing: .8px;
+  color: #ffffff;
+  text-shadow: 0 14px 32px rgba(0,0,0,.40);
+}
+
+.main-title-block h2,
+.admin-title-block h2 {
+  margin: 12px 0 0;
+  font-size: clamp(20px, 2.3vw, 30px);
+  font-weight: 900;
+  color: var(--primary);
+  letter-spacing: .5px;
+}
+
+.brand-text {
+  text-align: center;
+}
+
+.brand-text p {
+  margin: 6px 0 0;
+  color: #d8ecff;
+  font-size: clamp(12px, 1.3vw, 16px);
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.brand-text span {
+  display: block;
+  margin-top: 5px;
+  color: #b9d8f5;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.logos-row {
+  display: grid;
+  grid-template-columns: minmax(112px, 184px) 1fr minmax(112px, 184px);
+  align-items: center;
+  gap: clamp(18px, 4vw, 44px);
+  margin-top: 26px;
+}
+
+.institution-logo {
+  width: clamp(136px, 18vw, 184px);
+  height: clamp(136px, 18vw, 184px);
+  object-fit: contain;
+  aspect-ratio: 1 / 1;
+  background: transparent;
+  border: 0;
+  filter: drop-shadow(0 18px 42px rgba(78, 163, 255, .30));
+}
+
+.hmr-logo {
+  justify-self: start;
+}
+
+.kristal-logo {
+  justify-self: end;
+  transform: scale(1.08);
+  transform-origin: center;
+}
+
+.small-logo {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  aspect-ratio: 1 / 1;
+  background: transparent;
+  border: 0;
+  filter: drop-shadow(0 10px 22px rgba(78, 163, 255, .24));
+}
+
+.kristal-small-logo {
+  transform: scale(1.10);
+  transform-origin: center;
+}
+
+.login-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.login-panel .login-header,
+#adminLoginCard .login-header {
+  display: block;
+  margin-bottom: 22px;
+}
+
+.login-panel .login-header h2,
+#adminLoginCard .login-header h2 {
+  font-size: 26px;
+  line-height: 1.12;
+}
+
+.login-panel .login-header p,
+#adminLoginCard .login-header p {
+  margin: 12px 0 0;
+  font-weight: 900;
+  color: var(--muted);
+  letter-spacing: .3px;
+}
+
+h1, h2 { margin: 0 0 12px; }
+
+p { color: var(--muted); }
+
+.compact {
+  margin: 0;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+.card {
+  background: rgba(13,32,51,.92);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 24px 80px rgba(0,0,0,.22);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.wide { grid-column: 1 / -1; }
+
+.hidden { display: none; }
+
+label {
+  display: block;
+  margin-top: 12px;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+input, select {
+  width: 100%;
+  padding: 13px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: #071827;
+  color: var(--text);
+}
+
+.inline-field {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.inline-field input {
+  flex: 1;
+}
+
+.inline-button {
+  margin-top: 0;
+  white-space: nowrap;
+}
+
+button {
+  margin-top: 16px;
+  border: 0;
+  border-radius: 12px;
+  padding: 13px 18px;
+  background: var(--primary);
+  color: #02111f;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+button.secondary {
+  background: #1c3854;
+  color: var(--text);
+}
+
+.msg {
+  min-height: 22px;
+  font-weight: 700;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.list {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.item {
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.055);
+  border: 1px solid rgba(255,255,255,.09);
+}
+
+.item .meta {
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+.item .critico {
+  color: var(--danger);
+  font-weight: 900;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.actions a {
+  display: inline-block;
+  margin-top: 12px;
+  color: var(--primary);
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.site-footer-credit {
+  grid-column: 1 / -1;
+  margin-top: 2px;
+  padding: 14px 18px;
+  border-radius: 16px;
+  color: var(--gold);
+  background: rgba(255, 200, 87, .08);
+  border: 1px solid rgba(255, 200, 87, .20);
+  font-weight: 900;
+  text-align: center;
+}
+
+@media (max-width: 920px) {
+  body {
+    overflow: auto;
+  }
+
+  .page-shell {
+    height: auto;
+    min-height: 100vh;
+    grid-template-columns: 1fr;
+  }
+
+  .brand-row {
+    grid-template-columns: 104px 1fr 104px;
+    gap: 24px;
+  }
+
+  .top-logo {
+    width: 104px;
+    height: 104px;
+  }
+
+  .hospital-title {
+    font-size: 28px;
+  }
+
+  .system-title {
+    font-size: 32px;
+  }
+
+  .layout, .grid { grid-template-columns: 1fr; }
+
+  .institution-logo {
+    width: 108px;
+    height: 108px;
+  }
+
+  .logos-row {
+    grid-template-columns: 92px 1fr 92px;
+    gap: 18px;
+  }
+
+  .logos-row h2 {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 560px) {
+  .hospital-title {
+    white-space: normal;
+    font-size: 22px;
+  }
+
+  .brand-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .hmr-logo,
+  .kristal-logo {
+    justify-self: center;
+  }
+
+  .system-subtitle {
+    white-space: normal;
+  }
+}

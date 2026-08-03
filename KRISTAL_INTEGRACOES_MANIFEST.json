@@ -1,0 +1,1729 @@
+{
+  "app": "KRISTAL LABORATORIAL",
+  "developer": "Desenvolvedor: 3º Sgt Rolandi - H Mil Resende",
+  "version": "1.0.3",
+  "root": "KRISTAL_LABORATORIAL/INTEGRACOES",
+  "policy": {
+    "forbiddenDisplayNames": [
+      "COMPLAB",
+      "COMPULAB",
+      "MEDIARTE",
+      "DRIVERS",
+      "EQUIPAMENTOS"
+    ],
+    "finalFolderPolicy": "Usar somente KRISTAL_LABORATORIAL/INTEGRACOES."
+  },
+  "modules": [
+    {
+      "id": "KRISTAL_ADVANCE_DLL",
+      "displayName": "KRISTAL ADVANCE DLL",
+      "folder": "KRISTAL_ADVANCE_DLL",
+      "mainLibrary": "ScelDLL.dll",
+      "connectionType": "DRIVER_EXTERNO",
+      "protocol": "PROPRIETARIO"
+    },
+    {
+      "id": "KRISTAL_ADAPTADOR_SERIAL_USB_MCS99XX",
+      "displayName": "KRISTAL ADAPTADOR SERIAL USB MCS99XX",
+      "folder": "ADAPTADOR_SERIAL_USB_MCS99XX",
+      "mainPackage": "PACOTE_ORIGINAL.zip",
+      "connectionType": "SERIAL_USB",
+      "protocol": "DRIVER_WINDOWS"
+    },
+    {
+      "id": "KRISTAL_SMARTCLICK_ULTRA",
+      "displayName": "KRISTAL SMARTCLICK ULTRA",
+      "folder": "KRISTAL_SMARTCLICK_ULTRA",
+      "mainPackage": "PACOTE_ORIGINAL.zip",
+      "connectionType": "DRIVER_EXTERNO",
+      "protocol": "PROPRIETARIO"
+    },
+    {
+      "id": "KRISTAL_DATABASE_CLIENT",
+      "displayName": "KRISTAL DATABASE CLIENT",
+      "folder": "KRISTAL_DATABASE_CLIENT",
+      "mainLibrary": "fbclient-4.0.dll",
+      "connectionType": "BANCO_DADOS",
+      "protocol": "FIREBIRD_CLIENT"
+    },
+    {
+      "id": "KRISTAL_BH5390",
+      "displayName": "KRISTAL BH-5390",
+      "folder": "BH-5390",
+      "mainFile": "BH5390.drv",
+      "connectionType": "DRIVER_EXTERNO",
+      "protocol": "ASTM"
+    },
+    {
+      "id": "KRISTAL_BS360E",
+      "displayName": "KRISTAL BS360E",
+      "folder": "BS360E",
+      "mainFile": "BS360E_ASTM.drv",
+      "connectionType": "DRIVER_EXTERNO",
+      "protocol": "ASTM"
+    },
+    {
+      "id": "KRISTAL_AUDMAX",
+      "displayName": "KRISTAL AUDMAX",
+      "folder": "AUDMAX",
+      "mainFile": "Audmax.drv",
+      "connectionType": "DRIVER_EXTERNO",
+      "protocol": "ASTM"
+    },
+    {
+      "id": "KRISTAL_AUDLYTE",
+      "displayName": "KRISTAL AUDLYTE",
+      "folder": "AUDLYTE",
+      "mainFile": "audlyte.old",
+      "connectionType": "DRIVER_EXTERNO",
+      "protocol": "PROPRIETARIO"
+    },
+    {
+      "id": "KRISTAL_LABMAX_PREMIUM",
+      "displayName": "KRISTAL LABMAX PREMIUM",
+      "folder": "LABMAX_PREMIUM",
+      "mainFile": "LabmaxPremium.drv",
+      "connectionType": "DRIVER_EXTERNO",
+      "protocol": "PROPRIETARIO"
+    },
+    {
+      "id": "KRISTAL_URIVISION720",
+      "displayName": "KRISTAL URIVISION720",
+      "folder": "URIVISION720",
+      "mainFile": "Urivision720.drv",
+      "connectionType": "DRIVER_EXTERNO",
+      "protocol": "PROPRIETARIO"
+    },
+    {
+      "id": "KRISTAL_FATURAMENTO_SIRE",
+      "displayName": "KRISTAL FATURAMENTO SIRE",
+      "folder": "FATURAMENTO_SIRE",
+      "mainFile": "FaturamentoSIRE_Externos.exe",
+      "connectionType": "DRIVER_EXTERNO",
+      "protocol": "PROPRIETARIO"
+    }
+  ],
+  "packagesExtracted": [
+    {
+      "module": "ADAPTADOR_SERIAL_USB_MCS99XX",
+      "filesExtracted": 26
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "filesExtracted": 173
+    }
+  ],
+  "files": [
+    {
+      "module": "ADAPTADOR_SERIAL_USB_MCS99XX",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/ADAPTADOR_SERIAL_USB_MCS99XX/PACOTE_ORIGINAL.zip",
+      "sizeBytes": 915754,
+      "sha256": "308ee446bb8b51742aeff906f4ec17dd5b79f2cbfc6201a57da6bc77f9c07edb",
+      "type": "ZIP"
+    },
+    {
+      "module": "ADAPTADOR_SERIAL_USB_MCS99XX",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/ADAPTADOR_SERIAL_USB_MCS99XX/EXTRAIDO/2S-PCI-E-MCS99xx_Windows_driver_v3.0.0.0_WHCK_Binary/Windows 32bits/MOSCHIP_StnUninst.exe",
+      "sizeBytes": 249856,
+      "sha256": "30ceebc7683922415f70e1f507101fb33eb2cacaa58d9466b9473d8b5b30f306",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "ADAPTADOR_SERIAL_USB_MCS99XX",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/ADAPTADOR_SERIAL_USB_MCS99XX/EXTRAIDO/2S-PCI-E-MCS99xx_Windows_driver_v3.0.0.0_WHCK_Binary/Windows 32bits/pcieports.cat",
+      "sizeBytes": 15270,
+      "sha256": "bb7cfb5e15a392fc0515ef91f1de4824efbfcdd2c4294ed12b2cc161853e22f0",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "ADAPTADOR_SERIAL_USB_MCS99XX",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/ADAPTADOR_SERIAL_USB_MCS99XX/EXTRAIDO/2S-PCI-E-MCS99xx_Windows_driver_v3.0.0.0_WHCK_Binary/Windows 32bits/readme.txt",
+      "sizeBytes": 839,
+      "sha256": "59c8422cbede4956aaa4dd02ca13e6d587afe8f8e53e5f9837bfc21f7cb61250",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "ADAPTADOR_SERIAL_USB_MCS99XX",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/ADAPTADOR_SERIAL_USB_MCS99XX/EXTRAIDO/2S-PCI-E-MCS99xx_Windows_driver_v3.0.0.0_WHCK_Binary/Windows 32bits/StnCoInst.ini",
+      "sizeBytes": 1318,
+      "sha256": "a2b73e3ada1d94931b73fe060fb8e3a865906a7a322bef72e7f4d1fd183a3018",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "ADAPTADOR_SERIAL_USB_MCS99XX",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/ADAPTADOR_SERIAL_USB_MCS99XX/EXTRAIDO/2S-PCI-E-MCS99xx_Windows_driver_v3.0.0.0_WHCK_Binary/Windows 32bits/StnLang.ini",
+      "sizeBytes": 22774,
+      "sha256": "746170fd6b4c06a98dcda7b973f846c5a9e95cc8e1796854a0111210bcef7a8d",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "ADAPTADOR_SERIAL_USB_MCS99XX",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/ADAPTADOR_SERIAL_USB_MCS99XX/EXTRAIDO/2S-PCI-E-MCS99xx_Windows_driver_v3.0.0.0_WHCK_Binary/Windows 32bits/StnMF.inf",
+      "sizeBytes": 11109,
+      "sha256": "18373baecc7859be57f074c269adada2b2059f6ca1819ad0ea98d646902b09c3",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "ADAPTADOR_SERIAL_USB_MCS99XX",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/ADAPTADOR_SERIAL_USB_MCS99XX/EXTRAIDO/2S-PCI-E-MCS99xx_Windows_driver_v3.0.0.0_WHCK_Binary/Windows 32bits/StnNULL.inf",
+      "sizeBytes": 2036,
+      "sha256": "9361d76c5b0d55ff98a58273ea715b3812028269daa72c70e5cc8ce90f765988",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "ADAPTADOR_SERIAL_USB_MCS99XX",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/ADAPTADOR_SERIAL_USB_MCS99XX/EXTRAIDO/2S-PCI-E-MCS99xx_Windows_driver_v3.0.0.0_WHCK_Binary/Windows 32bits/StnPorts.inf",
+      "sizeBytes": 13095,
+      "sha256": "44cbd4e7e2808def66f841dbc9c7f315552cb58e93e01f9e79fbf28133267642",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "ADAPTADOR_SERIAL_USB_MCS99XX",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/ADAPTADOR_SERIAL_USB_MCS99XX/EXTRAIDO/2S-PCI-E-MCS99xx_Windows_driver_v3.0.0.0_WHCK_Binary/Windows 32bits/StnSetup.exe",
+      "sizeBytes": 270336,
+      "sha256": "64ac2421b1a43e546a0e0bbdf538faa0708ed57c538f0f4dff961114585b856c",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "ADAPTADOR_SERIAL_USB_MCS99XX",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/ADAPTADOR_SERIAL_USB_MCS99XX/EXTRAIDO/2S-PCI-E-MCS99xx_Windows_driver_v3.0.0.0_WHCK_Binary/Windows 64bits/MOSCHIP_StnUninst.exe",
+      "sizeBytes": 342016,
+      "sha256": "227507b0016d7bd20122a045090dfaa33c261d9c4e20461a11dfb9878e84c837",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "ADAPTADOR_SERIAL_USB_MCS99XX",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/ADAPTADOR_SERIAL_USB_MCS99XX/EXTRAIDO/2S-PCI-E-MCS99xx_Windows_driver_v3.0.0.0_WHCK_Binary/Windows 64bits/pcieports.cat",
+      "sizeBytes": 15252,
+      "sha256": "8d1e5d1645f60e8e3cf934eec615a1d529e2f9192eac8d69c47230f9952bfec2",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "ADAPTADOR_SERIAL_USB_MCS99XX",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/ADAPTADOR_SERIAL_USB_MCS99XX/EXTRAIDO/2S-PCI-E-MCS99xx_Windows_driver_v3.0.0.0_WHCK_Binary/Windows 64bits/readme.txt",
+      "sizeBytes": 839,
+      "sha256": "59c8422cbede4956aaa4dd02ca13e6d587afe8f8e53e5f9837bfc21f7cb61250",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "ADAPTADOR_SERIAL_USB_MCS99XX",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/ADAPTADOR_SERIAL_USB_MCS99XX/EXTRAIDO/2S-PCI-E-MCS99xx_Windows_driver_v3.0.0.0_WHCK_Binary/Windows 64bits/StnCoInst.ini",
+      "sizeBytes": 1318,
+      "sha256": "a2b73e3ada1d94931b73fe060fb8e3a865906a7a322bef72e7f4d1fd183a3018",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "ADAPTADOR_SERIAL_USB_MCS99XX",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/ADAPTADOR_SERIAL_USB_MCS99XX/EXTRAIDO/2S-PCI-E-MCS99xx_Windows_driver_v3.0.0.0_WHCK_Binary/Windows 64bits/StnLang.ini",
+      "sizeBytes": 22774,
+      "sha256": "746170fd6b4c06a98dcda7b973f846c5a9e95cc8e1796854a0111210bcef7a8d",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "ADAPTADOR_SERIAL_USB_MCS99XX",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/ADAPTADOR_SERIAL_USB_MCS99XX/EXTRAIDO/2S-PCI-E-MCS99xx_Windows_driver_v3.0.0.0_WHCK_Binary/Windows 64bits/StnMF.inf",
+      "sizeBytes": 11109,
+      "sha256": "18373baecc7859be57f074c269adada2b2059f6ca1819ad0ea98d646902b09c3",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "ADAPTADOR_SERIAL_USB_MCS99XX",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/ADAPTADOR_SERIAL_USB_MCS99XX/EXTRAIDO/2S-PCI-E-MCS99xx_Windows_driver_v3.0.0.0_WHCK_Binary/Windows 64bits/StnNULL.inf",
+      "sizeBytes": 2036,
+      "sha256": "9361d76c5b0d55ff98a58273ea715b3812028269daa72c70e5cc8ce90f765988",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "ADAPTADOR_SERIAL_USB_MCS99XX",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/ADAPTADOR_SERIAL_USB_MCS99XX/EXTRAIDO/2S-PCI-E-MCS99xx_Windows_driver_v3.0.0.0_WHCK_Binary/Windows 64bits/StnPorts.inf",
+      "sizeBytes": 13095,
+      "sha256": "44cbd4e7e2808def66f841dbc9c7f315552cb58e93e01f9e79fbf28133267642",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "ADAPTADOR_SERIAL_USB_MCS99XX",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/ADAPTADOR_SERIAL_USB_MCS99XX/EXTRAIDO/2S-PCI-E-MCS99xx_Windows_driver_v3.0.0.0_WHCK_Binary/Windows 64bits/StnSetup.exe",
+      "sizeBytes": 373248,
+      "sha256": "d31ba806a5b18efa3367a1c8399990e7683bece85282868acff72932643d9ec2",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "ADAPTADOR_SERIAL_USB_MCS99XX",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/ADAPTADOR_SERIAL_USB_MCS99XX/EXTRAIDO/2S-PCI-E-MCS99xx_Windows_driver_v3.0.0.0_WHCK_Binary/Windows 64bits/AMD64/StnCoInst.dll",
+      "sizeBytes": 23552,
+      "sha256": "8db8bde84b682ba36360daacc2226baeb194df2a085f5e70e75fe044309f75bf",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "ADAPTADOR_SERIAL_USB_MCS99XX",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/ADAPTADOR_SERIAL_USB_MCS99XX/EXTRAIDO/2S-PCI-E-MCS99xx_Windows_driver_v3.0.0.0_WHCK_Binary/Windows 64bits/AMD64/StnPorts.dll",
+      "sizeBytes": 95744,
+      "sha256": "32bf3c3df3332416c3be5988e3c15482e0ba68403651f14ca13266bac5742d86",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "ADAPTADOR_SERIAL_USB_MCS99XX",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/ADAPTADOR_SERIAL_USB_MCS99XX/EXTRAIDO/2S-PCI-E-MCS99xx_Windows_driver_v3.0.0.0_WHCK_Binary/Windows 64bits/AMD64/StnPPort.sys",
+      "sizeBytes": 99328,
+      "sha256": "72588480cb24cf0f13dfc48f23b06a5a6257c435f5ecf2917006bb56139e0117",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "ADAPTADOR_SERIAL_USB_MCS99XX",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/ADAPTADOR_SERIAL_USB_MCS99XX/EXTRAIDO/2S-PCI-E-MCS99xx_Windows_driver_v3.0.0.0_WHCK_Binary/Windows 64bits/AMD64/StnSPort.sys",
+      "sizeBytes": 139264,
+      "sha256": "c2237d56fca0c5cf2b7740c37bda327c6aebc4bda15ba5a399bbea8674a50b45",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "ADAPTADOR_SERIAL_USB_MCS99XX",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/ADAPTADOR_SERIAL_USB_MCS99XX/EXTRAIDO/2S-PCI-E-MCS99xx_Windows_driver_v3.0.0.0_WHCK_Binary/Windows 32bits/X86/StnCoInst.dll",
+      "sizeBytes": 22016,
+      "sha256": "1a2909d08e1363d4018e64330dcbd6615873edcc3a6b6dbf55d746e8f6398ab1",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "ADAPTADOR_SERIAL_USB_MCS99XX",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/ADAPTADOR_SERIAL_USB_MCS99XX/EXTRAIDO/2S-PCI-E-MCS99xx_Windows_driver_v3.0.0.0_WHCK_Binary/Windows 32bits/X86/StnPorts.dll",
+      "sizeBytes": 77824,
+      "sha256": "1d5bf82e574903c06ece46a0354f2d0b82f75d849a2f3de6d7401060163b0989",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "ADAPTADOR_SERIAL_USB_MCS99XX",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/ADAPTADOR_SERIAL_USB_MCS99XX/EXTRAIDO/2S-PCI-E-MCS99xx_Windows_driver_v3.0.0.0_WHCK_Binary/Windows 32bits/X86/StnPPort.sys",
+      "sizeBytes": 84480,
+      "sha256": "352809611bffccead4872372c81039d56fd2d7045319e229727672f76d3bd49e",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "ADAPTADOR_SERIAL_USB_MCS99XX",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/ADAPTADOR_SERIAL_USB_MCS99XX/EXTRAIDO/2S-PCI-E-MCS99xx_Windows_driver_v3.0.0.0_WHCK_Binary/Windows 32bits/X86/StnSPort.sys",
+      "sizeBytes": 132096,
+      "sha256": "a31c6a3c6727c4c24f3e6dc51c8e712d4ae4a9536702d3cd04f31ef38c086f20",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/PACOTE_ORIGINAL.zip",
+      "sizeBytes": 3041815,
+      "sha256": "5a395cf3a3aaec3cf9eb3cfe0e2a70ab8e4feee957737d6a1ff3ee585cb732e3",
+      "type": "ZIP"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/.DS_Store",
+      "sizeBytes": 10244,
+      "sha256": "7e59c1caaf14e94470235352ef6e466764be287374969b0737fd23a46fdc0fd0",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/composer.json",
+      "sizeBytes": 223,
+      "sha256": "3006ed2a26dd69988508166610f593874ecd5b003b915d1c70248b8c3e7346d8",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/composer.lock",
+      "sizeBytes": 6400,
+      "sha256": "d031778dd3b3f77d54f6c6cba197502a57711f5a41265f38582adaa220f7ae34",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/smartclick-ultra.php",
+      "sizeBytes": 5029,
+      "sha256": "2fda6d0379011ed905252a2569e735780481200947627b1a537cb324cf3f948c",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/smart_ultra.js",
+      "sizeBytes": 3721,
+      "sha256": "8e606f9a8ce306e689220354be115fe476e76871e8fb43168ab30af183968a63",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/.idea/.gitignore",
+      "sizeBytes": 184,
+      "sha256": "1bfdece3645ed8ed356030f22cc2004dc3f401ff060ac3d24de811c3bcd82e16",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/.idea/modules.xml",
+      "sizeBytes": 291,
+      "sha256": "33c51528e2a7246f0437c76f95e9f239e5ab75ccb0d9c412ba773a5415ce883a",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/.idea/php.xml",
+      "sizeBytes": 1220,
+      "sha256": "e1700799cacb56d2c7c528e0bc3bbfa39e51705854b0cd2adefb6247bc9b4ace",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/.idea/smartclick-ultra.iml",
+      "sizeBytes": 599,
+      "sha256": "ad38326f9b2376785e5f221120546a0c451fbeaefd786233d45665ea49cb43bc",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/.idea/workspace.xml",
+      "sizeBytes": 3165,
+      "sha256": "fb4d00b6075d1b68b1bee759f4591571c0c72b2fef8a0301979ae64f8f31ba56",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/ai/smartclick-ai.php",
+      "sizeBytes": 2694,
+      "sha256": "0a43400ad9b6caa9704f951dbfdc4b8041f0e5876c219a1f5892a92fa8411ff3",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/.DS_Store",
+      "sizeBytes": 8196,
+      "sha256": "b1691f3f2144fc4c06e8db1c9a0538ba85020254fc90a9563705244815d73f8f",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/.DS_Store",
+      "sizeBytes": 10244,
+      "sha256": "1a075e747bfad1ea4d1a07a7f142661eb230efcc00f40f41332495e8bc228431",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/autoload.php",
+      "sizeBytes": 771,
+      "sha256": "a0f3a58311167e63ac69ad0b72d6fc499aadd4b6859256e0f9bb5a52507b8164",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/composer/autoload_classmap.php",
+      "sizeBytes": 222,
+      "sha256": "375085d0d6690301081436cd75755cb2c882f8a7f6fc385c8814a11734fc413a",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/composer/autoload_namespaces.php",
+      "sizeBytes": 139,
+      "sha256": "ede505407590638a435137f4e060136f1008de79fc169b3de9793423b0cea38c",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/composer/autoload_psr4.php",
+      "sizeBytes": 344,
+      "sha256": "03798659446ca9cf5048717e7a35d75cc4943b4359530c9bdbbf290cf260b503",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/composer/autoload_real.php",
+      "sizeBytes": 1137,
+      "sha256": "eeb67de0097febc0b52f7c36c7c97fc281a9d95ecf7887fa471f4fa044ed19f7",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/composer/autoload_static.php",
+      "sizeBytes": 1424,
+      "sha256": "d66f73a6d0cc4725c294a89e32c3c3965dc7e59492a879cd661154b2ce78e234",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/composer/ClassLoader.php",
+      "sizeBytes": 16378,
+      "sha256": "d4b2313e562edf942838ec316d983c1a3459ca67da3e5658e861200b0b3693c2",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/composer/installed.json",
+      "sizeBytes": 6321,
+      "sha256": "41020c3b3d3d2766a2f323d507cbab941d5c87d82d4cb5d8ac8edd8b3331e183",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/composer/installed.php",
+      "sizeBytes": 1849,
+      "sha256": "bfd3b019b92284053f762ca45d4c6459ce53ccdebc87a3f85589adca30d474f1",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/composer/InstalledVersions.php",
+      "sizeBytes": 16143,
+      "sha256": "21f4ba19e7859cb3f85b8b1680c970ee25d972546c1606dcae0e7e5f43f626f0",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/composer/LICENSE",
+      "sizeBytes": 1070,
+      "sha256": "c8cce4b6b9729f264ffdf9296d505d63432497feeed1f586d1902b942197e024",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/composer/platform_check.php",
+      "sizeBytes": 925,
+      "sha256": "924322595091121f1d96713b461487eaa3970361493d434f2746b7821163e26a",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/psr/cache/CHANGELOG.md",
+      "sizeBytes": 746,
+      "sha256": "a69c7961dbc922e68a15c5a4a5f0e2a5e4bcd4aab35aa28f723f6e027699c0d6",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/psr/cache/composer.json",
+      "sizeBytes": 514,
+      "sha256": "c7e4945bf75bd6bec9afbb2bec2561baaf024cf248164f74ad003af614f16891",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/psr/cache/LICENSE.txt",
+      "sizeBytes": 1080,
+      "sha256": "a5291f8c6905c638db35dc564c0924ba99365248cdc8f9978b5b637f374af7d6",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/psr/cache/README.md",
+      "sizeBytes": 546,
+      "sha256": "8c67b845dd116b8efd934ef0151b976c5177d7ae787f8d4140eb46c25ab15e6a",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/psr/simple-cache/.editorconfig",
+      "sizeBytes": 271,
+      "sha256": "22d780a14a3bb595b6d8156202ae9b15025eee2cfefd8ac37a3dffa2ffc95744",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/psr/simple-cache/composer.json",
+      "sizeBytes": 553,
+      "sha256": "522318184b43cf837cbfc517a49abbed881d331464946c10a316919f1b66c198",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/psr/simple-cache/LICENSE.md",
+      "sizeBytes": 1137,
+      "sha256": "9d7269855b25e36b54461c029260a56c97499a647117ea37f4c5cdfc956a7f8b",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/psr/simple-cache/README.md",
+      "sizeBytes": 563,
+      "sha256": "3f6ceb3d1fa73168b7fe2239f303bdd38c190d44e41c12f07fcc4934462c828b",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/psr/simple-cache/src/CacheException.php",
+      "sizeBytes": 173,
+      "sha256": "9b92f4ad92711668a09e4c475f024b23d0d0b8a687908eb59996c61a5ee24e28",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/psr/simple-cache/src/CacheInterface.php",
+      "sizeBytes": 4822,
+      "sha256": "3210f4d4838fe90b204bdffe60aafe7789dc8684b43d2b0c93ea348ad8af94d5",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/psr/simple-cache/src/InvalidArgumentException.php",
+      "sizeBytes": 260,
+      "sha256": "5f45f9c49e02676e2fb03f60386fb292bbf03062890b4bf40c948e90187fcad9",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/psr/cache/src/CacheException.php",
+      "sizeBytes": 162,
+      "sha256": "2b5d913bbe02e31f4b70aeb9cbd95903f1f1358bd31569389db8d643e5b06d78",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/psr/cache/src/CacheItemInterface.php",
+      "sizeBytes": 3862,
+      "sha256": "b3e58461a0340407c245699cfc76d5c41cb37b4c99109ef68ad6a9c340e850cf",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/psr/cache/src/CacheItemPoolInterface.php",
+      "sizeBytes": 4471,
+      "sha256": "6bad951af6754508f3eaa3aa4117563a7457728a2734d2f68f711a675a3a7b89",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/psr/cache/src/InvalidArgumentException.php",
+      "sizeBytes": 299,
+      "sha256": "28acf77ecca63641222be1974c36dd159c587e207722b1a3f4953d588ccdfbad",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/mobiledetect/mobiledetectlib/CHANGELOG.md",
+      "sizeBytes": 3199,
+      "sha256": "86056f3d4084ed31cebd3e9a1b0c7538889c6b4d21c26b07e62cfe3ebd902d7e",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/mobiledetect/mobiledetectlib/CNAME",
+      "sizeBytes": 16,
+      "sha256": "789b494f375202ae7df983f527a522461cbad4c75f91b38b700222e3e60f8497",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/mobiledetect/mobiledetectlib/composer.json",
+      "sizeBytes": 1259,
+      "sha256": "6271da8cf8a126fc2a58940859cba3c2a801db9863c91f9367374b9e8fe37ad0",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/mobiledetect/mobiledetectlib/CONTRIBUTING.md",
+      "sizeBytes": 3696,
+      "sha256": "7286c3a659a6ca72c2460d49a3b686811a652c0c58213be73df2620d3f0dbadc",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/mobiledetect/mobiledetectlib/docker-compose.yml",
+      "sizeBytes": 1604,
+      "sha256": "66bf07fc33c26256b704dce9cf74a6cdf874a9fd3a3ce9b6b18f405c5ef82753",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/mobiledetect/mobiledetectlib/KNOWN_LIMITATIONS.md",
+      "sizeBytes": 1815,
+      "sha256": "c2aa8e9af24ee1d83deb8fd8d22f9e11e71c705b50b138a8f34c9cbd2ad8d89d",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/mobiledetect/mobiledetectlib/LICENSE",
+      "sizeBytes": 1102,
+      "sha256": "a9a9ed092f403b1769f93ee43c913b4e77d0df40bf05ddb86ebd2555cd6b8624",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/mobiledetect/mobiledetectlib/MobileDetect.json",
+      "sizeBytes": 38195,
+      "sha256": "752036788774f7c1df5c1d6a00909f0b451a731113bb42544db569cdfbabbef2",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/mobiledetect/mobiledetectlib/phpbench.json",
+      "sizeBytes": 111,
+      "sha256": "5ce0f360f08367c24a5ed6cf6bb5b2d9b6a0b4fd4238f71e8b1bc96b4ba1e6e2",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/mobiledetect/mobiledetectlib/README.md",
+      "sizeBytes": 4367,
+      "sha256": "9b451402b802e29f3a439df5e018db228570f8735534f96aca45e05fb02519e8",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/mobiledetect/mobiledetectlib/SECURITY.md",
+      "sizeBytes": 486,
+      "sha256": "89ef5feedca60be8f7d3825c6e66fa77e24de6c5d67100feb7c9f063c8830f2d",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/mobiledetect/mobiledetectlib/docker/build.sh",
+      "sizeBytes": 167,
+      "sha256": "a9886a8c63e9e697d2855a9134bc706db31e31a9e38b6fd4947978ab93919814",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/mobiledetect/mobiledetectlib/docker/Dockerfile.setup",
+      "sizeBytes": 177,
+      "sha256": "332c87d5a9c5a77d07e13c7d0d3ed0655a9f20d782c13430ad951c2232fe47dd",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/mobiledetect/mobiledetectlib/src/MobileDetect.php",
+      "sizeBytes": 88588,
+      "sha256": "03adb845f61cbd1b5cf6c40d3a4b688113e3a690b4a7773029a7940f10415878",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/mobiledetect/mobiledetectlib/src/Cache/Cache.php",
+      "sizeBytes": 2421,
+      "sha256": "3931d30c4f7af02e6807612c861e2fe4f04f34d908b47d17f5a0284e6e65b4a0",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/mobiledetect/mobiledetectlib/src/Cache/CacheException.php",
+      "sizeBytes": 353,
+      "sha256": "8b0d9569dc93b1a47ad6571ad6ddcef3556e6953aa54e409868f027a4bd0c1e5",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/mobiledetect/mobiledetectlib/src/Cache/CacheItem.php",
+      "sizeBytes": 2774,
+      "sha256": "4864f76d98e37fb3401aa2edfb10f088b20ed5e5ee1df444bdf78d65ecdd7f41",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/vendor/mobiledetect/mobiledetectlib/src/Exception/MobileDetectException.php",
+      "sizeBytes": 90,
+      "sha256": "06e3d3b0e3a6258076617aeb77a40eb7565570886f161a426a8e2678292e7325",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/core/.DS_Store",
+      "sizeBytes": 6148,
+      "sha256": "e85b766c4dc68758411961ecf500baa06c5b67863938fbbcd070912148314b2c",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/core/email_config_platforms.php",
+      "sizeBytes": 152397,
+      "sha256": "a387473070bfa8efb008d67d1dae82fd62af4e1bf03e89a9ad3f239c58bfe708",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/core/email_template.php",
+      "sizeBytes": 4479,
+      "sha256": "d1d71dc32c0ec395e1a2eaa99e08d65b3916f01c83bc8c5942fa6570c0472dc7",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/core/init.php",
+      "sizeBytes": 11598,
+      "sha256": "020b3fcbe353e344b8285444508a2aa799d6d7f84ee36829cbcde9e7d6fa14fd",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/core/init_setup.php",
+      "sizeBytes": 6355,
+      "sha256": "6be4b7eb1a39ef2357d293a82d9f39ee6cff14954b272cb9efcef1ea914027eb",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/core/installer.php",
+      "sizeBytes": 31054,
+      "sha256": "5a447d3a03ddc2d7809f18736af882c5408d679142038c93c949d36ecf184237",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/core/menu_functions.php",
+      "sizeBytes": 2244,
+      "sha256": "bfed05c0377c0af13861a92a2a043e210342a6529c360136bbd16eab36bdfeda",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/core/platforms.php",
+      "sizeBytes": 23873,
+      "sha256": "b93ba88e68f09fbb86b6d3c5b4cffd690a5639da7110769d8482513e78e8092a",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/core/platforms_config.php",
+      "sizeBytes": 3075,
+      "sha256": "859ca40b78ab8e170ec13eeed87d46376da680e4999615024756fdb844f804d9",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/core/scripts.php",
+      "sizeBytes": 5229,
+      "sha256": "9885daac46d0ab2e89f71285232376d1a52f19c32bf6f2c6127010a0a2170863",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/core/server_defaults.php",
+      "sizeBytes": 7223,
+      "sha256": "2e310422c42b96c8293726a21c41df91887cdf6c26cd1900f8f8d5844dcf0065",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/core/setup.php",
+      "sizeBytes": 6423,
+      "sha256": "983dd04a39e9d61d5be9b23ca0b1220f5591e0880279b2bf857b895dcc3fcd88",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/core/theme.php",
+      "sizeBytes": 862,
+      "sha256": "72fa03e1514d042305cf8dbaa54fc1b7bd48e09fbf57944604b315c543a961cb",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/pages/.DS_Store",
+      "sizeBytes": 6148,
+      "sha256": "d65165279105ca6773180500688df4bdc69a2c7b771752f0a46ef120b7fd8ec3",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/pages/accesses.php",
+      "sizeBytes": 31530,
+      "sha256": "d7325003ffac313c5c4e8c27d637d1a87dc1527c0a2bc07e79faca59def09a37",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/pages/ai-reports.php",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/pages/blacklist.php",
+      "sizeBytes": 12356,
+      "sha256": "88fb498815c067ee629291af854ca91595834246c96c2a61af881b1aef0172e5",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/pages/blacklistsmart.php",
+      "sizeBytes": 12223,
+      "sha256": "3e75865d646c0f94ead9b981c90c079d9837828afb8e21a6c9fdb2adf1b32330",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/pages/botlist.php",
+      "sizeBytes": 8493,
+      "sha256": "3a82264e3641da52842debadf2d9910baf835fb23673be9fa8dcdbebfffcf3a0",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/pages/clicks.php",
+      "sizeBytes": 31321,
+      "sha256": "c64451feadda292185cc9d0a031ddadaedf1f10b4536d17b6e49cbf2ba449e1f",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/pages/conversions.php",
+      "sizeBytes": 31002,
+      "sha256": "29c309e1b40bb5cb356724cc50dd5e647574e2e4730e37daa986e487628dddac",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/pages/conversions_null.php",
+      "sizeBytes": 20951,
+      "sha256": "895c14b8817a91c3bbc1405cf931d6b77559b0528f8f814ade88bc0e3539d929",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/pages/dashboard.php",
+      "sizeBytes": 9475,
+      "sha256": "ebe6456ca31a6c85834c966bb1df24364238efb0a51f10eb76bf0a6aa338a8a3",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/pages/dashboard.php.bkp",
+      "sizeBytes": 9388,
+      "sha256": "9641c2b48468c8064f330789e45570d7808d77fdbc220ac87807fc33b301d549",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/pages/decoder.php",
+      "sizeBytes": 8276,
+      "sha256": "35845208a23b5b1476bf0a06e8f22e73b36b5a84af25151bda179a891cf4af01",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/pages/details.php",
+      "sizeBytes": 5137,
+      "sha256": "e9225adf5a623f2d515999d96a967478357bd435115d407e806c83dc3be0c58b",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/pages/funnel.php",
+      "sizeBytes": 27114,
+      "sha256": "ff2bd009162f96b8dee219172f5cf3ec9c6bcc8deac435aa381e2479d3d3ce0a",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/pages/home.php",
+      "sizeBytes": 6924,
+      "sha256": "522b0b211f50409b296957bd732a144c057bff30234004e6e797dd575ba7fd1d",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/pages/integrations.php",
+      "sizeBytes": 17853,
+      "sha256": "dda9bd393f6d6eaa141d4da19e0dea434a8f451a508499cd33594203df35160d",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/pages/ip_tracker.php",
+      "sizeBytes": 11353,
+      "sha256": "4d497163aa51c05c89221ff40105d378ed05e254dbd35a327e8e185423c69d70",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/pages/logs.php",
+      "sizeBytes": 5044,
+      "sha256": "e9f2b6a721f4911aac7b803e2e668ecb4d34b8e9c608ee2bf1c81c148d7bfdca",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/pages/platforms.php",
+      "sizeBytes": 12176,
+      "sha256": "853888586ca1b09d47ba539072c0a9064721687e653629b8bf9350bdbf009710",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/pages/script.php",
+      "sizeBytes": 1361,
+      "sha256": "2b5c908c003768976f30ef5e38800b0154928af0e97261531a67dcefb2fc23f3",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/pages/settings.php",
+      "sizeBytes": 10046,
+      "sha256": "6dd9f2c0e2b39fd5b1f2b58c27453889dfe5f8fad0d197b5bc658b162b9b5582",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/pages/url-builder-template.php",
+      "sizeBytes": 16239,
+      "sha256": "4b614bceb6bfcbe987d0d83eb8a820826eb60ca75144a898d94020bc05749ff1",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/parts/footer.php",
+      "sizeBytes": 785,
+      "sha256": "28b97b65a81c9f3f9a47356d01e8bd10e6a7d80974d1ab3bcb9e9d29647aea23",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/parts/menu.php",
+      "sizeBytes": 19507,
+      "sha256": "978f7c53adc6076f7d0ddac26cb73ad71d64c9d63eabd119ced16a464bdcc922",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/pages/details/access.php",
+      "sizeBytes": 2001,
+      "sha256": "2a3d49a8972ad03f8686f4d14bc2443acab633674ae80c565d4f54f8a5457698",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/pages/details/click.php",
+      "sizeBytes": 2002,
+      "sha256": "8cd7122b8f73dddde202424a4c2e009a80549a19677544d00a951a0bb123e9f2",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/pages/details/conversion.php",
+      "sizeBytes": 2923,
+      "sha256": "48753ee842a8e34e1fef5da8bfb5fd6f3764408ff3e92c64aac3f8c369ca5e91",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/core/data/blacklist.php",
+      "sizeBytes": 4979,
+      "sha256": "6845c0f1f0e09745a72f8b21f19840b2a2b2b46371ac05b3506b5acc0722cf7e",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/core/data/clicks.php",
+      "sizeBytes": 16642,
+      "sha256": "f634662cfa28c1a874c68900dd1a8ee23f4cf0bf854bbaba56dc6c4b334d5b13",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/core/data/conversions.php",
+      "sizeBytes": 6969,
+      "sha256": "d258273d1c76d0930c1597e2a8f63fa5e41e33113066cf9ce514540cb431b5eb",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/core/data/decoder.php",
+      "sizeBytes": 2781,
+      "sha256": "fb3480351d774d3db46772bf5ab4d3951f6b9860499e9bde082702cc7dd664b8",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/core/data/ipbase.php",
+      "sizeBytes": 10409,
+      "sha256": "71b8cfd19b304c63468a9e695452c47a7eed6ce82298be3c1d2a6f574bb7cc8b",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/core/data/migration.php",
+      "sizeBytes": 8943,
+      "sha256": "55092a734d25cfc40378e4da2bc54b4fa57c400d198554995905a5bd35d5961c",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/core/data/pages.php",
+      "sizeBytes": 5473,
+      "sha256": "548afaa327b4d3c5302a6465606e27bd85fa2b15690b93283e38bf2844d98731",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/core/data/slugs.php",
+      "sizeBytes": 1438,
+      "sha256": "5c8b51363061d1b567a2e3ad61431090529ba6795407ac04caf5bc5d76892471",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/core/data/tables.php",
+      "sizeBytes": 7554,
+      "sha256": "8f046f7065e4848b898936344be30431f452bae1f48a04dbf5e4fb7315e0435d",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/core/data/tracking.js",
+      "sizeBytes": 1081,
+      "sha256": "22ed2afe730e3e50a47476993660b59e9581c0a6dabeb8c2079fcdf5cb5db54b",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/core/integrations/discord.php",
+      "sizeBytes": 1573,
+      "sha256": "2d5b2ddbb47083b35a6ed36d979bb91db73594f75f43dc79c3715b9fba30881a",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/core/integrations/google.php",
+      "sizeBytes": 16609,
+      "sha256": "c3f8382ca4f0abc6bf1e35aef856b25df55152668ec7b26bccf138dd77455f1a",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/core/integrations/google.php.bkp",
+      "sizeBytes": 15117,
+      "sha256": "d228e2aa0ae37ca38c30f19b942a817919b35b86d33bd2dbf9d621dd295bb452",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/core/integrations/init.php",
+      "sizeBytes": 3369,
+      "sha256": "559c1e656aede10e078b9251f604adc0cf65d9e24698af743d1aed22e8357d26",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/structure/core/integrations/telegram.php",
+      "sizeBytes": 1660,
+      "sha256": "401cc15537284979aa47539337019a9e714fc0826051fb2112a27680c2f45d6c",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/css/aios.css",
+      "sizeBytes": 12732,
+      "sha256": "eb741dfd5cd01c371ef5c69c8ab8e7befcca4e41cf54169cc7e4c98c5624cd48",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/css/bootstrap.min.css",
+      "sizeBytes": 232802,
+      "sha256": "d13bf57acd0a78e410f0278dfd35f1138b5c6abcf9a3162f0b5021e52bd4ee5a",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/css/integration_styles.css",
+      "sizeBytes": 3008,
+      "sha256": "47ed33f623e426834f219ce0cb262e37066245be7a01c3c74a268901c8ddb876",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/css/investigation_styles.css",
+      "sizeBytes": 1208,
+      "sha256": "f0516d0465948ccfb12a5a7f2ebb8bd5e2b28aee39779593a42d0740d7bcba1f",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/css/wh-cookie-popup.css",
+      "sizeBytes": 1952,
+      "sha256": "98a3cf786437ce51779944a49545b4485cb48f2dc595e8478896dccca02a81a3",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/.DS_Store",
+      "sizeBytes": 8196,
+      "sha256": "a4a713f7fc3e68efb4063844272af7b47573bf92df8f46813fecdaad2c2d2e8b",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/favicon.png",
+      "sizeBytes": 2058,
+      "sha256": "bd1d7a939dd275a25102aac7e045b146363debb7f63927b79047faf83f687e49",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/g_logo.png",
+      "sizeBytes": 4234,
+      "sha256": "3f0d07a748feb687399389225b094e5e7b0133b23bedae71e35f2cbefb7ae843",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/robot-angry.png",
+      "sizeBytes": 273429,
+      "sha256": "dace5b4345f839a48ab5ea6a844d6f9d3f944776c7fbb75c5962fe7740044789",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/robot-codding.png",
+      "sizeBytes": 313061,
+      "sha256": "6c0b5b99b5ff3ae279724c8b14ce4a7ec07aa8744e6832008b5060d6f4a7b0ed",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/robot-hello.png",
+      "sizeBytes": 291347,
+      "sha256": "61f68d987f0268af8498885ee54a1ee75e5449c5c96ca8f1f38e72d3e084c0dc",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/robot-magnify.png",
+      "sizeBytes": 273608,
+      "sha256": "2b057a2f884e56b77b6735b733f6617146f41f7395a977303366abdc7412fea6",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/robot-megaphone.png",
+      "sizeBytes": 297408,
+      "sha256": "6f0df6c6bfeb4bfb7c8270e348367301ba54d20286e80409d657ea4c07ef031f",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/robot-research.png",
+      "sizeBytes": 295981,
+      "sha256": "e5aa3ed5782ef4476f02686b3df4029943ebffec9390a5263987d93d55bc60cf",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/robot-success.png",
+      "sizeBytes": 290551,
+      "sha256": "6853e7ffccaa1f1c145f037b9ce911eb6cb85f0b06ebf5fb959866ba6ff4c62a",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/robot-support.png",
+      "sizeBytes": 321099,
+      "sha256": "bc3d956990f1a328826e4640e439c01df21e9480b0387071ebde752b0a96da95",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/smartclick-black-min.svg",
+      "sizeBytes": 19038,
+      "sha256": "b503694dfa6cf91d9f1fb4504401dfab38c9b3fcc0c67887bae4e43bf80f9dd6",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/smartclick-white-min.svg",
+      "sizeBytes": 19098,
+      "sha256": "7ec2d2d88f35e8d4e57c195c63be7c832e8cc3e5cd6639e91e33f29f5c0db7c0",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/smartclick-white.svg",
+      "sizeBytes": 20522,
+      "sha256": "dd34c68a3f8c1b7194fe78dfb19ce9d62a67f8dc6ec8914b4eae1f8f88c6e645",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/smartclick.svg",
+      "sizeBytes": 20462,
+      "sha256": "1bf42599b97d30c4089d5bf29bdb4c59299c620655eea6f8c8a5e8242f8a02fe",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/wp-logo-black.svg",
+      "sizeBytes": 1147,
+      "sha256": "3df2e380c15a01ab07061ec10a83a283bb460cfb3aa282de322a6c68458850f3",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/wp-logo-white.svg",
+      "sizeBytes": 1244,
+      "sha256": "49b0f7095d2c2e2e3551354d6bea3da68166cb80c25f13dfb22e6648f4846660",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/js/bootstrap.bundle.min.js",
+      "sizeBytes": 80721,
+      "sha256": "0833b2e9c3a26c258476c46266e6877fc75218625162e0460be9a3a098a61c6c",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/js/jquery-3.6.4.min.js",
+      "sizeBytes": 89794,
+      "sha256": "44b57c8c7b3f73de08c06579ad1305a31a80a29b9f40edf5af8238f0d2f0c79c",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/js/jquery-eu-cookie-law-popup.js",
+      "sizeBytes": 8965,
+      "sha256": "4eaff81d637e98da9752d3511be03c692fc5693477f22f7096ba6cc03d394122",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/js/popper.min.js",
+      "sizeBytes": 18593,
+      "sha256": "a218b23f23e8fe9cbf4b810716f15ba06634b87a19ef1427197c1c3e1f89b33c",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/js/scripts.js",
+      "sizeBytes": 11038,
+      "sha256": "ee9bdf73ee905c653e86cf4ac2bf26aa1700baf36e5bfecfbc814dfa1c8233da",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/js/theme-dark.js",
+      "sizeBytes": 378,
+      "sha256": "c2443eaa6909819e2134dd3e5a27d2995e95e07721c92b2a84336effe451ad55",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/js/theme-light.js",
+      "sizeBytes": 367,
+      "sha256": "e35fb92ac8b02102327ced059d5f8b655fc06147aa5291367c9a4afe36bac15b",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/plugins/.DS_Store",
+      "sizeBytes": 6148,
+      "sha256": "946b425ed32f01b12f13f031748d31a187a3ebe42f912f088155530eb4cbe4e4",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/plugins/funnel-graph-js/.DS_Store",
+      "sizeBytes": 10244,
+      "sha256": "198570f9c5f1ec1664eef8a3e315d8ad742fd568b10572e64bec360f4ba53447",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/plugins/mobiledetect/mobiledetect-4.8.php",
+      "sizeBytes": 88563,
+      "sha256": "3e7dea2ac9706b801e70fb3b9e2fb6fd031d97c895446dfcc633cb70859afa28",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/plugins/polymorph/polymorph.js",
+      "sizeBytes": 20590,
+      "sha256": "dd8786819d82806f72914567ed64eb0c6aa7241884a7b1c15697cd2fb3701b85",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/plugins/toastify/toastify-js.js",
+      "sizeBytes": 6776,
+      "sha256": "582becbb62bba81285347855cf7027db831b23e6419c89c427d05e4c3cea0741",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/plugins/tweens/tween.umd",
+      "sizeBytes": 32203,
+      "sha256": "db113f39dfb2ad0f454772d9cea935c8d334f3cd2ccb2ba61d21bee9f60917a5",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/plugins/vuejs/vue.min",
+      "sizeBytes": 94151,
+      "sha256": "9174c425c445377df4562ad9165ea08fdf9433a808296d7de5f619791df10e17",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/plugins/toastify/css/toastify.min.css",
+      "sizeBytes": 1523,
+      "sha256": "78551535760476bb888522b5653a06e9bb7b17063374574a90404466ba4cee58",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/plugins/toastify/js/toastify-js.js",
+      "sizeBytes": 6776,
+      "sha256": "582becbb62bba81285347855cf7027db831b23e6419c89c427d05e4c3cea0741",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/plugins/select2/css/select2-bootstrap-5-theme.min.css",
+      "sizeBytes": 31224,
+      "sha256": "e2f43e8704add92732d73de918c76d1f9258bb9ce02fc68237a7c5d708ce15a3",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/plugins/select2/css/select2.min.css",
+      "sizeBytes": 16263,
+      "sha256": "a64bd479f8dafd4a1d89aac51b7be7bdc36cbb0150782d5cf67cb82fb10dca2c",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/plugins/select2/js/select2.min.js",
+      "sizeBytes": 73163,
+      "sha256": "f7244fff610595b944f76bf3080d74e3af42b5dd234f8f079e698cc39ac966b0",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/plugins/funnel-graph-js/css/main.css",
+      "sizeBytes": 354,
+      "sha256": "dda8a2f54523fd0bf09b5ba15c1d5b17ffe549e73e657bed848a3d7b88e9b598",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/plugins/funnel-graph-js/css/theme.css",
+      "sizeBytes": 3865,
+      "sha256": "2ff36a2303b950ff5eca200111013b3206e4029ab05c1dbe9174dbd8a570bd94",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/plugins/funnel-graph-js/js/funnel-graph.js",
+      "sizeBytes": 34440,
+      "sha256": "ea89b0e4fd6e66c8ca1a4c8c2146082b81110f997415f18ea38cadb9b83aceda",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/plugins/datatable/css/datatables.min.css",
+      "sizeBytes": 23385,
+      "sha256": "e3d5ea052959563353f9ac8877c2933708e66f87e8bce0321a6e2f9ae20391a9",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/plugins/datatable/js/datatables.min.js",
+      "sizeBytes": 336007,
+      "sha256": "79caa294cea67ddcaa1fb6fc1b30e7deda111cd2e48c4d699e7867525b077a7e",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/icons/cursor.png",
+      "sizeBytes": 346,
+      "sha256": "49d11b88202e35c1911ce2ef46124dac0877d099757304b5c992b6cf710bc966",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/icons/cursor.svg",
+      "sizeBytes": 1300,
+      "sha256": "aa8cbaf03942a1505aa2541cf8ae5d13d6f0eb6673d82b02f1f957308646feb9",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/icons/discord-black.svg",
+      "sizeBytes": 984,
+      "sha256": "0487de215e9b47fc013444599da9557d4cfdb378124da90a74b3fdb5c9e81aa0",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/icons/discord-primary.svg",
+      "sizeBytes": 1084,
+      "sha256": "471ebdc11278ce3b4f77cacbc6e76eac588153e0140202ee069ff0558aed4c5f",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/icons/discord-white.svg",
+      "sizeBytes": 2285,
+      "sha256": "6f5a1f724cc547ff05e51415bfb385f7f5900891c69c767a4db0f533f1385d05",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/icons/discord.svg",
+      "sizeBytes": 2039,
+      "sha256": "fba26dab934059d8facf7782866fd1406a2ed92394b404b051d4768f78425ad9",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/icons/google-black.svg",
+      "sizeBytes": 479,
+      "sha256": "358debdbb497169af67b03e0e0cb14d44a47a0d5f709c848a229e75a458e88b8",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/icons/google-primary.svg",
+      "sizeBytes": 577,
+      "sha256": "b1b237e88c1096a608c8a3a917d4f9513466037b75752607269d002420b730a1",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/icons/google-white.svg",
+      "sizeBytes": 764,
+      "sha256": "56c7e036024092489c50a50c7403d356146f08e21f664f05a025117cf75c46af",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/icons/google.png",
+      "sizeBytes": 22726,
+      "sha256": "5ac98d02c4432faae06869208dc9a2115a422413b764e1c16ad931642d608bd9",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/icons/telegram-black.svg",
+      "sizeBytes": 594,
+      "sha256": "7b181cce0355335314e442c2a8ec65128ba4577127ff849f9199f99e60adb387",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/icons/telegram-primary.svg",
+      "sizeBytes": 680,
+      "sha256": "8c379085e459702e95da67db8abb1f5e3cd77aba86fb98fb5ebb84daf1e91640",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/icons/telegram-white.svg",
+      "sizeBytes": 760,
+      "sha256": "bc22db9a49454f1c6ab7f650542a4c462def3d328cef5c52f04a8a5b8856b513",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_SMARTCLICK_ULTRA",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_SMARTCLICK_ULTRA/EXTRAIDO/smartclick-ultra/assets/images/icons/telegram.svg",
+      "sizeBytes": 1235,
+      "sha256": "27829c103cfc0689ebf915133e6424a0a0bc1f97ddcd7e8784dd916d96f7a4d8",
+      "type": "EXTRAIDO"
+    },
+    {
+      "module": "KRISTAL_DATABASE_CLIENT",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_DATABASE_CLIENT/fbclient-4.0.dll",
+      "sizeBytes": 2023104,
+      "sha256": "b7e38841e89402d3304ad6cf76199483684c5b6a545903a7fe256c22e86fd863",
+      "type": "FILE"
+    },
+    {
+      "module": "KRISTAL_ADVANCE_DLL",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_ADVANCE_DLL/fld.dat",
+      "sizeBytes": 1351306,
+      "sha256": "2189637bda2b0677a9b8946a04d2121ed6e2a85c55661c35f3972cde73a23c33",
+      "type": "FILE"
+    },
+    {
+      "module": "KRISTAL_ADVANCE_DLL",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_ADVANCE_DLL/idx.dat",
+      "sizeBytes": 547220,
+      "sha256": "eff9e02b7b233bbab86fa2bb0c42c33ce4963d64e953bbffd6fb2f4642553c68",
+      "type": "FILE"
+    },
+    {
+      "module": "KRISTAL_ADVANCE_DLL",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_ADVANCE_DLL/Scr.med",
+      "sizeBytes": 118997,
+      "sha256": "8194e6643604617d0f9cb9610e868d0354c7e27ac978edcfd7596e648e00ffae",
+      "type": "FILE"
+    },
+    {
+      "module": "KRISTAL_ADVANCE_DLL",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_ADVANCE_DLL/Script_Base_Global.sql",
+      "sizeBytes": 2245,
+      "sha256": "9f5dfc590cd789cc053208905031d56e7b1b24439c8bfd043e2fe4d51ce43443",
+      "type": "FILE"
+    },
+    {
+      "module": "KRISTAL_ADVANCE_DLL",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_ADVANCE_DLL/Scripts.exe",
+      "sizeBytes": 554496,
+      "sha256": "235067b0c4cbc61c5267e2a4325156a1d41112b8675f463e55ebaa94efcbd695",
+      "type": "FILE"
+    },
+    {
+      "module": "KRISTAL_ADVANCE_DLL",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_ADVANCE_DLL/Versao.med",
+      "sizeBytes": 834,
+      "sha256": "ccab2a001903e064eb96a9fd357c3238018d1bb0f1b578e1afd9c2f08806ac2c",
+      "type": "FILE"
+    },
+    {
+      "module": "KRISTAL_ADVANCE_DLL",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_ADVANCE_DLL/KRISTAL_ADVANCE.ADV",
+      "sizeBytes": 763904,
+      "sha256": "551098e52ab08cf63a8389c2f9f53002f369b2cecd295d5fb70cea8bf5b0f477",
+      "type": "FILE"
+    },
+    {
+      "module": "KRISTAL_ADVANCE_DLL",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_ADVANCE_DLL/DB.cfg",
+      "sizeBytes": 548,
+      "sha256": "8626181399f353d91028fdec872c3a2d1a01c066235008fd62fc9613a3f70c36",
+      "type": "FILE"
+    },
+    {
+      "module": "KRISTAL_ADVANCE_DLL",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_ADVANCE_DLL/IngConfig.exe",
+      "sizeBytes": 439843,
+      "sha256": "fbd010f1824c6aef61763f2d7453454c6bdf1c7486c39823aff71fead685af5f",
+      "type": "FILE"
+    },
+    {
+      "module": "KRISTAL_ADVANCE_DLL",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_ADVANCE_DLL/Ntlcc.dll",
+      "sizeBytes": 53248,
+      "sha256": "55cc5e91f43d18ae96881aff575f4c8dcf461ce6a01c11bb8fbe682d9928348f",
+      "type": "FILE"
+    },
+    {
+      "module": "KRISTAL_ADVANCE_DLL",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_ADVANCE_DLL/Scel.log",
+      "sizeBytes": 220,
+      "sha256": "5304fdafba50ab322026e4f8956c8eb33465ed9a84cb35389a1b8e210e9f8efc",
+      "type": "FILE"
+    },
+    {
+      "module": "KRISTAL_ADVANCE_DLL",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_ADVANCE_DLL/ScelDLL.atual",
+      "sizeBytes": 3498496,
+      "sha256": "382b72e28cc71c844fdb661a3cedce4240cd080528cc749cad8c3cf8762c8c77",
+      "type": "FILE"
+    },
+    {
+      "module": "KRISTAL_ADVANCE_DLL",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_ADVANCE_DLL/ScelDLL.dll",
+      "sizeBytes": 2831872,
+      "sha256": "d6fece0aa5bc21e61eadc668568d97e28245c487101d6562331ef22cb9418536",
+      "type": "FILE"
+    },
+    {
+      "module": "KRISTAL_ADVANCE_DLL",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_ADVANCE_DLL/Chamados.dll",
+      "sizeBytes": 622592,
+      "sha256": "d3e1322f59b47ee68ebf0f7e905d3d514058154a820571b28cac9d40a7d7b872",
+      "type": "FILE"
+    },
+    {
+      "module": "KRISTAL_ADVANCE_DLL",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_ADVANCE_DLL/ColetaMaterial.dll",
+      "sizeBytes": 561152,
+      "sha256": "90ae83a0144a4447ccb07af3cf5ebce23dbdde0fa790b0cdc4e0769227c010a2",
+      "type": "FILE"
+    },
+    {
+      "module": "KRISTAL_ADVANCE_DLL",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_ADVANCE_DLL/Controle_Triagem.dll",
+      "sizeBytes": 2893824,
+      "sha256": "3412c8a335e5f701734a4ac7574ec788e4d115e3541c4990db061cfc71b56bf7",
+      "type": "FILE"
+    },
+    {
+      "module": "KRISTAL_ADVANCE_DLL",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_ADVANCE_DLL/EnvioAmostras.dll",
+      "sizeBytes": 1437696,
+      "sha256": "c7c1c87045283b4ce8465ae777a897d990d2f39b4e39cb87813cce3078e44697",
+      "type": "FILE"
+    },
+    {
+      "module": "KRISTAL_ADVANCE_DLL",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_ADVANCE_DLL/Estoque.dll",
+      "sizeBytes": 1703424,
+      "sha256": "32f6ef762d769dce55221013dff9f52d6931319b0bf0c4cb7071a3b4023ce0ca",
+      "type": "FILE"
+    },
+    {
+      "module": "KRISTAL_ADVANCE_DLL",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_ADVANCE_DLL/PE.dll",
+      "sizeBytes": 3873280,
+      "sha256": "3f6ab327fd397d8a16ea915646e0164da14f6145d572b455e8a9a1852490cffc",
+      "type": "FILE"
+    },
+    {
+      "module": "KRISTAL_ADVANCE_DLL",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_ADVANCE_DLL/RecebeAmostras.dll",
+      "sizeBytes": 491008,
+      "sha256": "600dcd8bcb94410ba8b0b86acc85b1be21189224de398cda8998402b43ff9af4",
+      "type": "FILE"
+    },
+    {
+      "module": "KRISTAL_ADVANCE_DLL",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/KRISTAL_ADVANCE_DLL/Triagem.dll",
+      "sizeBytes": 561152,
+      "sha256": "56cc634dbc64a63a804eacce050c9305681bc3cd654db74ee0b02c7020801936",
+      "type": "FILE"
+    },
+    {
+      "module": "BH-5390",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/BH-5390/BH5390.drv",
+      "sizeBytes": 471552,
+      "sha256": "e20b0d63052cfc83360b0e991e8d8220acb09bf8d707ca22f6e383c95af7d222",
+      "type": "FILE"
+    },
+    {
+      "module": "BS360E",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/BS360E/BS360E_ASTM.drv",
+      "sizeBytes": 460288,
+      "sha256": "7fb603b4da33b6d14a0968a4f8cdf542051bbd78a2e7f8593f05dd1be5b4a7a5",
+      "type": "FILE"
+    },
+    {
+      "module": "AUDMAX",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/AUDMAX/Audmax.drv",
+      "sizeBytes": 469504,
+      "sha256": "83a1ce6de0b5eae4d1f8ef5124d35d5a126a22f9c1fe3978d21135739bbe856a",
+      "type": "FILE"
+    },
+    {
+      "module": "AUDLYTE",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/AUDLYTE/audlyte.old",
+      "sizeBytes": 1074,
+      "sha256": "8cde7f522ecd2d8cb3c82e24183c22aa27eef5f463fd3ebd9230f12f7b286453",
+      "type": "FILE"
+    },
+    {
+      "module": "LABMAX_PREMIUM",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/LABMAX_PREMIUM/LabmaxPremium.drv",
+      "sizeBytes": 458240,
+      "sha256": "f5dde49e333e08741c7b30a1570966f937d0c2d47dc8308c55f1894ee3107369",
+      "type": "FILE"
+    },
+    {
+      "module": "URIVISION720",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/URIVISION720/Urivision720.drv",
+      "sizeBytes": 445952,
+      "sha256": "87f52108ce879e482682ace62b61155a89087b3dd2e26b51679e09aa53d56c6e",
+      "type": "FILE"
+    },
+    {
+      "module": "FATURAMENTO_SIRE",
+      "path": "KRISTAL_LABORATORIAL/INTEGRACOES/FATURAMENTO_SIRE/FaturamentoSIRE_Externos.exe",
+      "sizeBytes": 6091264,
+      "sha256": "b640f840c4832c003cef95ac2c2f7fd4786fc781ef75e12ed4c20658284bda61",
+      "type": "FILE"
+    }
+  ],
+  "missingSourceFiles": []
+}

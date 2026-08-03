@@ -1,0 +1,251 @@
+{
+  "app": "KRISTAL LABORATORIAL",
+  "developer": "Desenvolvedor: 3º Sgt Rolandi - H Mil Resende",
+  "version": "1.0.1",
+  "driverRoot": "drivers/KRISTAL_LABORATORIAL/EQUIPAMENTOS",
+  "folderPolicy": "Não usar nome de fornecedor nas pastas, equipamentos, drivers ou manifesto. Módulos avançados ficam em KRISTAL_ADVANCE_DLL.",
+  "forbiddenNames": [
+    "COMPLAB",
+    "COMPLAB_ADVANCED_DLL",
+    "Mediarte"
+  ],
+  "communicationModes": [
+    "TCP_IP",
+    "SERIAL_USB",
+    "PASTA_ARQUIVO",
+    "DRIVER_EXTERNO"
+  ],
+  "protocols": [
+    "ASTM",
+    "HL7",
+    "CSV",
+    "TXT",
+    "XML",
+    "PROPRIETARIO"
+  ],
+  "equipmentProfiles": [
+    {
+      "id": "KRISTAL_EQ_BH5390",
+      "displayName": "BH-5390",
+      "folder": "BH-5390",
+      "mainDriver": "BH5390.drv",
+      "protocol": "ASTM",
+      "connectionType": "DRIVER_EXTERNO"
+    },
+    {
+      "id": "KRISTAL_EQ_BS360E",
+      "displayName": "BS360E",
+      "folder": "BS360E",
+      "mainDriver": "BS360E_ASTM.drv",
+      "protocol": "ASTM",
+      "connectionType": "DRIVER_EXTERNO"
+    },
+    {
+      "id": "KRISTAL_EQ_AUDMAX",
+      "displayName": "AUDMAX",
+      "folder": "AUDMAX",
+      "mainDriver": "Audmax.drv",
+      "protocol": "ASTM",
+      "connectionType": "DRIVER_EXTERNO"
+    },
+    {
+      "id": "KRISTAL_EQ_AUDLYTE",
+      "displayName": "AUDLYTE",
+      "folder": "AUDLYTE",
+      "mainDriver": "audlyte.old",
+      "protocol": "PROPRIETARIO",
+      "connectionType": "DRIVER_EXTERNO"
+    },
+    {
+      "id": "KRISTAL_EQ_LABMAX_PREMIUM",
+      "displayName": "LABMAX PREMIUM",
+      "folder": "LABMAX_PREMIUM",
+      "mainDriver": "LabmaxPremium.drv",
+      "protocol": "PROPRIETARIO",
+      "connectionType": "DRIVER_EXTERNO"
+    },
+    {
+      "id": "KRISTAL_EQ_URIVISION720",
+      "displayName": "URIVISION720",
+      "folder": "URIVISION720",
+      "mainDriver": "Urivision720.drv",
+      "protocol": "PROPRIETARIO",
+      "connectionType": "DRIVER_EXTERNO"
+    },
+    {
+      "id": "KRISTAL_EQ_ADVANCE_DLL",
+      "displayName": "KRISTAL ADVANCE DLL",
+      "folder": "KRISTAL_ADVANCE_DLL",
+      "mainDriver": "ScelDLL.dll",
+      "protocol": "PROPRIETARIO",
+      "connectionType": "DRIVER_EXTERNO"
+    },
+    {
+      "id": "KRISTAL_EQ_FATURAMENTO_SIRE",
+      "displayName": "FATURAMENTO SIRE",
+      "folder": "FATURAMENTO_SIRE",
+      "mainExecutable": "FaturamentoSIRE_Externos.exe",
+      "protocol": "PROPRIETARIO",
+      "connectionType": "DRIVER_EXTERNO"
+    }
+  ],
+  "files": [
+    {
+      "sourceUploadedName": "BH5390.drv",
+      "path": "drivers/KRISTAL_LABORATORIAL/EQUIPAMENTOS/BH-5390/BH5390.drv",
+      "sizeBytes": 471552,
+      "sha256": "e20b0d63052cfc83360b0e991e8d8220acb09bf8d707ca22f6e383c95af7d222"
+    },
+    {
+      "sourceUploadedName": "BS360E_ASTM.drv",
+      "path": "drivers/KRISTAL_LABORATORIAL/EQUIPAMENTOS/BS360E/BS360E_ASTM.drv",
+      "sizeBytes": 460288,
+      "sha256": "7fb603b4da33b6d14a0968a4f8cdf542051bbd78a2e7f8593f05dd1be5b4a7a5"
+    },
+    {
+      "sourceUploadedName": "Audmax.drv",
+      "path": "drivers/KRISTAL_LABORATORIAL/EQUIPAMENTOS/AUDMAX/Audmax.drv",
+      "sizeBytes": 469504,
+      "sha256": "83a1ce6de0b5eae4d1f8ef5124d35d5a126a22f9c1fe3978d21135739bbe856a"
+    },
+    {
+      "sourceUploadedName": "audlyte.old",
+      "path": "drivers/KRISTAL_LABORATORIAL/EQUIPAMENTOS/AUDLYTE/audlyte.old",
+      "sizeBytes": 1074,
+      "sha256": "8cde7f522ecd2d8cb3c82e24183c22aa27eef5f463fd3ebd9230f12f7b286453"
+    },
+    {
+      "sourceUploadedName": "LabmaxPremium.drv",
+      "path": "drivers/KRISTAL_LABORATORIAL/EQUIPAMENTOS/LABMAX_PREMIUM/LabmaxPremium.drv",
+      "sizeBytes": 458240,
+      "sha256": "f5dde49e333e08741c7b30a1570966f937d0c2d47dc8308c55f1894ee3107369"
+    },
+    {
+      "sourceUploadedName": "Urivision720.drv",
+      "path": "drivers/KRISTAL_LABORATORIAL/EQUIPAMENTOS/URIVISION720/Urivision720.drv",
+      "sizeBytes": 445952,
+      "sha256": "87f52108ce879e482682ace62b61155a89087b3dd2e26b51679e09aa53d56c6e"
+    },
+    {
+      "sourceUploadedName": "FaturamentoSIRE_Externos.exe",
+      "path": "drivers/KRISTAL_LABORATORIAL/EQUIPAMENTOS/FATURAMENTO_SIRE/FaturamentoSIRE_Externos.exe",
+      "sizeBytes": 6091264,
+      "sha256": "b640f840c4832c003cef95ac2c2f7fd4786fc781ef75e12ed4c20658284bda61"
+    },
+    {
+      "sourceUploadedName": "borlndmm - Copia.dll",
+      "path": "drivers/KRISTAL_LABORATORIAL/EQUIPAMENTOS/KRISTAL_ADVANCE_DLL/borlndmm - Copia.dll",
+      "sizeBytes": 29696,
+      "sha256": "d2a651547a83723be81fb4e87bd75fae6f95666050e072a30c22d7ace0cb5f20"
+    },
+    {
+      "sourceUploadedName": "capicom - Copia.dll",
+      "path": "drivers/KRISTAL_LABORATORIAL/EQUIPAMENTOS/KRISTAL_ADVANCE_DLL/capicom - Copia.dll",
+      "sizeBytes": 511328,
+      "sha256": "61450bd6bc6590236b1df56e1594b12ae174496357a49b5963c41d0d1465d66f"
+    },
+    {
+      "sourceUploadedName": "Interf.dll",
+      "path": "drivers/KRISTAL_LABORATORIAL/EQUIPAMENTOS/KRISTAL_ADVANCE_DLL/Interf.dll",
+      "sizeBytes": 423936,
+      "sha256": "c17721f986d61ee92d97196f40a4f68c7bd9925171d9cf87fef6eaf26fb3075a"
+    },
+    {
+      "sourceUploadedName": "midas.dll",
+      "path": "drivers/KRISTAL_LABORATORIAL/EQUIPAMENTOS/KRISTAL_ADVANCE_DLL/midas.dll",
+      "sizeBytes": 383488,
+      "sha256": "6ce2ec2d1b790334767c4833f5f98c90bd542f100ac2df7c429f40a8c5ab0dfe"
+    },
+    {
+      "sourceUploadedName": "ssleay32.dll",
+      "path": "drivers/KRISTAL_LABORATORIAL/EQUIPAMENTOS/KRISTAL_ADVANCE_DLL/ssleay32.dll",
+      "sizeBytes": 337920,
+      "sha256": "ad67cbc56e500b24a297830cea6e4131b4f30ee9184a26751cc416a24fe2c87f"
+    },
+    {
+      "sourceUploadedName": "capicom.dll",
+      "path": "drivers/KRISTAL_LABORATORIAL/EQUIPAMENTOS/KRISTAL_ADVANCE_DLL/capicom.dll",
+      "sizeBytes": 511328,
+      "sha256": "61450bd6bc6590236b1df56e1594b12ae174496357a49b5963c41d0d1465d66f"
+    },
+    {
+      "sourceUploadedName": "Chamados.dll",
+      "path": "drivers/KRISTAL_LABORATORIAL/EQUIPAMENTOS/KRISTAL_ADVANCE_DLL/Chamados.dll",
+      "sizeBytes": 622592,
+      "sha256": "d3e1322f59b47ee68ebf0f7e905d3d514058154a820571b28cac9d40a7d7b872"
+    },
+    {
+      "sourceUploadedName": "ColetaMaterial.dll",
+      "path": "drivers/KRISTAL_LABORATORIAL/EQUIPAMENTOS/KRISTAL_ADVANCE_DLL/ColetaMaterial.dll",
+      "sizeBytes": 561152,
+      "sha256": "90ae83a0144a4447ccb07af3cf5ebce23dbdde0fa790b0cdc4e0769227c010a2"
+    },
+    {
+      "sourceUploadedName": "Controle_Triagem.dll",
+      "path": "drivers/KRISTAL_LABORATORIAL/EQUIPAMENTOS/KRISTAL_ADVANCE_DLL/Controle_Triagem.dll",
+      "sizeBytes": 2893824,
+      "sha256": "3412c8a335e5f701734a4ac7574ec788e4d115e3541c4990db061cfc71b56bf7"
+    },
+    {
+      "sourceUploadedName": "EnvioAmostras.dll",
+      "path": "drivers/KRISTAL_LABORATORIAL/EQUIPAMENTOS/KRISTAL_ADVANCE_DLL/EnvioAmostras.dll",
+      "sizeBytes": 1437696,
+      "sha256": "c7c1c87045283b4ce8465ae777a897d990d2f39b4e39cb87813cce3078e44697"
+    },
+    {
+      "sourceUploadedName": "Estoque.dll",
+      "path": "drivers/KRISTAL_LABORATORIAL/EQUIPAMENTOS/KRISTAL_ADVANCE_DLL/Estoque.dll",
+      "sizeBytes": 1703424,
+      "sha256": "32f6ef762d769dce55221013dff9f52d6931319b0bf0c4cb7071a3b4023ce0ca"
+    },
+    {
+      "sourceUploadedName": "PE.dll",
+      "path": "drivers/KRISTAL_LABORATORIAL/EQUIPAMENTOS/KRISTAL_ADVANCE_DLL/PE.dll",
+      "sizeBytes": 3873280,
+      "sha256": "3f6ab327fd397d8a16ea915646e0164da14f6145d572b455e8a9a1852490cffc"
+    },
+    {
+      "sourceUploadedName": "RecebeAmostras.dll",
+      "path": "drivers/KRISTAL_LABORATORIAL/EQUIPAMENTOS/KRISTAL_ADVANCE_DLL/RecebeAmostras.dll",
+      "sizeBytes": 491008,
+      "sha256": "600dcd8bcb94410ba8b0b86acc85b1be21189224de398cda8998402b43ff9af4"
+    },
+    {
+      "sourceUploadedName": "Triagem.dll",
+      "path": "drivers/KRISTAL_LABORATORIAL/EQUIPAMENTOS/KRISTAL_ADVANCE_DLL/Triagem.dll",
+      "sizeBytes": 561152,
+      "sha256": "56cc634dbc64a63a804eacce050c9305681bc3cd654db74ee0b02c7020801936"
+    },
+    {
+      "sourceUploadedName": "Script.txt",
+      "path": "drivers/KRISTAL_LABORATORIAL/EQUIPAMENTOS/KRISTAL_ADVANCE_DLL/Script.txt",
+      "sizeBytes": 198,
+      "sha256": "330b8c78ec81ad74ea754cd71605d7d4bca97b2a31fac5438f8bd302a44d46ad"
+    },
+    {
+      "sourceUploadedName": "DB.cfg",
+      "path": "drivers/KRISTAL_LABORATORIAL/EQUIPAMENTOS/KRISTAL_ADVANCE_DLL/DB.cfg",
+      "sizeBytes": 548,
+      "sha256": "8626181399f353d91028fdec872c3a2d1a01c066235008fd62fc9613a3f70c36"
+    },
+    {
+      "sourceUploadedName": "Ntlcc.dll",
+      "path": "drivers/KRISTAL_LABORATORIAL/EQUIPAMENTOS/KRISTAL_ADVANCE_DLL/Ntlcc.dll",
+      "sizeBytes": 53248,
+      "sha256": "55cc5e91f43d18ae96881aff575f4c8dcf461ce6a01c11bb8fbe682d9928348f"
+    },
+    {
+      "sourceUploadedName": "Scel.log",
+      "path": "drivers/KRISTAL_LABORATORIAL/EQUIPAMENTOS/KRISTAL_ADVANCE_DLL/Scel.log",
+      "sizeBytes": 220,
+      "sha256": "5304fdafba50ab322026e4f8956c8eb33465ed9a84cb35389a1b8e210e9f8efc"
+    },
+    {
+      "sourceUploadedName": "ScelDLL.dll",
+      "path": "drivers/KRISTAL_LABORATORIAL/EQUIPAMENTOS/KRISTAL_ADVANCE_DLL/ScelDLL.dll",
+      "sizeBytes": 2831872,
+      "sha256": "d6fece0aa5bc21e61eadc668568d97e28245c487101d6562331ef22cb9418536"
+    }
+  ],
+  "missingSourceFiles": []
+}

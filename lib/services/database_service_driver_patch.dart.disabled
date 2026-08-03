@@ -1,0 +1,20 @@
+// PATCH DE REFERÊNCIA
+// Adicione esta tabela ao seu database_service.dart dentro do método de criação/migração.
+//
+// await db.execute('''
+//   CREATE TABLE IF NOT EXISTS drivers_equipamentos (
+//     id TEXT PRIMARY KEY,
+//     equipamentoId TEXT,
+//     nome TEXT,
+//     modelo TEXT,
+//     protocolo TEXT,
+//     rootPath TEXT,
+//     pastaRelativa TEXT,
+//     executavelConfiguracao TEXT,
+//     arquivoDriver TEXT,
+//     arquivoConfig TEXT,
+//     observacao TEXT,
+//     status TEXT,
+//     criadoEm TEXT
+//   )
+// ''');

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>HOSPITAL MILITAR DE RESENDE - KRISTAL LABORATORIAL</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="/assets/app.css" rel="stylesheet">
+</head>
+<body>
+  <main class="page-shell">
+    <section class="hero-panel">
+      <div class="hero-content-center">
+        <header class="hospital-title">HOSPITAL MILITAR DE RESENDE</header>
+        <div class="brand-row">
+          <img class="top-logo hmr-logo" src="/assets/logo_hmr.png" alt="Brasao do Hospital Militar de Resende">
+          <div class="brand-center">
+            <div class="system-title">KRISTAL LABORATORIAL</div>
+            <div class="system-subtitle">SISTEMA ADAPTATIVO AVANÇADO</div>
+          </div>
+          <img class="top-logo kristal-logo" src="/assets/logo_kristal.png" alt="Logo KRISTAL LABORATORIAL">
+        </div>
+      </div>
+    </section>
+
+    <section class="login-panel card" id="loginCard">
+      <div class="login-header">
+        <h2>Acesso do Paciente</h2>
+        <p>HOSPITAL MILITAR DE RESENDE</p>
+      </div>
+
+      <form id="loginForm">
+        <label>CPF</label>
+        <input id="cpf" name="cpf" autocomplete="username" required>
+        <label>Codigo de acesso</label>
+        <input id="codigo" name="codigo" type="password" autocomplete="current-password" required>
+        <button type="submit">Entrar</button>
+      </form>
+
+      <p id="loginMsg" class="msg"></p>
+    </section>
+
+    <section class="card hidden exams-panel" id="examesCard">
+      <div class="row">
+        <h2>Meus Exames</h2>
+        <button id="logoutBtn" class="secondary">Sair</button>
+      </div>
+      <div class="row">
+        <button id="historicoBtn">Historico permanente</button>
+        <button id="recentesBtn" class="secondary">Recentes</button>
+      </div>
+      <div id="examesList" class="list"></div>
+    </section>
+
+    <footer class="site-footer-credit">
+      Desenvolvedor: 3° Sgt Rolandi - H Mil Resende
+    </footer>
+  </main>
+
+  <script src="/assets/app.js"></script>
+</body>
+</html>

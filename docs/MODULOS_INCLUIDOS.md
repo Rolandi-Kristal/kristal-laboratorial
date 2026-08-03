@@ -1,0 +1,19 @@
+Módulos incluídos:
+- Login superusuário
+- Pacientes
+- Exames
+- Pedidos
+- Amostras
+- Etiquetas vinculadas ao exame
+- Leitura laser/USB e código manual
+- Imagem/caminho da etiqueta ou amostra
+- Resultados com validação crítica
+- Laudos PDF com hash
+- Backup manual e automático
+- Portal do paciente
+- Equipamentos: Audmax, BC5380, BH-5390, BS360E, Coagmaster, LabmaxPremium, Urivision720
+- Reagentes e lotes
+- Calibrações
+- Controle de qualidade
+- Auditoria
+- Usuários/operadores restritos ao superusuário/administrador

@@ -1,0 +1,19 @@
+KRISTAL LABORATORIAL WINDOWS v8
+
+Estrutura:
+- lib/core: constantes globais, incluindo crédito fixo e login mestre.
+- lib/models: usuários, pacientes, exames, itens, pedidos, amostras, resultados, equipamentos, setores, materiais, estoque, qualidade, convênios, médicos, reagentes, calibrações, worklist e auditoria.
+- lib/services: banco SQLite local, autenticação, auditoria, catálogo de exames, LGPD, hash de laudo, validação crítica, PDF, worklist, reagentes, calibrações e amostras.
+- lib/integration: ASTM, HL7 ORU, HL7 ORM, CSV, TCP/IP, Serial e registry de protocolos.
+- lib/screens: login, home, dashboard, estrutura do sistema e telas operacionais.
+- lib/export: exportação CSV.
+- lib/reports: indicadores laboratoriais.
+- assets/images: logo oficial da KRISTAL LABORATORIAL.
+
+Crédito obrigatório:
+Desenvolvedor: 3º Sgt Rolandi - H Mil Resende
+
+Compilação:
+flutter pub get
+flutter create --platforms=windows .
+flutter run -d windows

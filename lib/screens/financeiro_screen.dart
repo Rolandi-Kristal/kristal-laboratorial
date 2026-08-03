@@ -1,0 +1,2 @@
+import 'package:flutter/material.dart';
+class FinanceiroScreen extends StatelessWidget { const FinanceiroScreen({super.key}); @override Widget build(BuildContext context)=> Scaffold(appBar:AppBar(title:const Text('Financeiro')), body: const Center(child: Card(child: Padding(padding: EdgeInsets.all(24), child: Text('Módulo financeiro pronto para faturamento particular, convênios, caixa e relatórios.'))))); }
