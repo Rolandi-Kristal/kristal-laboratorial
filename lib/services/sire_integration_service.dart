@@ -203,8 +203,7 @@ class SireIntegrationService {
       throw ArgumentError('CPF inválido para consulta SIRE.');
     }
 
-    final Uri uri = Uri.parse(_cleanBaseUrl(baseUrl)).replace(
-      path: '${Uri.parse(_cleanBaseUrl(baseUrl)).path}/GetBeneficiarioByCPF',
+    final Uri uri = _sireEndpointUri(baseUrl, 'GetBeneficiarioByCPF').replace(
       queryParameters: <String, String>{'CPF': cleanCpf},
     );
     final Map<String, dynamic> json = await _getJson(
@@ -247,9 +246,7 @@ class SireIntegrationService {
           'Informe ao menos um procedimento para emissão do CDM.');
     }
 
-    final Uri base = Uri.parse(_cleanBaseUrl(baseUrl));
-    final Uri uri = base.replace(
-      path: '${base.path}/PostCDM',
+    final Uri uri = _sireEndpointUri(baseUrl, 'PostCDM').replace(
       queryParameters: <String, String>{
         'BeneficiarioId': beneficiarioId.trim(),
         'PlanoInternoId': planoInternoId.trim(),
@@ -384,6 +381,29 @@ class SireIntegrationService {
     String two(int value) => value.toString().padLeft(2, '0');
     return '${now.year}${two(now.month)}${two(now.day)}_'
         '${two(now.hour)}${two(now.minute)}${two(now.second)}';
+  }
+
+  Uri _sireEndpointUri(String baseUrl, String endpoint) {
+    final String normalizedEndpoint =
+        endpoint.trim().replaceAll(RegExp(r'^/+|/+$'), '');
+    if (normalizedEndpoint.isEmpty) {
+      throw ArgumentError('Endpoint SIRE obrigatório.');
+    }
+
+    final Uri parsed = Uri.parse(_cleanBaseUrl(baseUrl));
+    final List<String> segments = parsed.pathSegments
+        .where((String segment) => segment.trim().isNotEmpty)
+        .toList(growable: true);
+
+    if (segments.isNotEmpty) {
+      final String last = segments.last.toLowerCase();
+      if (last == 'postcdm' || last == 'getbeneficiariobycpf') {
+        segments.removeLast();
+      }
+    }
+
+    segments.add(normalizedEndpoint);
+    return parsed.replace(path: '/${segments.join('/')}');
   }
 
   String _cleanBaseUrl(String value) {
