@@ -118,7 +118,11 @@ class AppConstants {
   }
 
   static List<String> superUserPasswordConfigPaths() {
+    final String executableDir = p.dirname(Platform.resolvedExecutable);
+    final String packageRoot = p.dirname(executableDir);
     return <String>[
+      p.join(packageRoot, 'config', 'superusuario.env'),
+      p.join(packageRoot, 'portal_web', '.env'),
       superUserPasswordConfigPath(),
       p.join(rootDirectoryPath, 'portal_web', '.env'),
     ];
