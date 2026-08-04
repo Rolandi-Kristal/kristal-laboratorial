@@ -29,10 +29,12 @@ Write-Host "Origem: $Origem"
 Write-Host "Destino: $Destino"
 Write-Host "Log: $logFile"
 
-$process = Start-Process -FilePath 'python' -ArgumentList $argsList -Wait -PassThru -NoNewWindow -RedirectStandardOutput $logFile -RedirectStandardError ($logFile + '.err')
-if ($process.ExitCode -ne 0) {
-  Get-Content ($logFile + '.err') -ErrorAction SilentlyContinue
-  throw "Importacao falhou com codigo $($process.ExitCode). Verifique: $logFile"
+$errFile = $logFile + '.err'
+& python @argsList 1> $logFile 2> $errFile
+$exitCode = $LASTEXITCODE
+if ($exitCode -ne 0) {
+  Get-Content $errFile -ErrorAction SilentlyContinue
+  throw "Importacao falhou com codigo $exitCode. Verifique: $logFile"
 }
 Get-Content $logFile
 Write-Host 'Importacao finalizada. Dados preservados permanentemente no repositório KRISTAL.' -ForegroundColor Green
