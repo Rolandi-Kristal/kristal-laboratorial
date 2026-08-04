@@ -39,7 +39,7 @@ class Settings:
             port=int(os.getenv("KRISTAL_PORTAL_PORT", "8787")),
             secret_key=os.getenv("KRISTAL_SECRET_KEY", "troque_por_uma_chave_forte_com_64_caracteres"),
             admin_login=os.getenv("KRISTAL_ADMIN_LOGIN", "Kristal"),
-            admin_password=os.getenv("KRISTAL_ADMIN_PASSWORD", "troque_esta_senha"),
+            admin_password=os.getenv("KRISTAL_SUPERUSER_PASSWORD", ""),
             db_path=os.getenv("KRISTAL_DB_PATH", "data/kristal_portal.db"),
             storage_dir=os.getenv("KRISTAL_STORAGE_DIR", "storage"),
             api_key=os.getenv("KRISTAL_API_KEY", ""),

@@ -69,7 +69,7 @@ No primeiro start, o servidor gera localmente:
 - `.env`
 - `KRISTAL_API_KEY`
 - `KRISTAL_SECRET_KEY`
-- `KRISTAL_ADMIN_PASSWORD`
+- `KRISTAL_SUPERUSER_PASSWORD`
 - `SEGREDOS_INICIAIS_ADMIN.txt`
 
 Esses arquivos ficam somente na pasta `D:\kristal_laboratorial\portal_web` do servidor e nao sao enviados no ZIP.

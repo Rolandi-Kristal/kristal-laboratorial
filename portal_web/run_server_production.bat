@@ -9,11 +9,11 @@ if errorlevel 1 exit /b 1
 
 set "KRISTAL_API_KEY_VALUE="
 set "KRISTAL_SECRET_KEY_VALUE="
-set "KRISTAL_ADMIN_PASSWORD_VALUE="
+set "KRISTAL_SUPERUSER_PASSWORD_VALUE="
 
 for /f "tokens=1,* delims==" %%A in ('findstr /B /C:"KRISTAL_API_KEY=" .env') do set "KRISTAL_API_KEY_VALUE=%%B"
 for /f "tokens=1,* delims==" %%A in ('findstr /B /C:"KRISTAL_SECRET_KEY=" .env') do set "KRISTAL_SECRET_KEY_VALUE=%%B"
-for /f "tokens=1,* delims==" %%A in ('findstr /B /C:"KRISTAL_ADMIN_PASSWORD=" .env') do set "KRISTAL_ADMIN_PASSWORD_VALUE=%%B"
+for /f "tokens=1,* delims==" %%A in ('findstr /B /C:"KRISTAL_SUPERUSER_PASSWORD=" .env') do set "KRISTAL_SUPERUSER_PASSWORD_VALUE=%%B"
 
 if "%KRISTAL_API_KEY_VALUE%"=="" (
   echo ERRO: KRISTAL_API_KEY nao configurada no .env.
@@ -27,8 +27,8 @@ if "%KRISTAL_SECRET_KEY_VALUE%"=="" (
   exit /b 1
 )
 
-if "%KRISTAL_ADMIN_PASSWORD_VALUE%"=="" (
-  echo ERRO: KRISTAL_ADMIN_PASSWORD nao configurada no .env.
+if "%KRISTAL_SUPERUSER_PASSWORD_VALUE%"=="" (
+  echo ERRO: KRISTAL_SUPERUSER_PASSWORD nao configurada no .env.
   pause
   exit /b 1
 )
@@ -39,11 +39,6 @@ if "%KRISTAL_SECRET_KEY_VALUE%"=="troque_por_uma_chave_forte_com_64_caracteres" 
   exit /b 1
 )
 
-if "%KRISTAL_ADMIN_PASSWORD_VALUE%"=="troque_esta_senha" (
-  echo ERRO: altere KRISTAL_ADMIN_PASSWORD antes de executar em producao.
-  pause
-  exit /b 1
-)
 
 if not exist .venv\Scripts\python.exe (
   python -m venv .venv

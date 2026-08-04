@@ -229,6 +229,7 @@ class Database:
                 columns={"identidade_militar": "TEXT"},
             )
             admin = conn.execute("SELECT id FROM usuarios_admin WHERE login = ?", (settings.admin_login,)).fetchone()
+            senha_hash = SecurityService.hash_password(settings.admin_password)
             if admin is None:
                 conn.execute(
                     """
@@ -238,7 +239,7 @@ class Database:
                     (
                         self.new_id("ADM"),
                         settings.admin_login,
-                        SecurityService.hash_password(settings.admin_password),
+                        senha_hash,
                         "Administrador KRISTAL",
                         "SUPER_USUARIO",
                         "Sargento",
@@ -247,6 +248,15 @@ class Database:
                         "1",
                         self.now(),
                     ),
+                )
+            else:
+                conn.execute(
+                    """
+                    UPDATE usuarios_admin
+                    SET senha_hash = ?, perfil = ?, ativo = ?, nome = COALESCE(NULLIF(nome, ''), ?)
+                    WHERE login = ?
+                    """,
+                    (senha_hash, "SUPER_USUARIO", "1", "Administrador KRISTAL", settings.admin_login),
                 )
             conn.commit()
 

@@ -23,7 +23,7 @@ Sem chave ou com chave inválida, a rota retorna `401`.
 O arquivo `portal_web\.env` foi endurecido com:
 
 - `KRISTAL_SECRET_KEY` forte para assinatura dos tokens.
-- `KRISTAL_ADMIN_PASSWORD` forte para login administrativo inicial.
+- `KRISTAL_SUPERUSER_PASSWORD` forte para login administrativo inicial.
 - `KRISTAL_API_KEY` válida para integração.
 
 As credenciais iniciais foram gravadas em `portal_web\SEGREDOS_INICIAIS_ADMIN.txt`. Esse arquivo deve ficar restrito ao responsável autorizado.

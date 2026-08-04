@@ -16,10 +16,9 @@ class AppConstants {
       'Desenvolvedor: 3° Sgt Rolandi - H Mil Resende';
 
   static const String defaultSuperUserLogin = 'Kristal';
-  static const String defaultSuperUserPassword =
-      String.fromEnvironment('KRISTAL_DEFAULT_SUPER_PASSWORD');
+  static final String defaultSuperUserPassword = _loadSuperUserPassword();
   static const String masterLogin = defaultSuperUserLogin;
-  static const String masterPassword = defaultSuperUserPassword;
+  static final String masterPassword = defaultSuperUserPassword;
 
   static const String logoPath = 'assets/images/kristal_login_logo.png';
   static const String hmrLogoPath = 'assets/images/hmr_brasao.png';
@@ -112,5 +111,53 @@ class AppConstants {
 
   static String masterKeyPath() {
     return p.join(appDataDirectoryPath(), masterKeyFile);
+  }
+
+  static String superUserPasswordConfigPath() {
+    return p.join(rootDirectoryPath, 'config', 'superusuario.env');
+  }
+
+  static List<String> superUserPasswordConfigPaths() {
+    return <String>[
+      superUserPasswordConfigPath(),
+      p.join(rootDirectoryPath, 'portal_web', '.env'),
+    ];
+  }
+
+  static String _loadSuperUserPassword() {
+    final String? envPassword =
+        Platform.environment['KRISTAL_SUPERUSER_PASSWORD'];
+    if (envPassword != null && envPassword.isNotEmpty) {
+      return envPassword;
+    }
+
+    for (final String configPath in superUserPasswordConfigPaths()) {
+      final File configFile = File(configPath);
+      if (!configFile.existsSync()) {
+        continue;
+      }
+      final String? loaded =
+          _readEnvValue(configFile, 'KRISTAL_SUPERUSER_PASSWORD');
+      if (loaded != null && loaded.isNotEmpty) {
+        return loaded;
+      }
+    }
+    return '';
+  }
+
+  static String? _readEnvValue(File file, String expectedKey) {
+    for (final String line in file.readAsLinesSync()) {
+      final String clean = line.trim();
+      if (clean.isEmpty || clean.startsWith('#') || !clean.contains('=')) {
+        continue;
+      }
+      final int separator = clean.indexOf('=');
+      final String key = clean.substring(0, separator).trim();
+      final String value = clean.substring(separator + 1).trim();
+      if (key == expectedKey) {
+        return value;
+      }
+    }
+    return null;
   }
 }

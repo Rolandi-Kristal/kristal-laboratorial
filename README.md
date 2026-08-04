@@ -9,7 +9,7 @@ Credenciais, bancos, backups, certificados privados, `.env`, chaves API e arquiv
 A senha inicial do superusuário deve ser definida no ambiente de implantação ou no build seguro, por exemplo:
 
 ```bat
-flutter build windows --release --dart-define=KRISTAL_DEFAULT_SUPER_PASSWORD=SENHA_FORTE_LOCAL
+flutter build windows --release
 ```
 
 ## Compilar no Windows
