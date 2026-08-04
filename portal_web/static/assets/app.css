@@ -483,3 +483,28 @@ button.secondary {
     white-space: normal;
   }
 }
+
+.developer-credit {
+  text-align: center;
+  color: var(--gold);
+  font-weight: 900;
+  padding: 2px 0 4px;
+}
+
+.exam-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.exam-row .actions {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 760px) {
+  .exam-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

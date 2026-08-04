@@ -41,6 +41,9 @@ class Database:
                     senha_hash TEXT NOT NULL,
                     nome TEXT NOT NULL,
                     perfil TEXT NOT NULL,
+                    graduacao TEXT,
+                    posto TEXT,
+                    identidade_militar TEXT,
                     ativo TEXT NOT NULL DEFAULT '1',
                     criado_em TEXT NOT NULL
                 );
@@ -49,6 +52,7 @@ class Database:
                     nome TEXT NOT NULL,
                     cpf TEXT UNIQUE NOT NULL,
                     preccp TEXT,
+                    identidade_militar TEXT,
                     cns TEXT,
                     nascimento TEXT,
                     telefone TEXT,
@@ -92,6 +96,7 @@ class Database:
                     paciente_nome TEXT,
                     cpf TEXT,
                     preccp TEXT,
+                    identidade_militar TEXT,
                     cns TEXT,
                     pedido_id TEXT,
                     amostra_id TEXT,
@@ -154,6 +159,41 @@ class Database:
                     hash_integridade TEXT NOT NULL,
                     criado_em TEXT NOT NULL
                 );
+                CREATE TABLE IF NOT EXISTS legacy_sources (
+                    stored_name TEXT PRIMARY KEY,
+                    sha256 TEXT UNIQUE NOT NULL,
+                    size_bytes INTEGER NOT NULL,
+                    imported_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+                );
+                CREATE TABLE IF NOT EXISTS legacy_files (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    original_extension TEXT NOT NULL,
+                    stored_name TEXT NOT NULL,
+                    sha256 TEXT UNIQUE NOT NULL,
+                    size_bytes INTEGER NOT NULL,
+                    category TEXT NOT NULL,
+                    imported_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+                );
+                CREATE TABLE IF NOT EXISTS legacy_table_schemas (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    source_sha256 TEXT NOT NULL,
+                    logical_database TEXT NOT NULL,
+                    table_name TEXT NOT NULL,
+                    columns_json TEXT NOT NULL,
+                    create_sql_sha256 TEXT NOT NULL,
+                    imported_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE(source_sha256, logical_database, table_name)
+                );
+                CREATE TABLE IF NOT EXISTS legacy_rows (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    source_sha256 TEXT NOT NULL,
+                    logical_database TEXT NOT NULL,
+                    table_name TEXT NOT NULL,
+                    row_index INTEGER NOT NULL,
+                    row_json TEXT NOT NULL,
+                    row_sha256 TEXT UNIQUE NOT NULL,
+                    imported_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+                );
                 CREATE INDEX IF NOT EXISTS idx_pacientes_cpf ON pacientes(cpf);
                 CREATE INDEX IF NOT EXISTS idx_exames_paciente ON exames(paciente_id);
                 CREATE INDEX IF NOT EXISTS idx_hist_paciente ON historico_exames_pacientes(paciente_id);
@@ -162,13 +202,38 @@ class Database:
                 CREATE INDEX IF NOT EXISTS idx_catalogo_exames_sire ON catalogo_exames(codigo_sire);
                 CREATE INDEX IF NOT EXISTS idx_sire_cdm_envios_pedido ON sire_cdm_envios(pedido_id);
                 CREATE INDEX IF NOT EXISTS idx_sire_cdm_envios_cdm ON sire_cdm_envios(cdm_id);
+                CREATE INDEX IF NOT EXISTS idx_legacy_rows_table ON legacy_rows(table_name);
+                CREATE INDEX IF NOT EXISTS idx_legacy_rows_db_table ON legacy_rows(logical_database, table_name);
+                CREATE INDEX IF NOT EXISTS idx_legacy_rows_hash ON legacy_rows(row_sha256);
+                CREATE INDEX IF NOT EXISTS idx_legacy_sources_sha256 ON legacy_sources(sha256);
+                CREATE INDEX IF NOT EXISTS idx_legacy_files_sha256 ON legacy_files(sha256);
+                CREATE INDEX IF NOT EXISTS idx_legacy_files_category ON legacy_files(category);
             """)
+            self._ensure_columns(
+                conn,
+                table="usuarios_admin",
+                columns={
+                    "graduacao": "TEXT",
+                    "posto": "TEXT",
+                    "identidade_militar": "TEXT",
+                },
+            )
+            self._ensure_columns(
+                conn,
+                table="pacientes",
+                columns={"identidade_militar": "TEXT"},
+            )
+            self._ensure_columns(
+                conn,
+                table="historico_exames_pacientes",
+                columns={"identidade_militar": "TEXT"},
+            )
             admin = conn.execute("SELECT id FROM usuarios_admin WHERE login = ?", (settings.admin_login,)).fetchone()
             if admin is None:
                 conn.execute(
                     """
-                    INSERT INTO usuarios_admin (id, login, senha_hash, nome, perfil, ativo, criado_em)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO usuarios_admin (id, login, senha_hash, nome, perfil, graduacao, posto, identidade_militar, ativo, criado_em)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         self.new_id("ADM"),
@@ -176,11 +241,21 @@ class Database:
                         SecurityService.hash_password(settings.admin_password),
                         "Administrador KRISTAL",
                         "SUPER_USUARIO",
+                        "Sargento",
+                        "3º",
+                        "",
                         "1",
                         self.now(),
                     ),
                 )
             conn.commit()
+
+    @staticmethod
+    def _ensure_columns(conn: sqlite3.Connection, *, table: str, columns: dict[str, str]) -> None:
+        existing = {row["name"] for row in conn.execute(f"PRAGMA table_info({table})").fetchall()}
+        for name, column_type in columns.items():
+            if name not in existing:
+                conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {column_type}")
 
     def audit(self, *, usuario: str, acao: str, tabela: str, registro_id: str, detalhes: str) -> None:
         with self.connect() as conn:

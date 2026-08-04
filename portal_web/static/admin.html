@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <title>HOSPITAL MILITAR DE RESENDE - Administracao KRISTAL</title>
+  <title>HOSPITAL MILITAR DE RESENDE - Administração KRISTAL</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="/assets/app.css" rel="stylesheet">
 </head>
@@ -16,27 +16,25 @@
           <div class="brand-center">
             <div class="system-title">KRISTAL LABORATORIAL</div>
             <div class="system-subtitle">SISTEMA ADAPTATIVO AVANÇADO</div>
-            <div class="admin-caption">Administracao do Portal Web</div>
+            <div class="admin-caption">Administração do Portal Web</div>
           </div>
           <img class="top-logo kristal-logo" src="/assets/logo_kristal.png" alt="Logo KRISTAL LABORATORIAL">
         </div>
       </div>
     </section>
 
+    <section class="developer-credit">Desenvolvedor: 3° Sgt Rolandi - H Mil Resende</section>
+
     <section class="card" id="adminLoginCard">
       <div class="login-header">
         <h2>Acesso Administrativo</h2>
         <p>HOSPITAL MILITAR DE RESENDE</p>
       </div>
-
       <form id="adminLoginForm">
-        <label>Usuario</label>
-        <input id="adminLogin" required>
-        <label>Senha</label>
-        <input id="adminSenha" type="password" required>
+        <label>Usuário</label><input id="adminLogin" autocomplete="username" required>
+        <label>Senha</label><input id="adminSenha" type="password" autocomplete="current-password" required>
         <button type="submit">Entrar</button>
       </form>
-
       <p id="adminLoginMsg" class="msg"></p>
     </section>
 
@@ -49,119 +47,99 @@
         <p class="msg" id="adminPerfilMsg"></p>
       </div>
 
-      <div class="card">
+      <div class="card admin-edit-only">
+        <h2>Usuários Administrativos</h2>
+        <form id="usuarioForm">
+          <input type="hidden" name="id" id="usuarioId">
+          <label>Nome</label><input name="nome" id="usuarioNome" required>
+          <label>Login</label><input name="login" id="usuarioLogin" required>
+          <label>Senha</label><input name="senha" id="usuarioSenha" type="password">
+          <label>Perfil</label><select name="perfil" id="usuarioPerfil"><option value="ADMIN">ADMIN</option><option value="SUPER_USUARIO">SUPER_USUARIO</option></select>
+          <label>Graduação</label><select name="graduacao" id="usuarioGraduacao" class="militar-graduacao"></select>
+          <label>Posto</label><select name="posto" id="usuarioPosto" class="militar-posto"></select>
+          <label>Identidade militar</label><input name="identidade_militar" id="usuarioIdentidade" inputmode="numeric">
+          <label>Ativo</label><select name="ativo" id="usuarioAtivo"><option value="1">SIM</option><option value="0">NÃO</option></select>
+          <div class="row"><button type="submit">Salvar usuário</button><button type="button" class="secondary" id="limparUsuarioBtn">Limpar</button></div>
+        </form>
+        <p id="usuarioMsg" class="msg"></p>
+        <input id="usuarioSearch" placeholder="Buscar usuário, login, perfil ou identidade militar">
+        <button id="buscarUsuariosBtn">Buscar usuários</button>
+        <div id="usuarioList" class="list"></div>
+      </div>
+
+      <div class="card admin-edit-only">
         <h2>Paciente</h2>
         <form id="pacienteForm">
           <input type="hidden" name="id" id="pacienteId">
+          <label>ID permanente</label><input id="pacienteIdView" disabled placeholder="Gerado automaticamente">
           <label>Nome</label><input name="nome" id="pacienteNome" required>
-          <label>CPF</label><input name="cpf" id="pacienteCpf" required>
-          <label>Codigo de acesso</label>
-          <div class="inline-field">
-            <input name="codigo_acesso" id="codigoAcessoPaciente">
-            <button type="button" class="secondary inline-button" id="gerarCodigoPacienteBtn">Gerar</button>
-          </div>
-          <label>PREC-CP</label><input name="preccp" id="pacientePreccp">
-          <label>CNS</label><input name="cns" id="pacienteCns">
+          <label>CPF</label><input name="cpf" id="pacienteCpf" inputmode="numeric" required>
+          <label>Código de acesso</label>
+          <div class="inline-field"><input name="codigo_acesso" id="codigoAcessoPaciente"><button type="button" class="secondary inline-button" id="gerarCodigoPacienteBtn">Gerar</button></div>
+          <label>PREC-CP</label><input name="preccp" id="pacientePreccp" inputmode="numeric">
+          <label>Identidade militar</label><input name="identidade_militar" id="pacienteIdentidade" inputmode="numeric">
           <label>Nascimento</label><input name="nascimento" id="pacienteNascimento">
-          <label>Telefone</label><input name="telefone" id="pacienteTelefone">
-          <label>E-mail</label><input name="email" id="pacienteEmail">
-          <div class="row">
-            <button type="submit">Salvar paciente</button>
-            <button type="button" class="secondary" id="limparPacienteBtn">Limpar</button>
-          </div>
+          <label>Telefone</label><input name="telefone" id="pacienteTelefone" inputmode="numeric">
+          <label>E-mail</label><input name="email" id="pacienteEmail" type="email">
+          <div class="row"><button type="submit">Salvar paciente</button><button type="button" class="secondary" id="limparPacienteBtn">Limpar</button></div>
         </form>
         <p id="pacienteMsg" class="msg"></p>
       </div>
 
-      <div class="card">
+      <div class="card admin-edit-only">
         <h2>Catálogo de Exames</h2>
         <form id="catalogoForm">
           <input type="hidden" name="id" id="catalogoId">
           <label>MNE</label><input name="mne" id="catalogoMne" required>
-          <label>Codigo SIRE</label><input name="codigo_sire" id="catalogoCodigoSire">
+          <label>Código SIRE</label><input name="codigo_sire" id="catalogoCodigoSire">
           <label>Nome do exame</label><input name="nome" id="catalogoNome" required>
           <label>Setor</label><input name="setor" id="catalogoSetor">
           <label>Material</label><input name="material" id="catalogoMaterial">
-          <label>Metodo</label><input name="metodo" id="catalogoMetodo">
+          <label>Método</label><input name="metodo" id="catalogoMetodo">
           <label>Unidade</label><input name="unidade" id="catalogoUnidade">
-          <label>Referencia</label><input name="referencia" id="catalogoReferencia">
-          <label>Valor cheio</label><input name="valor_cheio" id="catalogoValorCheio">
-          <label>A indenizar 20%</label><input name="valor_indenizar_20" id="catalogoValorIndenizar20">
+          <label>Referência</label><input name="referencia" id="catalogoReferencia">
+          <label>Valor cheio (R$)</label><input name="valor_cheio" id="catalogoValorCheio" inputmode="decimal" placeholder="23,35">
+          <label>A indenizar 20% (R$)</label><input name="valor_indenizar_20" id="catalogoValorIndenizar20" inputmode="decimal" placeholder="4,67">
           <label>Equipamento / Integração</label><input name="equipamento" id="catalogoEquipamento">
-          <label>Ativo</label>
-          <select name="ativo" id="catalogoAtivo"><option value="1">SIM</option><option value="0">NAO</option></select>
-          <div class="row">
-            <button type="submit">Salvar catálogo</button>
-            <button type="button" class="secondary" id="limparCatalogoBtn">Limpar</button>
-          </div>
+          <label>Ativo</label><select name="ativo" id="catalogoAtivo"><option value="1">SIM</option><option value="0">NÃO</option></select>
+          <div class="row"><button type="submit">Salvar catálogo</button><button type="button" class="secondary" id="limparCatalogoBtn">Limpar</button></div>
         </form>
         <p id="catalogoMsg" class="msg"></p>
       </div>
 
-      <div class="card">
-        <h2>Cadastrar Exame / Laudo</h2>
+      <div class="card admin-edit-only">
+        <h2>Exame / Laudo</h2>
         <form id="exameForm">
-          <label>ID do paciente</label><input name="paciente_id" required>
+          <label>Paciente cadastrado</label><select name="paciente_id" id="examePacienteSelect" required></select>
           <label>Exame</label><input name="exame_nome" required>
-          <label>Valor</label><input name="valor" required>
+          <label>Valor (R$)</label><input name="valor" inputmode="decimal" placeholder="23,35" required>
           <label>Unidade</label><input name="unidade">
-          <label>Referencia</label><input name="referencia">
+          <label>Referência</label><input name="referencia">
           <label>Pedido</label><input name="pedido_id">
           <label>Amostra</label><input name="amostra_id">
-          <label>Critico</label><select name="critico"><option>NAO</option><option>SIM</option></select>
+          <label>Crítico</label><select name="critico"><option>NÃO</option><option>SIM</option></select>
           <label>PDF do laudo</label><input name="pdf" type="file" accept="application/pdf">
           <button type="submit">Salvar exame</button>
         </form>
         <p id="exameMsg" class="msg"></p>
       </div>
 
-      <div class="card wide">
-        <h2>Pacientes Cadastrados</h2>
-        <input id="pacienteSearch" placeholder="Buscar paciente, CPF ou PREC-CP">
-        <button id="buscarPacientesBtn">Buscar pacientes</button>
-        <div id="pacienteList" class="list"></div>
+      <div class="card wide admin-edit-only">
+        <h2>Importar Exames</h2>
+        <form id="importarExamesForm">
+          <label>Arquivo CSV, TXT ou JSON</label><input name="arquivo" id="importarExamesArquivo" type="file" accept=".csv,.txt,.json" required>
+          <button type="submit">Importar exames</button>
+        </form>
+        <p id="importarExamesMsg" class="msg"></p>
       </div>
 
-      <div class="card wide">
-        <h2>Catálogo Cadastrado</h2>
-        <input id="catalogoSearch" placeholder="Buscar MNE, código SIRE, exame, setor ou material">
-        <button id="buscarCatalogoBtn">Buscar catálogo</button>
-        <div id="catalogoList" class="list"></div>
-      </div>
-
-      <div class="card wide">
-        <h2>Servidor</h2>
-        <label>Chave API do servidor</label><input id="serverApiKey" type="password" placeholder="KRISTAL_API_KEY">
-        <div class="row">
-          <button id="salvarServerApiKeyBtn" class="secondary">Salvar chave API</button>
-          <button id="testarServerStatusBtn">Testar status protegido</button>
-          <button id="backupManualServidorBtn">Backup manual do servidor</button>
-        </div>
-        <p id="serverMsg" class="msg"></p>
-      </div>
-
-      <div class="card wide">
-        <h2>Consulta de Laudos</h2>
-        <input id="adminSearch" placeholder="Buscar paciente, CPF, PREC-CP ou exame">
-        <div class="row">
-          <button id="buscarHistoricoBtn">Buscar historico</button>
-          <button id="buscarRecentesBtn" class="secondary">Buscar recentes</button>
-        </div>
-        <div id="adminList" class="list"></div>
-      </div>
-
-      <div class="card wide hidden" id="superDangerPanel">
-        <h2>Superusuário</h2>
-        <p class="msg">Exclusão total remove pacientes, exames, histórico e catálogo do portal. Usuários e auditoria são preservados.</p>
-        <label>Confirmação</label><input id="confirmacaoExclusaoTotal" placeholder="EXCLUIR TODOS OS DADOS">
-        <button id="excluirTudoBtn" class="secondary">Excluir todos os dados cadastrados</button>
-        <p id="excluirTudoMsg" class="msg"></p>
-      </div>
+      <div class="card wide"><h2>Pacientes Cadastrados</h2><input id="pacienteSearch" placeholder="Buscar paciente, CPF, PREC-CP ou identidade militar"><button id="buscarPacientesBtn">Buscar pacientes</button><div id="pacienteList" class="list"></div></div>
+      <div class="card wide"><h2>Catálogo Cadastrado</h2><input id="catalogoSearch" placeholder="Buscar MNE, código SIRE, exame, setor ou material"><button id="buscarCatalogoBtn">Buscar catálogo</button><div id="catalogoList" class="list"></div></div>
+      <div class="card wide"><h2>Consulta de Laudos</h2><input id="adminSearch" placeholder="Buscar paciente, CPF, PREC-CP ou exame"><div class="row"><button id="buscarHistoricoBtn">Buscar histórico</button><button id="buscarRecentesBtn" class="secondary">Buscar recentes</button></div><div id="adminList" class="list"></div></div>
+      <div class="card wide"><h2>Servidor</h2><label>Chave API do servidor</label><input id="serverApiKey" type="password" placeholder="KRISTAL_API_KEY"><div class="row"><button id="salvarServerApiKeyBtn" class="secondary">Salvar chave API</button><button id="testarServerStatusBtn">Testar status protegido</button><button id="backupManualServidorBtn">Backup manual do servidor</button></div><p id="serverMsg" class="msg"></p></div>
+      <div class="card wide hidden" id="superDangerPanel"><h2>Superusuário</h2><p class="msg">Arquivamento lógico: os dados permanecem no banco para auditoria e consulta futura.</p><label>Confirmação</label><input id="confirmacaoExclusaoTotal" placeholder="EXCLUIR TODOS OS DADOS"><button id="excluirTudoBtn" class="secondary">Arquivar dados cadastrados</button><p id="excluirTudoMsg" class="msg"></p></div>
     </section>
-
-    <footer class="site-footer-credit">Desenvolvedor: 3° Sgt Rolandi - H Mil Resende</footer>
   </main>
-
   <script src="/assets/admin.js"></script>
 </body>
 </html>

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import csv
 import hashlib
+import io
 import json
 import os
 import shutil
@@ -10,7 +12,7 @@ import urllib.request
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Query, UploadFile
 from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 
@@ -33,6 +35,9 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
     def super_auth(authorization: Annotated[str | None, Header()] = None) -> dict:
         return _auth(settings=settings, authorization=authorization, roles={"SUPER_USUARIO"})
 
+    def require_super(auth: dict) -> None:
+        if auth.get("role") != "SUPER_USUARIO":
+            raise HTTPException(status_code=403, detail="Apenas SUPER_USUARIO pode modificar dados do portal.")
     def api_auth(x_api_key: Annotated[str | None, Header(alias="X-API-Key")] = None) -> None:
         _validate_api_key(settings=settings, api_key=x_api_key)
 
@@ -91,6 +96,87 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
         database.audit(usuario=row["cpf"], acao="LOGIN_PACIENTE", tabela="pacientes", registro_id=row["id"], detalhes="Login do paciente.")
         return {"token": token, "nome": row["nome"]}
 
+
+    @app.get("/api/admin/usuarios")
+    def listar_usuarios_admin(auth: dict = Depends(admin_auth), q: str = "") -> list[dict]:
+        del auth
+        like = f"%{q.strip()}%"
+        with database.connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT id, login, nome, perfil, graduacao, posto, identidade_militar, ativo, criado_em
+                FROM usuarios_admin
+                WHERE login LIKE ? OR nome LIKE ? OR perfil LIKE ? OR identidade_militar LIKE ?
+                ORDER BY nome
+                """,
+                (like, like, like, like),
+            ).fetchall()
+        return [dict(row) for row in rows]
+
+    @app.post("/api/admin/usuarios")
+    def salvar_usuario_admin(
+        login: Annotated[str, Form()],
+        nome: Annotated[str, Form()],
+        perfil: Annotated[str, Form()],
+        auth: dict = Depends(admin_auth),
+        id: Annotated[str | None, Form()] = None,
+        senha: Annotated[str | None, Form()] = None,
+        graduacao: Annotated[str | None, Form()] = None,
+        posto: Annotated[str | None, Form()] = None,
+        identidade_militar: Annotated[str | None, Form()] = None,
+        ativo: Annotated[str, Form()] = "1",
+    ) -> dict[str, str]:
+        require_super(auth)
+        login_clean = login.strip()
+        nome_clean = nome.strip()
+        perfil_clean = _normalize_admin_profile(perfil)
+        graduacao_clean, posto_clean = _validate_military_rank(graduacao or "", posto or "")
+        identidade_clean = _digits(identidade_militar or "")
+        if not login_clean or not nome_clean:
+            raise HTTPException(status_code=400, detail="Login e nome são obrigatórios.")
+        usuario_id = id.strip() if id is not None and id.strip() else database.new_id("USR")
+        ativo_clean = "1" if ativo.strip() in {"1", "SIM", "ATIVO", "true", "TRUE"} else "0"
+        with database.connect() as conn:
+            duplicate = conn.execute("SELECT id FROM usuarios_admin WHERE login = ? AND id <> ?", (login_clean, usuario_id)).fetchone()
+            if duplicate is not None:
+                raise HTTPException(status_code=409, detail="Login já cadastrado para outro usuário.")
+            exists = conn.execute("SELECT id FROM usuarios_admin WHERE id = ?", (usuario_id,)).fetchone()
+            now = database.now()
+            if exists is None:
+                if not senha or not senha.strip():
+                    raise HTTPException(status_code=400, detail="Senha é obrigatória para novo usuário.")
+                conn.execute(
+                    """
+                    INSERT INTO usuarios_admin (
+                        id, login, senha_hash, nome, perfil, graduacao, posto,
+                        identidade_militar, ativo, criado_em
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        usuario_id, login_clean, SecurityService.hash_password(senha.strip()),
+                        nome_clean, perfil_clean, graduacao_clean, posto_clean,
+                        identidade_clean, ativo_clean, now,
+                    ),
+                )
+                action = "CADASTRAR_USUARIO_ADMIN"
+            else:
+                fields = [
+                    "login = ?", "nome = ?", "perfil = ?", "graduacao = ?",
+                    "posto = ?", "identidade_militar = ?", "ativo = ?",
+                ]
+                values: list[str] = [
+                    login_clean, nome_clean, perfil_clean, graduacao_clean,
+                    posto_clean, identidade_clean, ativo_clean,
+                ]
+                if senha is not None and senha.strip():
+                    fields.append("senha_hash = ?")
+                    values.append(SecurityService.hash_password(senha.strip()))
+                values.append(usuario_id)
+                conn.execute(f"UPDATE usuarios_admin SET {', '.join(fields)} WHERE id = ?", values)
+                action = "ATUALIZAR_USUARIO_ADMIN"
+            conn.commit()
+        database.audit(usuario=auth.get("login", "super"), acao=action, tabela="usuarios_admin", registro_id=usuario_id, detalhes=login_clean)
+        return {"id": usuario_id, "status": "usuario_admin_salvo"}
     @app.post("/api/admin/pacientes")
     def cadastrar_paciente(
         nome: Annotated[str, Form()],
@@ -98,34 +184,40 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
         codigo_acesso: Annotated[str, Form()],
         auth: dict = Depends(admin_auth),
         preccp: Annotated[str | None, Form()] = None,
-        cns: Annotated[str | None, Form()] = None,
+        identidade_militar: Annotated[str | None, Form()] = None,
         nascimento: Annotated[str | None, Form()] = None,
         telefone: Annotated[str | None, Form()] = None,
         email: Annotated[str | None, Form()] = None,
     ) -> dict[str, str]:
-        cpf_clean = _digits(cpf)
+        require_super(auth)
+        nome_clean = nome.strip()
+        cpf_clean = _valid_cpf_or_400(cpf)
+        preccp_clean = _digits(preccp or "")
+        identidade_clean = _digits(identidade_militar or "")
+        if not nome_clean or not codigo_acesso.strip():
+            raise HTTPException(status_code=400, detail="Nome e código de acesso são obrigatórios.")
         paciente_id = database.new_id("PAC")
         with database.connect() as conn:
             exists = conn.execute("SELECT id FROM pacientes WHERE cpf = ?", (cpf_clean,)).fetchone()
             if exists is not None:
-                raise HTTPException(status_code=409, detail="CPF já cadastrado.")
+                raise HTTPException(status_code=409, detail="CPF já cadastrado. Use o paciente existente para novos exames.")
             now = database.now()
             conn.execute(
                 """
                 INSERT INTO pacientes (
-                    id, nome, cpf, preccp, cns, nascimento, telefone, email,
+                    id, nome, cpf, preccp, identidade_militar, cns, nascimento, telefone, email,
                     codigo_acesso_hash, ativo, ativo_consulta_recente, arquivado,
                     excluido_fisicamente, criado_em, atualizado_em
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
-                    paciente_id, nome.strip(), cpf_clean, preccp or "", cns or "",
-                    nascimento or "", telefone or "", email or "",
-                    SecurityService.hash_password(codigo_acesso), "1", "1", "0", "0", now, now,
+                    paciente_id, nome_clean, cpf_clean, preccp_clean, identidade_clean, "",
+                    nascimento or "", _digits(telefone or ""), email or "",
+                    SecurityService.hash_password(codigo_acesso.strip()), "1", "1", "0", "0", now, now,
                 ),
             )
             conn.commit()
-        database.audit(usuario=auth.get("login", "admin"), acao="CADASTRAR_PACIENTE", tabela="pacientes", registro_id=paciente_id, detalhes=nome)
+        database.audit(usuario=auth.get("login", "admin"), acao="CADASTRAR_PACIENTE", tabela="pacientes", registro_id=paciente_id, detalhes=nome_clean)
         return {"id": paciente_id, "status": "paciente_cadastrado"}
 
     @app.get("/api/admin/pacientes")
@@ -135,16 +227,15 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
         with database.connect() as conn:
             rows = conn.execute(
                 """
-                SELECT id, nome, cpf, preccp, cns, telefone, email, criado_em
+                SELECT id, nome, cpf, preccp, identidade_militar, nascimento, telefone, email, criado_em, atualizado_em
                 FROM pacientes
                 WHERE arquivado = '0' AND excluido_fisicamente = '0'
-                AND (nome LIKE ? OR cpf LIKE ? OR preccp LIKE ?)
+                AND (nome LIKE ? OR cpf LIKE ? OR preccp LIKE ? OR identidade_militar LIKE ?)
                 ORDER BY nome
                 """,
-                (like, like, like),
+                (like, like, like, like),
             ).fetchall()
         return [dict(row) for row in rows]
-
     @app.post("/api/admin/exames")
     async def cadastrar_exame(
         paciente_id: Annotated[str, Form()],
@@ -164,12 +255,20 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
         observacao: Annotated[str | None, Form()] = None,
         pdf: UploadFile | None = File(default=None),
     ) -> dict[str, str]:
+        require_super(auth)
+        exame_nome_clean = exame_nome.strip()
+        if not exame_nome_clean:
+            raise HTTPException(status_code=400, detail="Nome do exame é obrigatório.")
+        valor_brl = _normalize_brl_or_400(valor)
         exame_id = database.new_id("EXA")
         pdf_path = ""
         if pdf is not None and pdf.filename:
             pdf_path = await _save_pdf(settings=settings, exame_id=exame_id, upload=pdf)
         with database.connect() as conn:
-            paciente = conn.execute("SELECT id, nome, cpf, preccp, cns FROM pacientes WHERE id = ?", (paciente_id,)).fetchone()
+            paciente = conn.execute(
+                "SELECT id, nome, cpf, preccp, identidade_militar FROM pacientes WHERE id = ? AND excluido_fisicamente = '0'",
+                (paciente_id,),
+            ).fetchone()
             if paciente is None:
                 raise HTTPException(status_code=404, detail="Paciente não localizado.")
             now = database.now()
@@ -185,8 +284,8 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
-                    exame_id, paciente_id, pedido_id or "", amostra_id or "", exame_nome.strip(),
-                    valor.strip(), unidade or "", referencia or "", status_laudo, critico,
+                    exame_id, paciente_id, pedido_id or "", amostra_id or "", exame_nome_clean,
+                    valor_brl, unidade or "", referencia or "", status_laudo, critico,
                     coletado_em or "", liberado, profissional_responsavel or "", equipamento or "",
                     "KRISTAL", pdf_path, "1", "0", "0", now, now, observacao or "",
                 ),
@@ -195,25 +294,24 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
             conn.execute(
                 """
                 INSERT INTO historico_exames_pacientes (
-                    id, paciente_id, paciente_nome, cpf, preccp, cns, pedido_id, amostra_id,
-                    exame_nome, valor, unidade, referencia, status_laudo, critico, coletado_em,
-                    liberado_em, profissional_responsavel, equipamento, origem, pdf_path,
-                    ativo_consulta_recente, arquivado, excluido_fisicamente, criado_em,
-                    atualizado_em, observacao
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    id, paciente_id, paciente_nome, cpf, preccp, identidade_militar, cns,
+                    pedido_id, amostra_id, exame_nome, valor, unidade, referencia,
+                    status_laudo, critico, coletado_em, liberado_em, profissional_responsavel,
+                    equipamento, origem, pdf_path, ativo_consulta_recente, arquivado,
+                    excluido_fisicamente, criado_em, atualizado_em, observacao
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     history_id, paciente["id"], paciente["nome"], paciente["cpf"], paciente["preccp"],
-                    paciente["cns"], pedido_id or "", amostra_id or "", exame_nome.strip(), valor.strip(),
-                    unidade or "", referencia or "", status_laudo, critico, coletado_em or "", liberado,
-                    profissional_responsavel or "", equipamento or "", "KRISTAL", pdf_path,
-                    "0", "1", "0", now, now, observacao or "",
+                    paciente["identidade_militar"], "", pedido_id or "", amostra_id or "",
+                    exame_nome_clean, valor_brl, unidade or "", referencia or "", status_laudo,
+                    critico, coletado_em or "", liberado, profissional_responsavel or "",
+                    equipamento or "", "KRISTAL", pdf_path, "0", "1", "0", now, now, observacao or "",
                 ),
             )
             conn.commit()
-        database.audit(usuario=auth.get("login", "admin"), acao="CADASTRAR_EXAME", tabela="exames", registro_id=exame_id, detalhes=exame_nome)
+        database.audit(usuario=auth.get("login", "admin"), acao="CADASTRAR_EXAME", tabela="exames", registro_id=exame_id, detalhes=exame_nome_clean)
         return {"id": exame_id, "historico_id": f"HIST-{exame_id}"}
-
     @app.get("/api/paciente/exames")
     def paciente_exames(auth: dict = Depends(paciente_auth), historico: bool = True) -> list[dict]:
         table = "historico_exames_pacientes" if historico else "exames"
@@ -307,13 +405,16 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
         auth: dict = Depends(admin_auth),
         codigo_acesso: Annotated[str | None, Form()] = None,
         preccp: Annotated[str | None, Form()] = None,
-        cns: Annotated[str | None, Form()] = None,
+        identidade_militar: Annotated[str | None, Form()] = None,
         nascimento: Annotated[str | None, Form()] = None,
         telefone: Annotated[str | None, Form()] = None,
         email: Annotated[str | None, Form()] = None,
     ) -> dict[str, str]:
-        cpf_clean = _digits(cpf)
+        require_super(auth)
+        cpf_clean = _valid_cpf_or_400(cpf)
         nome_clean = nome.strip()
+        preccp_clean = _digits(preccp or "")
+        identidade_clean = _digits(identidade_militar or "")
         if not paciente_id.strip() or not nome_clean or not cpf_clean:
             raise HTTPException(status_code=400, detail="ID, nome e CPF são obrigatórios.")
         with database.connect() as conn:
@@ -330,12 +431,12 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
             if duplicate is not None:
                 raise HTTPException(status_code=409, detail="CPF já pertence a outro paciente.")
             fields = [
-                "nome = ?", "cpf = ?", "preccp = ?", "cns = ?", "nascimento = ?",
+                "nome = ?", "cpf = ?", "preccp = ?", "identidade_militar = ?", "nascimento = ?",
                 "telefone = ?", "email = ?", "atualizado_em = ?",
             ]
             values: list[str] = [
-                nome_clean, cpf_clean, preccp or "", cns or "", nascimento or "",
-                telefone or "", email or "", database.now(),
+                nome_clean, cpf_clean, preccp_clean, identidade_clean, nascimento or "",
+                _digits(telefone or ""), email or "", database.now(),
             ]
             if codigo_acesso is not None and codigo_acesso.strip():
                 fields.append("codigo_acesso_hash = ?")
@@ -354,6 +455,7 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
 
     @app.delete("/api/admin/pacientes/{paciente_id}")
     def excluir_paciente(paciente_id: str, auth: dict = Depends(admin_auth)) -> dict[str, str]:
+        require_super(auth)
         if not paciente_id.strip():
             raise HTTPException(status_code=400, detail="ID do paciente é obrigatório.")
         with database.connect() as conn:
@@ -365,26 +467,26 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
                 raise HTTPException(status_code=404, detail="Paciente não localizado.")
             now = database.now()
             conn.execute(
-                "UPDATE pacientes SET ativo = '0', ativo_consulta_recente = '0', arquivado = '1', excluido_fisicamente = '1', atualizado_em = ? WHERE id = ?",
+                "UPDATE pacientes SET ativo = '0', ativo_consulta_recente = '0', arquivado = '1', excluido_fisicamente = '0', atualizado_em = ? WHERE id = ?",
                 (now, paciente_id),
             )
             conn.execute(
-                "UPDATE exames SET ativo_consulta_recente = '0', arquivado = '1', excluido_fisicamente = '1', atualizado_em = ? WHERE paciente_id = ?",
+                "UPDATE exames SET ativo_consulta_recente = '0', arquivado = '1', excluido_fisicamente = '0', atualizado_em = ? WHERE paciente_id = ?",
                 (now, paciente_id),
             )
             conn.execute(
-                "UPDATE historico_exames_pacientes SET ativo_consulta_recente = '0', arquivado = '1', excluido_fisicamente = '1', atualizado_em = ? WHERE paciente_id = ?",
+                "UPDATE historico_exames_pacientes SET ativo_consulta_recente = '0', arquivado = '1', excluido_fisicamente = '0', atualizado_em = ? WHERE paciente_id = ?",
                 (now, paciente_id),
             )
             conn.commit()
         database.audit(
             usuario=auth.get("login", "admin"),
-            acao="EXCLUIR_PACIENTE",
+            acao="ARQUIVAR_PACIENTE",
             tabela="pacientes",
             registro_id=paciente_id,
-            detalhes="Exclusão administrativa do paciente e bloqueio dos exames vinculados.",
+            detalhes="Arquivamento lógico do paciente e dos exames vinculados.",
         )
-        return {"id": paciente_id, "status": "paciente_excluido"}
+        return {"id": paciente_id, "status": "paciente_arquivado"}
 
     @app.get("/api/admin/catalogo-exames")
     def listar_catalogo_exames(auth: dict = Depends(admin_auth), q: str = "") -> list[dict]:
@@ -421,6 +523,7 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
         equipamento: Annotated[str | None, Form()] = None,
         ativo: Annotated[str, Form()] = "1",
     ) -> dict[str, str]:
+        require_super(auth)
         mne_clean = mne.strip().upper()
         nome_clean = nome.strip()
         if not mne_clean or not nome_clean:
@@ -442,7 +545,7 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
                     (
                         catalogo_id, mne_clean, codigo_sire or "", nome_clean, setor or "",
                         material or "", metodo or "", unidade or "", referencia or "",
-                        valor_cheio or "", valor_indenizar_20 or "", equipamento or "",
+                        _normalize_brl_or_400(valor_cheio or "0"), _normalize_brl_or_400(valor_indenizar_20 or "0"), equipamento or "",
                         ativo_clean, now, now,
                     ),
                 )
@@ -458,8 +561,8 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
                     """,
                     (
                         mne_clean, codigo_sire or "", nome_clean, setor or "", material or "",
-                        metodo or "", unidade or "", referencia or "", valor_cheio or "",
-                        valor_indenizar_20 or "", equipamento or "", ativo_clean, now, catalogo_id,
+                        metodo or "", unidade or "", referencia or "", _normalize_brl_or_400(valor_cheio or "0"),
+                        _normalize_brl_or_400(valor_indenizar_20 or "0"), equipamento or "", ativo_clean, now, catalogo_id,
                     ),
                 )
                 action = "ATUALIZAR_CATALOGO_EXAME"
@@ -475,22 +578,23 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
 
     @app.delete("/api/admin/catalogo-exames/{catalogo_id}")
     def excluir_catalogo_exame(catalogo_id: str, auth: dict = Depends(admin_auth)) -> dict[str, str]:
+        require_super(auth)
         if not catalogo_id.strip():
             raise HTTPException(status_code=400, detail="ID do catálogo é obrigatório.")
         with database.connect() as conn:
             row = conn.execute("SELECT id, nome FROM catalogo_exames WHERE id = ?", (catalogo_id,)).fetchone()
             if row is None:
                 raise HTTPException(status_code=404, detail="Exame do catálogo não localizado.")
-            conn.execute("DELETE FROM catalogo_exames WHERE id = ?", (catalogo_id,))
+            conn.execute("UPDATE catalogo_exames SET ativo = '0', atualizado_em = ? WHERE id = ?", (database.now(), catalogo_id))
             conn.commit()
         database.audit(
             usuario=auth.get("login", "admin"),
-            acao="EXCLUIR_CATALOGO_EXAME",
+            acao="INATIVAR_CATALOGO_EXAME",
             tabela="catalogo_exames",
             registro_id=catalogo_id,
-            detalhes="Exclusão administrativa do catálogo de exames.",
+            detalhes="Inativação lógica do catálogo de exames.",
         )
-        return {"id": catalogo_id, "status": "catalogo_exame_excluido"}
+        return {"id": catalogo_id, "status": "catalogo_exame_inativado"}
 
     @app.post("/api/admin/dados/excluir-todos")
     def excluir_todos_dados(
@@ -499,21 +603,252 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
     ) -> dict[str, str]:
         if confirmacao.strip() != "EXCLUIR TODOS OS DADOS":
             raise HTTPException(status_code=400, detail="Confirmação inválida.")
+        now = database.now()
         with database.connect() as conn:
-            conn.execute("DELETE FROM exames")
-            conn.execute("DELETE FROM historico_exames_pacientes")
-            conn.execute("DELETE FROM pacientes")
-            conn.execute("DELETE FROM catalogo_exames")
+            conn.execute("UPDATE exames SET ativo_consulta_recente = '0', arquivado = '1', excluido_fisicamente = '0', atualizado_em = ?", (now,))
+            conn.execute("UPDATE historico_exames_pacientes SET ativo_consulta_recente = '0', arquivado = '1', excluido_fisicamente = '0', atualizado_em = ?", (now,))
+            conn.execute("UPDATE pacientes SET ativo = '0', ativo_consulta_recente = '0', arquivado = '1', excluido_fisicamente = '0', atualizado_em = ?", (now,))
+            conn.execute("UPDATE catalogo_exames SET ativo = '0', atualizado_em = ?", (now,))
             conn.commit()
         database.audit(
             usuario=auth.get("login", "super"),
-            acao="EXCLUIR_TODOS_DADOS_CADASTRADOS",
+            acao="ARQUIVAR_TODOS_DADOS_CADASTRADOS",
             tabela="sistema",
             registro_id="TODOS",
-            detalhes="Superusuário excluiu pacientes, exames, histórico e catálogo de exames.",
+            detalhes="Superusuário arquivou logicamente pacientes, exames, histórico e catálogo de exames.",
         )
-        return {"status": "dados_cadastrados_excluidos"}
+        return {"status": "dados_cadastrados_arquivados"}
 
+
+    @app.post("/api/admin/exames/importar")
+    async def importar_exames_admin(
+        arquivo: UploadFile = File(...),
+        auth: dict = Depends(admin_auth),
+    ) -> dict[str, object]:
+        require_super(auth)
+        content = await arquivo.read()
+        if not content:
+            raise HTTPException(status_code=400, detail="Arquivo de importação vazio.")
+        suffix = Path(arquivo.filename or "").suffix.lower()
+        try:
+            text = content.decode("utf-8-sig")
+        except UnicodeDecodeError as error:
+            raise HTTPException(status_code=400, detail="Arquivo deve estar em texto UTF-8 para importação tabular.") from error
+        rows: list[dict[str, object]]
+        if suffix == ".json":
+            try:
+                payload = json.loads(text)
+            except json.JSONDecodeError as error:
+                raise HTTPException(status_code=400, detail=f"JSON inválido: {error.msg}") from error
+            if not isinstance(payload, list):
+                raise HTTPException(status_code=400, detail="JSON deve conter uma lista de exames.")
+            rows = [item for item in payload if isinstance(item, dict)]
+        else:
+            sample = text[:2048]
+            delimiter = ";" if sample.count(";") >= sample.count(",") else ","
+            rows = list(csv.DictReader(io.StringIO(text), delimiter=delimiter))
+        if not rows:
+            raise HTTPException(status_code=400, detail="Nenhum exame encontrado no arquivo.")
+        imported: list[str] = []
+        errors: list[str] = []
+        with database.connect() as conn:
+            now = database.now()
+            for index, row in enumerate(rows, start=1):
+                paciente_id = str(row.get("paciente_id") or "").strip()
+                cpf_value = str(row.get("cpf") or "").strip()
+                if not paciente_id and cpf_value:
+                    cpf_clean = _valid_cpf_or_400(cpf_value)
+                    paciente_row = conn.execute(
+                        "SELECT id, nome, cpf, preccp, identidade_militar FROM pacientes WHERE cpf = ? AND excluido_fisicamente = '0'",
+                        (cpf_clean,),
+                    ).fetchone()
+                else:
+                    paciente_row = conn.execute(
+                        "SELECT id, nome, cpf, preccp, identidade_militar FROM pacientes WHERE id = ? AND excluido_fisicamente = '0'",
+                        (paciente_id,),
+                    ).fetchone()
+                exame_nome = str(row.get("exame_nome") or row.get("exame") or "").strip()
+                valor_raw = str(row.get("valor") or "").strip()
+                if paciente_row is None or not exame_nome or not valor_raw:
+                    errors.append(f"Linha {index}: paciente, exame ou valor ausente/inválido.")
+                    continue
+                valor_brl = _normalize_brl_or_400(valor_raw)
+                exame_id = database.new_id("EXA")
+                liberado = str(row.get("liberado_em") or now)
+                pedido_id = str(row.get("pedido_id") or "")
+                amostra_id = str(row.get("amostra_id") or "")
+                unidade = str(row.get("unidade") or "")
+                referencia = str(row.get("referencia") or "")
+                critico = "SIM" if str(row.get("critico") or "").upper() == "SIM" else "NÃO"
+                conn.execute(
+                    """
+                    INSERT INTO exames (
+                        id, paciente_id, pedido_id, amostra_id, exame_nome, valor, unidade,
+                        referencia, status_laudo, critico, coletado_em, liberado_em,
+                        profissional_responsavel, equipamento, origem, pdf_path,
+                        ativo_consulta_recente, arquivado, excluido_fisicamente,
+                        criado_em, atualizado_em, observacao
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        exame_id, paciente_row["id"], pedido_id, amostra_id, exame_nome, valor_brl,
+                        unidade, referencia, "LIBERADO", critico, str(row.get("coletado_em") or ""),
+                        liberado, str(row.get("profissional_responsavel") or ""),
+                        str(row.get("equipamento") or ""), "KRISTAL", "", "1", "0", "0",
+                        now, now, str(row.get("observacao") or ""),
+                    ),
+                )
+                history_id = f"HIST-{exame_id}"
+                conn.execute(
+                    """
+                    INSERT INTO historico_exames_pacientes (
+                        id, paciente_id, paciente_nome, cpf, preccp, identidade_militar, cns,
+                        pedido_id, amostra_id, exame_nome, valor, unidade, referencia,
+                        status_laudo, critico, coletado_em, liberado_em, profissional_responsavel,
+                        equipamento, origem, pdf_path, ativo_consulta_recente, arquivado,
+                        excluido_fisicamente, criado_em, atualizado_em, observacao
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        history_id, paciente_row["id"], paciente_row["nome"], paciente_row["cpf"],
+                        paciente_row["preccp"], paciente_row["identidade_militar"], "", pedido_id,
+                        amostra_id, exame_nome, valor_brl, unidade, referencia, "LIBERADO", critico,
+                        str(row.get("coletado_em") or ""), liberado,
+                        str(row.get("profissional_responsavel") or ""), str(row.get("equipamento") or ""),
+                        "KRISTAL", "", "0", "1", "0", now, now, str(row.get("observacao") or ""),
+                    ),
+                )
+                imported.append(exame_id)
+            conn.commit()
+        database.audit(usuario=auth.get("login", "admin"), acao="IMPORTAR_EXAMES_PORTAL", tabela="exames", registro_id=str(len(imported)), detalhes=f"Arquivo={arquivo.filename or ''}; Erros={len(errors)}")
+        return {"importados": imported, "total_importados": len(imported), "erros": errors}
+
+    @app.get("/api/admin/dados-legados/fontes")
+    def listar_fontes_dados_legados(auth: dict = Depends(admin_auth)) -> dict[str, list[dict]]:
+        with database.connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT stored_name, sha256, size_bytes, imported_at
+                FROM legacy_sources
+                ORDER BY imported_at DESC, stored_name ASC
+                """
+            ).fetchall()
+        return {
+            "fontes": [
+                {
+                    "arquivo": row["stored_name"],
+                    "sha256": row["sha256"],
+                    "tamanho_bytes": int(row["size_bytes"]),
+                    "importado_em": row["imported_at"],
+                }
+                for row in rows
+            ]
+        }
+
+    @app.get("/api/admin/dados-legados/arquivos")
+    def listar_arquivos_dados_legados(auth: dict = Depends(admin_auth)) -> dict[str, list[dict]]:
+        with database.connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT original_extension, stored_name, sha256, size_bytes, category, imported_at
+                FROM legacy_files
+                ORDER BY imported_at DESC, stored_name ASC
+                """
+            ).fetchall()
+        return {
+            "arquivos": [
+                {
+                    "arquivo": row["stored_name"],
+                    "extensao": row["original_extension"],
+                    "sha256": row["sha256"],
+                    "tamanho_bytes": int(row["size_bytes"]),
+                    "categoria": row["category"],
+                    "importado_em": row["imported_at"],
+                }
+                for row in rows
+            ]
+        }
+    @app.get("/api/admin/dados-legados/tabelas")
+    def listar_tabelas_dados_legados(auth: dict = Depends(admin_auth)) -> dict[str, list[dict]]:
+        with database.connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT s.logical_database, s.table_name, s.columns_json, COUNT(r.id) AS total_linhas
+                FROM legacy_table_schemas s
+                LEFT JOIN legacy_rows r
+                  ON r.source_sha256 = s.source_sha256
+                 AND r.logical_database = s.logical_database
+                 AND r.table_name = s.table_name
+                GROUP BY s.source_sha256, s.logical_database, s.table_name, s.columns_json
+                ORDER BY s.logical_database ASC, s.table_name ASC
+                """
+            ).fetchall()
+        tabelas: list[dict] = []
+        for row in rows:
+            try:
+                colunas = json.loads(row["columns_json"])
+            except json.JSONDecodeError as error:
+                raise HTTPException(status_code=500, detail="Metadados de tabela inválidos: " + str(row["table_name"])) from error
+            tabelas.append({
+                "database": row["logical_database"],
+                "tabela": row["table_name"],
+                "colunas": colunas,
+                "total_linhas": int(row["total_linhas"]),
+            })
+        return {"tabelas": tabelas}
+
+    @app.get("/api/admin/dados-legados/linhas")
+    def consultar_linhas_dados_legados(
+        auth: dict = Depends(admin_auth),
+        database_logica: Annotated[str | None, Query(alias="database")] = None,
+        tabela: str | None = None,
+        q: str | None = None,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> dict[str, object]:
+        if limit < 1 or limit > 500:
+            raise HTTPException(status_code=400, detail="limit deve ficar entre 1 e 500.")
+        if offset < 0:
+            raise HTTPException(status_code=400, detail="offset não pode ser negativo.")
+        filters: list[str] = []
+        params: list[object] = []
+        if database_logica and database_logica.strip():
+            filters.append("logical_database = ?")
+            params.append(database_logica.strip())
+        if tabela and tabela.strip():
+            filters.append("table_name = ?")
+            params.append(tabela.strip())
+        if q and q.strip():
+            filters.append("row_json LIKE ?")
+            params.append(f"%{q.strip()}%")
+        where_sql = " WHERE " + " AND ".join(filters) if filters else ""
+        with database.connect() as conn:
+            total = conn.execute(f"SELECT COUNT(*) AS total FROM legacy_rows{where_sql}", params).fetchone()["total"]
+            rows = conn.execute(
+                f"""
+                SELECT logical_database, table_name, row_index, row_json, row_sha256, imported_at
+                FROM legacy_rows
+                {where_sql}
+                ORDER BY logical_database ASC, table_name ASC, row_index ASC
+                LIMIT ? OFFSET ?
+                """,
+                [*params, limit, offset],
+            ).fetchall()
+        registros: list[dict] = []
+        for row in rows:
+            try:
+                dados = json.loads(row["row_json"])
+            except json.JSONDecodeError as error:
+                raise HTTPException(status_code=500, detail="Registro importado inválido: " + str(row["row_sha256"])) from error
+            registros.append({
+                "database": row["logical_database"],
+                "tabela": row["table_name"],
+                "indice": int(row["row_index"]),
+                "dados": dados,
+                "sha256": row["row_sha256"],
+                "importado_em": row["imported_at"],
+            })
+        return {"total": int(total), "limit": limit, "offset": offset, "linhas": registros}
 
     @app.get("/api/server/status")
     def server_status(_: None = Depends(api_auth)) -> dict[str, str]:
@@ -797,8 +1132,79 @@ def _validate_patient_owns_exam(*, database: Database, patient_id: str, exame_id
         raise HTTPException(status_code=403, detail="Laudo não pertence ao paciente.")
 
 
-def _digits(value: str) -> str:
-    return "".join(char for char in value if char.isdigit())
+
+def _normalize_admin_profile(value: str) -> str:
+    clean = value.strip().upper().replace(" ", "_")
+    if clean in {"SUPER", "SUPERUSUARIO", "SUPER_USUARIO"}:
+        return "SUPER_USUARIO"
+    if clean in {"ADMIN", "ADMINISTRADOR"}:
+        return "ADMIN"
+    raise HTTPException(status_code=400, detail="Perfil deve ser SUPER_USUARIO ou ADMIN.")
+
+
+def _validate_military_rank(graduacao: str, posto: str) -> tuple[str, str]:
+    graduacao_clean = graduacao.strip()
+    posto_clean = posto.strip()
+    allowed = {
+        "Recruta": set(),
+        "Soldado": set(),
+        "Cabo": set(),
+        "Sargento": {"1º", "2º", "3º"},
+        "Subtenente": set(),
+        "Aspirante": set(),
+        "Tenente": {"1º", "2º"},
+        "Capitão": set(),
+        "Major": set(),
+        "Tenente-Coronel": set(),
+        "Coronel": set(),
+        "General": {"Brigada", "Divisão", "Exército"},
+        "Marechal": set(),
+    }
+    if not graduacao_clean:
+        return "", ""
+    if graduacao_clean not in allowed:
+        raise HTTPException(status_code=400, detail="Graduação inválida.")
+    valid_posts = allowed[graduacao_clean]
+    if valid_posts and posto_clean not in valid_posts:
+        raise HTTPException(status_code=400, detail="Posto inválido para a graduação informada.")
+    if not valid_posts and posto_clean:
+        raise HTTPException(status_code=400, detail="Esta graduação não possui posto.")
+    return graduacao_clean, posto_clean
+
+
+def _valid_cpf_or_400(value: str) -> str:
+    cpf = _digits(value)
+    if len(cpf) != 11 or len(set(cpf)) == 1:
+        raise HTTPException(status_code=400, detail="CPF inválido.")
+    numbers = [int(char) for char in cpf]
+    for digit_index in (9, 10):
+        factor = digit_index + 1
+        total = sum(numbers[index] * (factor - index) for index in range(digit_index))
+        expected = (total * 10) % 11
+        if expected == 10:
+            expected = 0
+        if numbers[digit_index] != expected:
+            raise HTTPException(status_code=400, detail="CPF inválido.")
+    return cpf
+
+
+def _normalize_brl_or_400(value: str) -> str:
+    raw = value.strip()
+    if not raw:
+        raise HTTPException(status_code=400, detail="Valor monetário é obrigatório.")
+    clean = raw.replace("R$", "").replace(" ", "")
+    if "," in clean:
+        clean = clean.replace(".", "").replace(",", ".")
+    try:
+        cents = round(float(clean) * 100)
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail="Valor deve ser numérico em Real. Exemplo: 23,35.") from error
+    if cents < 0:
+        raise HTTPException(status_code=400, detail="Valor monetário não pode ser negativo.")
+    inteiro, centavos = divmod(cents, 100)
+    return f"{inteiro},{centavos:02d}"
+def _digits(value: str | None) -> str:
+    return "".join(char for char in (value or "") if char.isdigit())
 
 
 def _validate_api_key(*, settings: Settings, api_key: str | None) -> None:
