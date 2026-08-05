@@ -108,3 +108,4 @@ tmp_*
 /ATUALIZACAO_SERVIDOR_HMR_PRONTA_*/
 /KRISTAL_LABORATORIAL_PRODUCAO_SERVIDOR_*/
 /incoming_referencias_*/
+config/superusuario.env

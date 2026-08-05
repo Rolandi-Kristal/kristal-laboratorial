@@ -33,7 +33,7 @@ body {
 
 .admin-shell {
   min-height: 100vh;
-  width: min(100% - 36px, 1120px);
+  width: min(100% - 36px, 1440px);
   margin: 0 auto;
   padding: 18px 0 42px;
   display: grid;
@@ -292,19 +292,25 @@ p { color: var(--muted); }
 .card {
   background: rgba(13,32,51,.92);
   border: 1px solid rgba(255,255,255,.1);
-  border-radius: 20px;
+  border-radius: 8px;
   padding: 24px;
   box-shadow: 0 24px 80px rgba(0,0,0,.22);
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: start;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: stretch;
   gap: 18px;
 }
 
 .wide { grid-column: 1 / -1; }
+
+.admin-form-card {
+  grid-column: span 6;
+  min-width: 0;
+  height: 100%;
+}
 
 .hidden { display: none; }
 
@@ -323,6 +329,14 @@ input, select {
   border: 1px solid rgba(255,255,255,.14);
   background: #071827;
   color: var(--text);
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+input[readonly] {
+  background: #10283d;
+  color: #d7e9fb;
+  cursor: not-allowed;
 }
 
 .inline-field {
@@ -588,5 +602,35 @@ button.secondary {
   }
   .hospital-title {
     white-space: normal;
+  }
+}
+
+/* KRISTAL_ADMIN_RESPONSIVE_V2 */
+#adminPanel > .card {
+  min-width: 0;
+}
+
+.item,
+.item .meta {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 960px) {
+  .admin-form-card {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+
+  .card {
+    padding: 18px;
+  }
+
+  .row > button {
+    flex: 1 1 180px;
   }
 }

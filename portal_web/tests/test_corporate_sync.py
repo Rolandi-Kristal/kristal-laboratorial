@@ -1,0 +1,130 @@
+from __future__ import annotations
+
+import json
+import sqlite3
+import sys
+import tempfile
+import unittest
+from contextlib import closing
+from pathlib import Path
+
+from fastapi import HTTPException
+
+PORTAL_ROOT = Path(__file__).resolve().parent.parent
+if str(PORTAL_ROOT) not in sys.path:
+    sys.path.insert(0, str(PORTAL_ROOT))
+
+from app.corporate_sync import CorporateSyncError, CorporateSyncStore
+from app.routes import (
+    _backup_sqlite,
+    _normalize_brl_or_400,
+    _read_backup_schedule,
+    _validate_backup_time,
+    _write_backup_schedule,
+)
+
+
+class CorporateSyncStoreTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.db_path = Path(self.temp.name) / "corporate.db"
+        self.store = CorporateSyncStore(str(self.db_path))
+        self.store.initialize()
+
+    def _record(self, *, operation: str = "OP-1", name: str = "Paciente") -> dict:
+        return {
+            "operation_id": operation,
+            "entity": "pacientes",
+            "record_id": "PAC-1",
+            "payload": {"id": "PAC-1", "nome": name, "cpf": "52998224725"},
+            "deleted": False,
+            "client_updated_at": "2026-08-05T12:00:00Z",
+        }
+
+    def test_push_pull_and_hash_are_deterministic(self) -> None:
+        pushed = self.store.push(client_id="ESTACAO-1", records=[self._record()])
+        self.assertEqual(pushed["accepted"], 1)
+        self.assertEqual(pushed["server_version"], 1)
+
+        pulled = self.store.pull(client_id="ESTACAO-2", since_version=0, limit=500)
+        self.assertEqual(len(pulled["records"]), 1)
+        record = pulled["records"][0]
+        self.assertEqual(record["payload"]["nome"], "Paciente")
+        self.assertEqual(len(record["sha256"]), 64)
+        self.assertEqual(pulled["next_version"], 1)
+
+    def test_duplicate_operation_is_idempotent(self) -> None:
+        first = self.store.push(client_id="ESTACAO-1", records=[self._record()])
+        second = self.store.push(client_id="ESTACAO-1", records=[self._record()])
+        self.assertEqual(first["versions"], second["versions"])
+        self.assertEqual(self.store.current_version(), 1)
+
+    def test_rejects_unauthorized_entity(self) -> None:
+        record = self._record()
+        record["entity"] = "segredos"
+        with self.assertRaises(CorporateSyncError):
+            self.store.push(client_id="ESTACAO-1", records=[record])
+
+    def test_rejects_payload_with_divergent_id(self) -> None:
+        record = self._record()
+        record["payload"]["id"] = "PAC-OUTRO"
+        with self.assertRaises(CorporateSyncError):
+            self.store.push(client_id="ESTACAO-1", records=[record])
+
+
+class BackupAndCurrencyTests(unittest.TestCase):
+    def test_backup_window_accepts_evening_and_overnight(self) -> None:
+        self.assertEqual(_validate_backup_time("23:00"), "23:00")
+        self.assertEqual(_validate_backup_time("18:00"), "18:00")
+        self.assertEqual(_validate_backup_time("03:59"), "03:59")
+
+    def test_backup_window_rejects_business_hours_and_bad_format(self) -> None:
+        for value in ("04:00", "17:59", "24:00", "9:00", "23:60"):
+            with self.subTest(value=value), self.assertRaises(HTTPException):
+                _validate_backup_time(value)
+
+    def test_brl_normalization_is_exact_and_rounded_half_up(self) -> None:
+        self.assertEqual(_normalize_brl_or_400("R$ 1.234,56"), "1234.56")
+        self.assertEqual(_normalize_brl_or_400("23,35"), "23.35")
+        self.assertEqual(_normalize_brl_or_400("23,355"), "23.36")
+
+    def test_brl_rejects_negative_and_invalid_values(self) -> None:
+        for value in ("-1,00", "abc", "", "NaN", "Infinity"):
+            with self.subTest(value=value), self.assertRaises(HTTPException):
+                _normalize_brl_or_400(value)
+
+    def test_schedule_file_defaults_persists_and_recovers_from_invalid_json(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            schedule = Path(directory) / "backup_schedule.json"
+
+            class SettingsStub:
+                backup_schedule_file = str(schedule)
+
+            self.assertEqual(_read_backup_schedule(settings=SettingsStub()), "23:00")
+            _write_backup_schedule(settings=SettingsStub(), horario="22:30")
+            self.assertEqual(_read_backup_schedule(settings=SettingsStub()), "22:30")
+            content = json.loads(schedule.read_text(encoding="utf-8"))
+            self.assertEqual(content["janela"], "18:00-03:59")
+            schedule.write_text("{invalido", encoding="utf-8")
+            self.assertEqual(_read_backup_schedule(settings=SettingsStub()), "23:00")
+
+    def test_sqlite_backup_is_integral(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "source.db"
+            destination = Path(directory) / "backup.db"
+            with closing(sqlite3.connect(source)) as conn:
+                conn.execute("CREATE TABLE dados (id INTEGER PRIMARY KEY, valor TEXT NOT NULL)")
+                conn.executemany(
+                    "INSERT INTO dados(valor) VALUES (?)",
+                    [("um",), ("dois",), ("três",)],
+                )
+                conn.commit()
+            _backup_sqlite(source=source, destination=destination)
+            with closing(sqlite3.connect(destination)) as conn:
+                self.assertEqual(conn.execute("PRAGMA integrity_check").fetchone()[0], "ok")
+                self.assertEqual(conn.execute("SELECT COUNT(*) FROM dados").fetchone()[0], 3)
+
+
+if __name__ == "__main__":
+    unittest.main()

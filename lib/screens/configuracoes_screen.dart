@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/app_constants.dart';
+import '../services/backup_scheduler_service.dart';
 import '../services/config_service.dart';
 
 class ConfiguracoesScreen extends StatefulWidget {
@@ -67,17 +68,32 @@ class _ConfiguracoesScreenState extends State<ConfiguracoesScreen> {
 
   Future<void> _save() async {
     final ConfigService config = ConfigService.instance;
+    final String horarioBackup = backupHoraController.text.trim();
+    try {
+      BackupSchedulerService.parseAllowedTime(horarioBackup);
+    } on FormatException catch (error) {
+      if (!mounted) return;
+      setState(() => mensagem = error.message);
+      return;
+    }
 
-    await config.setValue('laboratorio_nome', laboratorioController.text.trim());
+    await config.setValue(
+        'laboratorio_nome', laboratorioController.text.trim());
     await config.setValue(
       'responsavel_tecnico',
       responsavelController.text.trim(),
     );
-    await config.setValue('responsavel_conselho', conselhoController.text.trim());
+    await config.setValue(
+        'responsavel_conselho', conselhoController.text.trim());
     await config.setValue('portal_paciente_url', portalController.text.trim());
     await config.setValue(
       'backup_automatico_hora',
-      backupHoraController.text.trim(),
+      horarioBackup,
+    );
+
+    BackupSchedulerService.instance.configureDaily(
+      enabled: true,
+      horario: horarioBackup,
     );
 
     if (!mounted) return;
@@ -149,7 +165,7 @@ class _ConfiguracoesScreenState extends State<ConfiguracoesScreen> {
                 const SizedBox(height: 12),
                 _field(
                   controller: backupHoraController,
-                  label: 'Horário sugerido do backup automático',
+                  label: 'Horário do backup automático (18:00 a 03:59)',
                   icon: Icons.schedule,
                 ),
                 const SizedBox(height: 18),

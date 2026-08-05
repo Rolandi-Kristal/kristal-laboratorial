@@ -1,0 +1,20 @@
+CORRECAO DO INSTALADOR KRISTAL LABORATORIAL - HMR
+
+1. No servidor, encerre o instalador antigo com Ctrl+C.
+2. Copie INSTALAR_PRODUCAO_HMR_ADMIN.ps1 para:
+   D:\kristal_laboratorial\INSTALAR_PRODUCAO_HMR_ADMIN.ps1
+3. Abra o Windows PowerShell como Administrador.
+4. Execute:
+
+   cd "D:\kristal_laboratorial"
+   powershell -NoProfile -ExecutionPolicy Bypass -File ".\INSTALAR_PRODUCAO_HMR_ADMIN.ps1" -Destino "D:\kristal_laboratorial" -ConfigurarServidor -CriarAtalhoDesktop
+
+5. Aguarde a mensagem:
+   KRISTAL LABORATORIAL instalada e atualizada com sucesso.
+
+6. Somente depois da mensagem de sucesso, carregue os dados:
+
+   powershell -NoProfile -ExecutionPolicy Bypass -File ".\scripts\CARREGAR_DADOS_OPERACIONAIS_LEGADOS_KRISTAL.ps1" -Root "D:\kristal_laboratorial"
+
+O instalador corrigido detecta origem e destino iguais, preserva os dados
+operacionais e impede a copia recursiva da pasta de backups.

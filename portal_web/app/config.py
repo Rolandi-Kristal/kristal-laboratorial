@@ -21,6 +21,9 @@ class Settings:
     sire_default_plano_interno_id: str
     sire_default_percentual_desconto: int
     backup_dir: str
+    corporate_db_path: str
+    operational_db_path: str
+    backup_schedule_file: str
 
     @staticmethod
     def _load_env_file(path: str = ".env") -> None:
@@ -42,7 +45,7 @@ class Settings:
             port=int(os.getenv("KRISTAL_PORTAL_PORT", "8787")),
             secret_key=os.getenv("KRISTAL_SECRET_KEY", "troque_por_uma_chave_forte_com_64_caracteres"),
             admin_login=os.getenv("KRISTAL_ADMIN_LOGIN", "Kristal"),
-            admin_password=os.getenv("KRISTAL_SUPERUSER_PASSWORD", ""),
+            admin_password=os.getenv("KRISTAL_SUPERUSER_PASSWORD", "").strip() or os.getenv("KRISTAL_ADMIN_PASSWORD", "").strip(),
             db_path=os.getenv("KRISTAL_DB_PATH", "data/kristal_portal.db"),
             storage_dir=os.getenv("KRISTAL_STORAGE_DIR", "storage"),
             api_key=os.getenv("KRISTAL_API_KEY", ""),
@@ -53,4 +56,7 @@ class Settings:
             sire_default_plano_interno_id=os.getenv("KRISTAL_SIRE_PLANO_INTERNO_ID", ""),
             sire_default_percentual_desconto=int(os.getenv("KRISTAL_SIRE_PERCENTUAL_DESCONTO", "20")),
             backup_dir=os.getenv("KRISTAL_BACKUP_DIR", "backups"),
+            corporate_db_path=os.getenv("KRISTAL_CORPORATE_DB_PATH", "../data/kristal_corporativo.db"),
+            operational_db_path=os.getenv("KRISTAL_OPERATIONAL_DB_PATH", "../data/kristal_laboratorial.db"),
+            backup_schedule_file=os.getenv("KRISTAL_BACKUP_SCHEDULE_FILE", "data/backup_schedule.json"),
         )

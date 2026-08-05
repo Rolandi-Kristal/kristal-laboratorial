@@ -228,6 +228,11 @@ class Database:
                 table="historico_exames_pacientes",
                 columns={"identidade_militar": "TEXT"},
             )
+            if not settings.admin_password:
+                raise RuntimeError(
+                    "KRISTAL_SUPERUSER_PASSWORD não configurada. "
+                    "A inicialização foi interrompida para preservar a credencial existente."
+                )
             admin = conn.execute("SELECT id FROM usuarios_admin WHERE login = ?", (settings.admin_login,)).fetchone()
             senha_hash = SecurityService.hash_password(settings.admin_password)
             if admin is None:

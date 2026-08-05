@@ -7,22 +7,45 @@ import json
 import os
 import shutil
 import sqlite3
+import subprocess
 import urllib.error
 import urllib.request
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Query, UploadFile
 from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel, Field
 
 from app.config import Settings
+from app.corporate_sync import CorporateSyncError, CorporateSyncStore
 from app.database import Database
 from app.security import SecurityService
+
+class SyncRecordInput(BaseModel):
+    operation_id: str = Field(min_length=1, max_length=200)
+    entity: str = Field(min_length=1, max_length=80)
+    record_id: str = Field(min_length=1, max_length=200)
+    payload: dict[str, Any]
+    deleted: bool = False
+    client_updated_at: str | None = None
+
+
+class SyncPushRequest(BaseModel):
+    client_id: str = Field(min_length=1, max_length=200)
+    records: list[SyncRecordInput] = Field(max_length=500)
+
+
+class BackupScheduleInput(BaseModel):
+    horario: str = Field(min_length=5, max_length=5)
 
 
 def create_app(*, settings: Settings, database: Database) -> FastAPI:
     app = FastAPI(title="KRISTAL LABORATORIAL Portal Web", version="1.0.0")
+    corporate_sync = CorporateSyncStore(settings.corporate_db_path)
+    corporate_sync.initialize()
     static_dir = Path(__file__).resolve().parent.parent / "static"
     app.mount("/assets", StaticFiles(directory=static_dir / "assets"), name="assets")
 
@@ -860,6 +883,110 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
             })
         return {"total": int(total), "limit": limit, "offset": offset, "linhas": registros}
 
+    @app.post("/api/server/sync/push")
+    def corporate_sync_push(
+        request: SyncPushRequest,
+        _: None = Depends(api_auth),
+    ) -> dict[str, Any]:
+        try:
+            records = [
+                {
+                    "operation_id": item.operation_id,
+                    "entity": item.entity,
+                    "record_id": item.record_id,
+                    "payload": item.payload,
+                    "deleted": item.deleted,
+                    "client_updated_at": item.client_updated_at,
+                }
+                for item in request.records
+            ]
+            return corporate_sync.push(client_id=request.client_id, records=records)
+        except CorporateSyncError as error:
+            raise HTTPException(status_code=400, detail=str(error)) from error
+
+    @app.get("/api/server/sync/pull")
+    def corporate_sync_pull(
+        client_id: str = Query(min_length=1, max_length=200),
+        since_version: int = Query(default=0, ge=0),
+        limit: int = Query(default=500, ge=1, le=1000),
+        _: None = Depends(api_auth),
+    ) -> dict[str, Any]:
+        try:
+            return corporate_sync.pull(
+                client_id=client_id,
+                since_version=since_version,
+                limit=limit,
+            )
+        except CorporateSyncError as error:
+            raise HTTPException(status_code=400, detail=str(error)) from error
+
+    @app.get("/api/server/sync/status")
+    def corporate_sync_status(_: None = Depends(api_auth)) -> dict[str, Any]:
+        return corporate_sync.status()
+
+    @app.get("/api/server/backup/config")
+    def consultar_horario_backup(
+        _: dict = Depends(admin_auth),
+    ) -> dict[str, str]:
+        return {
+            "horario": _read_backup_schedule(settings=settings),
+            "janela": "18:00-03:59",
+            "padrao": "23:00",
+        }
+
+    @app.put("/api/server/backup/config")
+    def configurar_horario_backup(
+        request: BackupScheduleInput,
+        auth: dict = Depends(super_auth),
+        _: None = Depends(api_auth),
+    ) -> dict[str, str]:
+        horario = _validate_backup_time(request.horario)
+        if os.name != "nt":
+            raise HTTPException(
+                status_code=501,
+                detail="O agendamento automático requer o servidor Windows de produção.",
+            )
+        script_path = Path(__file__).resolve().parent.parent / "instalar_backup_automatico_windows.ps1"
+        if not script_path.is_file():
+            raise HTTPException(status_code=500, detail="Instalador da tarefa de backup não encontrado.")
+        powershell = shutil.which("powershell.exe")
+        if not powershell:
+            raise HTTPException(status_code=500, detail="Windows PowerShell não encontrado no servidor.")
+        try:
+            completed = subprocess.run(
+                [
+                    powershell,
+                    "-NoProfile",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    str(script_path),
+                    "-Horario",
+                    horario,
+                ],
+                cwd=str(script_path.parent),
+                capture_output=True,
+                text=True,
+                timeout=60,
+                check=False,
+            )
+        except subprocess.TimeoutExpired as error:
+            raise HTTPException(status_code=504, detail="O Windows excedeu o prazo ao configurar o backup.") from error
+        except OSError as error:
+            raise HTTPException(status_code=500, detail=f"Falha ao iniciar o agendador: {error}") from error
+        if completed.returncode != 0:
+            diagnostic = (completed.stderr or completed.stdout or "Falha não detalhada.").strip()
+            raise HTTPException(status_code=500, detail=f"Agendador do Windows recusou a configuração: {diagnostic[-800:]}")
+        _write_backup_schedule(settings=settings, horario=horario)
+        database.audit(
+            usuario=str(auth.get("login") or auth.get("sub") or "SUPER_USUARIO"),
+            acao="ALTERAR_HORARIO_BACKUP",
+            tabela="configuracoes",
+            registro_id="backup_automatico",
+            detalhes=f"HORARIO={horario};JANELA=18:00-03:59",
+        )
+        return {"status": "horario_backup_configurado", "horario": horario}
+
     @app.get("/api/server/status")
     def server_status(_: None = Depends(api_auth)) -> dict[str, str]:
         return {
@@ -874,24 +1001,72 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
         }
 
     @app.post("/api/server/backup")
-    def criar_backup_servidor(_: None = Depends(api_auth)) -> dict[str, str]:
+    def criar_backup_servidor(_: None = Depends(api_auth)) -> dict[str, Any]:
         backup_dir = Path(settings.backup_dir)
         backup_dir.mkdir(parents=True, exist_ok=True)
-        source = Path(settings.db_path)
-        if not source.exists():
-            raise HTTPException(status_code=404, detail="Banco do portal ainda não existe.")
         stamp = database.now().replace(":", "-")
-        destination = backup_dir / f"kristal_portal_backup_{stamp}.db"
-        shutil.copy2(source, destination)
-        sha256 = hashlib.sha256(destination.read_bytes()).hexdigest()
+        sources = {
+            "portal": Path(settings.db_path),
+            "corporativo": Path(settings.corporate_db_path),
+            "operacional": Path(settings.operational_db_path),
+        }
+        backups: list[dict[str, Any]] = []
+        for name, source in sources.items():
+            if not source.exists():
+                if name == "portal":
+                    raise HTTPException(status_code=404, detail="Banco do portal ainda não existe.")
+                continue
+            destination = backup_dir / f"kristal_{name}_backup_{stamp}.db"
+            _backup_sqlite(source=source, destination=destination)
+            backups.append(
+                {
+                    "tipo": name,
+                    "arquivo": str(destination),
+                    "bytes": destination.stat().st_size,
+                    "sha256": _sha256_file(destination),
+                }
+            )
+
+        storage = Path(settings.storage_dir)
+        if storage.exists() and any(item.is_file() for item in storage.rglob("*")):
+            archive_base = backup_dir / f"kristal_storage_backup_{stamp}"
+            archive_path = Path(shutil.make_archive(str(archive_base), "zip", root_dir=storage))
+            backups.append(
+                {
+                    "tipo": "laudos_storage",
+                    "arquivo": str(archive_path),
+                    "bytes": archive_path.stat().st_size,
+                    "sha256": _sha256_file(archive_path),
+                }
+            )
+
+        manifest = backup_dir / f"kristal_backup_manifest_{stamp}.json"
+        manifest.write_text(
+            json.dumps(
+                {
+                    "sistema": "KRISTAL LABORATORIAL",
+                    "criado_em": database.now(),
+                    "arquivos": backups,
+                },
+                ensure_ascii=False,
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+        manifest_sha256 = _sha256_file(manifest)
         database.audit(
             usuario="API_KEY",
-            acao="BACKUP_SERVIDOR_MANUAL",
+            acao="BACKUP_SERVIDOR_COMPLETO",
             tabela="database",
-            registro_id=str(destination),
-            detalhes=f"SHA256={sha256}",
+            registro_id=str(manifest),
+            detalhes=f"ARQUIVOS={len(backups)};SHA256_MANIFESTO={manifest_sha256}",
         )
-        return {"status": "backup_criado", "arquivo": str(destination), "sha256": sha256}
+        return {
+            "status": "backup_completo_criado",
+            "manifesto": str(manifest),
+            "manifesto_sha256": manifest_sha256,
+            "arquivos": backups,
+        }
 
     @app.post("/api/sire/cdm/manual")
     @app.post("/api/sire/cdm/automatico")
@@ -1344,21 +1519,90 @@ def _valid_cpf_or_400(value: str) -> str:
     return cpf
 
 
+def _validate_backup_time(value: str) -> str:
+    clean = value.strip()
+    if len(clean) != 5 or clean[2] != ":" or not clean[:2].isdigit() or not clean[3:].isdigit():
+        raise HTTPException(status_code=400, detail="Horário inválido. Use HH:mm.")
+    hour = int(clean[:2])
+    minute = int(clean[3:])
+    if hour > 23 or minute > 59:
+        raise HTTPException(status_code=400, detail="Horário inválido. Use HH:mm.")
+    if 4 <= hour < 18:
+        raise HTTPException(status_code=400, detail="O backup deve permanecer entre 18:00 e 03:59.")
+    return f"{hour:02d}:{minute:02d}"
+
+
+def _read_backup_schedule(*, settings: Settings) -> str:
+    path = Path(settings.backup_schedule_file)
+    if not path.is_file():
+        return "23:00"
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return "23:00"
+    value = raw.get("horario") if isinstance(raw, dict) else None
+    if not isinstance(value, str):
+        return "23:00"
+    try:
+        return _validate_backup_time(value)
+    except HTTPException:
+        return "23:00"
+
+
+def _write_backup_schedule(*, settings: Settings, horario: str) -> None:
+    path = Path(settings.backup_schedule_file)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(
+        json.dumps(
+            {"horario": horario, "janela": "18:00-03:59"},
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    os.replace(temporary, path)
+
+
+def _backup_sqlite(*, source: Path, destination: Path) -> None:
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    source_conn = sqlite3.connect(str(source), timeout=30)
+    destination_conn = sqlite3.connect(str(destination), timeout=30)
+    try:
+        source_conn.execute("PRAGMA busy_timeout = 30000")
+        source_conn.backup(destination_conn, pages=4096, sleep=0.05)
+        integrity = destination_conn.execute("PRAGMA integrity_check").fetchone()
+        if integrity is None or str(integrity[0]).lower() != "ok":
+            raise sqlite3.DatabaseError("O backup SQLite falhou na verificação de integridade.")
+        destination_conn.commit()
+    finally:
+        destination_conn.close()
+        source_conn.close()
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as file:
+        while chunk := file.read(1024 * 1024):
+            digest.update(chunk)
+    return digest.hexdigest()
+
 def _normalize_brl_or_400(value: str) -> str:
     raw = value.strip()
     if not raw:
         raise HTTPException(status_code=400, detail="Valor monetário é obrigatório.")
-    clean = raw.replace("R$", "").replace(" ", "")
+    clean = raw.replace("R$", "").replace(" ", "").replace("\u00a0", "")
     if "," in clean:
         clean = clean.replace(".", "").replace(",", ".")
+    elif clean.count(".") > 1 or (clean.count(".") == 1 and len(clean.rsplit(".", 1)[1]) == 3):
+        clean = clean.replace(".", "")
     try:
-        cents = round(float(clean) * 100)
-    except ValueError as error:
+        amount = Decimal(clean).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    except InvalidOperation as error:
         raise HTTPException(status_code=400, detail="Valor deve ser numérico em Real. Exemplo: 23,35.") from error
-    if cents < 0:
+    if not amount.is_finite() or amount < 0:
         raise HTTPException(status_code=400, detail="Valor monetário não pode ser negativo.")
-    inteiro, centavos = divmod(cents, 100)
-    return f"{inteiro},{centavos:02d}"
+    return f"{amount:.2f}"
 def _digits(value: str | None) -> str:
     return "".join(char for char in (value or "") if char.isdigit())
 

@@ -35,7 +35,7 @@ def main() -> int:
     url = f'http://{host}:{port}/api/server/backup'
     request = urllib.request.Request(url, data=b'', method='POST', headers={'X-API-Key': api_key, 'Accept': 'application/json'})
     try:
-        with urllib.request.urlopen(request, timeout=30) as response:
+        with urllib.request.urlopen(request, timeout=16200) as response:
             payload = response.read().decode('utf-8')
     except urllib.error.HTTPError as error:
         print(error.read().decode('utf-8', errors='replace'), file=sys.stderr)

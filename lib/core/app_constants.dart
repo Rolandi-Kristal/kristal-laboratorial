@@ -34,46 +34,53 @@ class AppConstants {
   static const String masterKeyFile = 'kristal_master.key';
   static const String cryptoPrefix = 'KRISTAL_AES_GCM_V1:';
 
-  static const String rootDirectoryPath = r'D:\kristal_laboratorial';
-  static const String dataDirectoryPath = r'D:\kristal_laboratorial\data';
-  static const String driversDirectoryPath = r'D:\kristal_laboratorial\drivers';
-  static const String backupDirectoryPath = r'D:\kristal_laboratorial\backups';
+  static const String rootDirectoryPath =
+      r'D:\KRISTAL LABORATORIAL SISTEMA\kristal_laboratorial';
+  static const String dataDirectoryPath =
+      r'D:\KRISTAL LABORATORIAL SISTEMA\kristal_laboratorial\data';
+  static const String driversDirectoryPath =
+      r'D:\KRISTAL LABORATORIAL SISTEMA\kristal_laboratorial\drivers';
+  static const String backupDirectoryPath =
+      r'D:\KRISTAL LABORATORIAL SISTEMA\kristal_laboratorial\backups';
   static const String reportsDirectoryPath =
-      r'D:\kristal_laboratorial\relatorios';
-  static const String exportsDirectoryPath = r'D:\kristal_laboratorial\exports';
-  static const String logsDirectoryPath = r'D:\kristal_laboratorial\logs';
+      r'D:\KRISTAL LABORATORIAL SISTEMA\kristal_laboratorial\relatorios';
+  static const String exportsDirectoryPath =
+      r'D:\KRISTAL LABORATORIAL SISTEMA\kristal_laboratorial\exports';
+  static const String logsDirectoryPath =
+      r'D:\KRISTAL LABORATORIAL SISTEMA\kristal_laboratorial\logs';
 
   static const String bancoLocalPath =
-      r'D:\kristal_laboratorial\data\kristal_laboratorial.db';
-  static const String backupLocalPath = r'D:\kristal_laboratorial\backups';
+      r'D:\KRISTAL LABORATORIAL SISTEMA\kristal_laboratorial\data\kristal_laboratorial.db';
+  static const String backupLocalPath =
+      r'D:\KRISTAL LABORATORIAL SISTEMA\kristal_laboratorial\backups';
 
   static const String servidorLocalHost = '10.4.169.64';
   static const String servidorLocalPorta = '8787';
   static const String portalPacienteUrl = 'http://10.4.169.64:8787';
 
   static const String kristalIntegrationsDirectoryPath =
-      r'D:\kristal_laboratorial\integracoes';
+      r'D:\KRISTAL LABORATORIAL SISTEMA\kristal_laboratorial\integracoes';
   static const String kristalSireDirectoryPath =
-      r'D:\kristal_laboratorial\integracoes\kristal_sire';
+      r'D:\KRISTAL LABORATORIAL SISTEMA\kristal_laboratorial\integracoes\kristal_sire';
   static const String kristalSireCoreDirectoryPath =
-      r'D:\kristal_laboratorial\integracoes\kristal_sire\nucleo';
+      r'D:\KRISTAL LABORATORIAL SISTEMA\kristal_laboratorial\integracoes\kristal_sire\nucleo';
 
   static const String kristalSireShortcutPath =
-      r'D:\kristal_laboratorial\integracoes\kristal_sire\KRISTAL_SIRE.lnk';
+      r'D:\KRISTAL LABORATORIAL SISTEMA\kristal_laboratorial\integracoes\kristal_sire\KRISTAL_SIRE.lnk';
   static const String kristalSireExternalShortcutPath =
-      r'D:\kristal_laboratorial\integracoes\kristal_sire\KRISTAL_SIRE_EXTERNOS.lnk';
+      r'D:\KRISTAL LABORATORIAL SISTEMA\kristal_laboratorial\integracoes\kristal_sire\KRISTAL_SIRE_EXTERNOS.lnk';
 
   static const String kristalSireCoreExecutablePath =
-      r'D:\kristal_laboratorial\integracoes\kristal_sire\nucleo\KRISTAL_SIRE_CORE.exe';
+      r'D:\KRISTAL LABORATORIAL SISTEMA\kristal_laboratorial\integracoes\kristal_sire\nucleo\KRISTAL_SIRE_CORE.exe';
   static const String kristalSireExternalCoreExecutablePath =
-      r'D:\kristal_laboratorial\integracoes\kristal_sire\nucleo\KRISTAL_SIRE_EXTERNOS_CORE.exe';
+      r'D:\KRISTAL LABORATORIAL SISTEMA\kristal_laboratorial\integracoes\kristal_sire\nucleo\KRISTAL_SIRE_EXTERNOS_CORE.exe';
 
   static const String kristalSireExportDirectoryPath =
-      r'D:\kristal_laboratorial\exports\sire';
+      r'D:\KRISTAL LABORATORIAL SISTEMA\kristal_laboratorial\exports\sire';
 
   static const String sireDirectoryPath = kristalSireDirectoryPath;
   static const String hyperTerminalDirectoryPath =
-      r'D:\kristal_laboratorial\integracoes\hyper_terminal';
+      r'D:\KRISTAL LABORATORIAL SISTEMA\kristal_laboratorial\integracoes\hyper_terminal';
   static const String sireExecutablePath = kristalSireShortcutPath;
   static const String sireExternalExecutablePath =
       kristalSireExternalShortcutPath;

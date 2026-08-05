@@ -82,8 +82,14 @@ def main() -> None:
         changed = True
 
     config_password = load_config_password()
-    if not values.get('KRISTAL_SUPERUSER_PASSWORD', '') and config_password:
-        values['KRISTAL_SUPERUSER_PASSWORD'] = config_password
+    legacy_password = values.pop('KRISTAL_ADMIN_PASSWORD', '').strip()
+    if not values.get('KRISTAL_SUPERUSER_PASSWORD', ''):
+        migrated_password = config_password or legacy_password
+        if not migrated_password:
+            raise RuntimeError(
+                'KRISTAL_SUPERUSER_PASSWORD não configurada em config/superusuario.env.'
+            )
+        values['KRISTAL_SUPERUSER_PASSWORD'] = migrated_password
         changed = True
 
     if values.get('KRISTAL_API_KEY', '') in PLACEHOLDERS['KRISTAL_API_KEY']:

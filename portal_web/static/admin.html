@@ -47,7 +47,7 @@
         <p class="msg" id="adminPerfilMsg"></p>
       </div>
 
-      <div class="card admin-edit-only">
+      <div class="card admin-edit-only admin-form-card">
         <h2>Usuários Administrativos</h2>
         <form id="usuarioForm">
           <input type="hidden" name="id" id="usuarioId">
@@ -67,7 +67,7 @@
         <div id="usuarioList" class="list"></div>
       </div>
 
-      <div class="card admin-edit-only">
+      <div class="card admin-edit-only admin-form-card">
         <h2>Paciente</h2>
         <form id="pacienteForm">
           <input type="hidden" name="id" id="pacienteId">
@@ -86,7 +86,7 @@
         <p id="pacienteMsg" class="msg"></p>
       </div>
 
-      <div class="card admin-edit-only">
+      <div class="card admin-edit-only admin-form-card">
         <h2>Catálogo de Exames</h2>
         <form id="catalogoForm">
           <input type="hidden" name="id" id="catalogoId">
@@ -98,8 +98,8 @@
           <label>Método</label><input name="metodo" id="catalogoMetodo">
           <label>Unidade</label><input name="unidade" id="catalogoUnidade">
           <label>Referência</label><input name="referencia" id="catalogoReferencia">
-          <label>Valor cheio (R$)</label><input name="valor_cheio" id="catalogoValorCheio" inputmode="decimal" placeholder="23,35">
-          <label>A indenizar 20% (R$)</label><input name="valor_indenizar_20" id="catalogoValorIndenizar20" inputmode="decimal" placeholder="4,67">
+          <label>Valor cheio</label><input class="money-input" name="valor_cheio" id="catalogoValorCheio" inputmode="decimal" placeholder="R$ 23,35">
+          <label>A indenizar (20%)</label><input class="money-input" name="valor_indenizar_20" id="catalogoValorIndenizar20" inputmode="decimal" placeholder="R$ 4,67" readonly>
           <label>Equipamento / Integração</label><input name="equipamento" id="catalogoEquipamento">
           <label>Ativo</label><select name="ativo" id="catalogoAtivo"><option value="1">SIM</option><option value="0">NÃO</option></select>
           <div class="row"><button type="submit">Salvar catálogo</button><button type="button" class="secondary" id="limparCatalogoBtn">Limpar</button></div>
@@ -107,12 +107,12 @@
         <p id="catalogoMsg" class="msg"></p>
       </div>
 
-      <div class="card admin-edit-only">
+      <div class="card admin-edit-only admin-form-card">
         <h2>Exame / Laudo</h2>
         <form id="exameForm">
           <label>Paciente cadastrado</label><select name="paciente_id" id="examePacienteSelect" required></select>
           <label>Exame</label><input name="exame_nome" required>
-          <label>Valor (R$)</label><input name="valor" inputmode="decimal" placeholder="23,35" required>
+          <label>Valor financeiro</label><input class="money-input" name="valor" inputmode="decimal" placeholder="R$ 23,35" required>
           <label>Unidade</label><input name="unidade">
           <label>Referência</label><input name="referencia">
           <label>Pedido</label><input name="pedido_id">
@@ -136,7 +136,7 @@
       <div class="card wide"><h2>Pacientes Cadastrados</h2><input id="pacienteSearch" placeholder="Buscar paciente, CPF, PREC-CP ou identidade militar"><button id="buscarPacientesBtn">Buscar pacientes</button><div id="pacienteList" class="list"></div></div>
       <div class="card wide"><h2>Catálogo Cadastrado</h2><input id="catalogoSearch" placeholder="Buscar MNE, código SIRE, exame, setor ou material"><button id="buscarCatalogoBtn">Buscar catálogo</button><div id="catalogoList" class="list"></div></div>
       <div class="card wide"><h2>Consulta de Laudos</h2><input id="adminSearch" placeholder="Buscar paciente, CPF, PREC-CP ou exame"><div class="row"><button id="buscarHistoricoBtn">Buscar histórico</button><button id="buscarRecentesBtn" class="secondary">Buscar recentes</button></div><div id="adminList" class="list"></div></div>
-      <div class="card wide"><h2>Servidor</h2><label>Chave API do servidor</label><input id="serverApiKey" type="password" placeholder="KRISTAL_API_KEY"><div class="row"><button id="salvarServerApiKeyBtn" class="secondary">Salvar chave API</button><button id="testarServerStatusBtn">Testar status protegido</button><button id="backupManualServidorBtn">Backup manual do servidor</button></div><p id="serverMsg" class="msg"></p></div>
+      <div class="card wide"><h2>Servidor</h2><label>Chave API do servidor</label><input id="serverApiKey" type="password" placeholder="KRISTAL_API_KEY"><label>Horário do backup automático</label><input id="backupHorario" type="time" value="23:00" step="60"><p class="msg">Janela permitida: 18:00 até 03:59. Padrão: 23:00.</p><div class="row"><button id="salvarServerApiKeyBtn" class="secondary">Salvar chave API</button><button id="testarServerStatusBtn">Testar status protegido</button><button id="backupManualServidorBtn">Backup manual do servidor</button><button id="salvarBackupHorarioBtn" class="admin-edit-only">Salvar horário automático</button></div><p id="serverMsg" class="msg"></p></div>
       <div class="card wide hidden" id="superDangerPanel"><h2>Superusuário</h2><p class="msg">Arquivamento lógico: os dados permanecem no banco para auditoria e consulta futura.</p><label>Confirmação</label><input id="confirmacaoExclusaoTotal" placeholder="EXCLUIR TODOS OS DADOS"><button id="excluirTudoBtn" class="secondary">Arquivar dados cadastrados</button><p id="excluirTudoMsg" class="msg"></p></div>
     </section>
   </main>
