@@ -17,6 +17,9 @@ class Settings:
     sire_base_url: str
     sire_username: str
     sire_password: str
+    sire_auto_cdm: bool
+    sire_default_plano_interno_id: str
+    sire_default_percentual_desconto: int
     backup_dir: str
 
     @staticmethod
@@ -46,5 +49,8 @@ class Settings:
             sire_base_url=os.getenv("KRISTAL_SIRE_BASE_URL", "https://sire2025.eb.mil.br/P002_SIRE2025_BL/rest/PostCDM"),
             sire_username=os.getenv("KRISTAL_SIRE_USERNAME", ""),
             sire_password=os.getenv("KRISTAL_SIRE_PASSWORD", ""),
+            sire_auto_cdm=os.getenv("KRISTAL_SIRE_AUTO_CDM", "1").strip().lower() in {"1", "sim", "true", "yes"},
+            sire_default_plano_interno_id=os.getenv("KRISTAL_SIRE_PLANO_INTERNO_ID", ""),
+            sire_default_percentual_desconto=int(os.getenv("KRISTAL_SIRE_PERCENTUAL_DESCONTO", "20")),
             backup_dir=os.getenv("KRISTAL_BACKUP_DIR", "backups"),
         )

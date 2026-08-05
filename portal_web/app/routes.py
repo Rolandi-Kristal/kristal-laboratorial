@@ -311,7 +311,17 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
             )
             conn.commit()
         database.audit(usuario=auth.get("login", "admin"), acao="CADASTRAR_EXAME", tabela="exames", registro_id=exame_id, detalhes=exame_nome_clean)
-        return {"id": exame_id, "historico_id": f"HIST-{exame_id}"}
+        cdm_status = _emitir_cdm_automatico_exame(
+            settings=settings,
+            database=database,
+            paciente=dict(paciente),
+            pedido_id=pedido_id or "",
+            exame_nome=exame_nome_clean,
+            valor_brl=valor_brl,
+            unidade=unidade or "",
+            referencia=referencia or "",
+        )
+        return {"id": exame_id, "historico_id": f"HIST-{exame_id}", "cdm_automatico": cdm_status}
     @app.get("/api/paciente/exames")
     def paciente_exames(auth: dict = Depends(paciente_auth), historico: bool = True) -> list[dict]:
         table = "historico_exames_pacientes" if historico else "exames"
@@ -883,6 +893,7 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
         )
         return {"status": "backup_criado", "arquivo": str(destination), "sha256": sha256}
 
+    @app.post("/api/sire/cdm/manual")
     @app.post("/api/sire/cdm/automatico")
     def exportar_cdm_sire_automatico(
         beneficiario_id: Annotated[str, Form()],
@@ -978,6 +989,151 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
         }
 
     return app
+
+
+def _emitir_cdm_automatico_exame(
+    *,
+    settings: Settings,
+    database: Database,
+    paciente: dict,
+    pedido_id: str,
+    exame_nome: str,
+    valor_brl: str,
+    unidade: str,
+    referencia: str,
+) -> str:
+    if not settings.sire_auto_cdm:
+        return "DESATIVADO"
+    beneficiario_id = str(paciente.get("preccp") or paciente.get("identidade_militar") or "").strip()
+    plano_interno_id = settings.sire_default_plano_interno_id.strip()
+    if not settings.sire_username or not settings.sire_password or not beneficiario_id or not plano_interno_id:
+        _registrar_cdm_pendente(
+            database=database,
+            paciente_id=str(paciente.get("id") or ""),
+            pedido_id=pedido_id,
+            beneficiario_id=beneficiario_id,
+            plano_interno_id=plano_interno_id,
+            motivo="Credenciais SIRE, BeneficiarioId ou PlanoInternoId ausentes.",
+            payload={"exame_nome": exame_nome, "valor": valor_brl, "unidade": unidade, "referencia": referencia},
+        )
+        return "PENDENTE_CONFIGURACAO"
+    procedimento = _procedimento_cdm_from_exame(database=database, exame_nome=exame_nome, valor_brl=valor_brl)
+    if procedimento is None:
+        _registrar_cdm_pendente(
+            database=database,
+            paciente_id=str(paciente.get("id") or ""),
+            pedido_id=pedido_id,
+            beneficiario_id=beneficiario_id,
+            plano_interno_id=plano_interno_id,
+            motivo="Catalogo sem codigo SIRE/CBHPM para o exame.",
+            payload={"exame_nome": exame_nome, "valor": valor_brl, "unidade": unidade, "referencia": referencia},
+        )
+        return "PENDENTE_CODIGO_SIRE"
+    percentual = settings.sire_default_percentual_desconto
+    if percentual not in {0, 20, 100}:
+        _registrar_cdm_pendente(
+            database=database,
+            paciente_id=str(paciente.get("id") or ""),
+            pedido_id=pedido_id,
+            beneficiario_id=beneficiario_id,
+            plano_interno_id=plano_interno_id,
+            motivo="PercentualDesconto configurado invalido.",
+            payload=procedimento,
+        )
+        return "PENDENTE_PERCENTUAL_INVALIDO"
+    procedimentos_json = json.dumps([procedimento], ensure_ascii=False, separators=(",", ":"))
+    payload_bytes = procedimentos_json.encode("utf-8")
+    request_url = _sire_post_cdm_url(settings.sire_base_url, beneficiario_id=beneficiario_id, plano_interno_id=plano_interno_id, percentual_desconto=percentual)
+    request = urllib.request.Request(request_url, data=payload_bytes, method="POST", headers={"Content-Type": "application/json", "Accept": "application/json"})
+    credentials = f"{settings.sire_username}:{settings.sire_password}".encode("utf-8")
+    request.add_header("Authorization", "Basic " + __import__("base64").b64encode(credentials).decode("ascii"))
+    try:
+        with urllib.request.urlopen(request, timeout=45) as response:
+            retorno_text = response.read().decode("utf-8")
+    except urllib.error.HTTPError as error:
+        retorno_text = error.read().decode("utf-8", errors="replace")
+        _registrar_cdm_erro(database=database, paciente_id=str(paciente.get("id") or ""), pedido_id=pedido_id, payload=procedimentos_json, retorno=retorno_text, status=f"ERRO_HTTP_{error.code}")
+        return f"ERRO_HTTP_{error.code}"
+    except urllib.error.URLError as error:
+        _registrar_cdm_erro(database=database, paciente_id=str(paciente.get("id") or ""), pedido_id=pedido_id, payload=procedimentos_json, retorno=str(error.reason), status="ERRO_REDE")
+        return "ERRO_REDE"
+    try:
+        retorno = json.loads(retorno_text)
+    except json.JSONDecodeError:
+        _registrar_cdm_erro(database=database, paciente_id=str(paciente.get("id") or ""), pedido_id=pedido_id, payload=procedimentos_json, retorno=retorno_text, status="ERRO_JSON_SIRE")
+        return "ERRO_JSON_SIRE"
+    if not isinstance(retorno, dict):
+        _registrar_cdm_erro(database=database, paciente_id=str(paciente.get("id") or ""), pedido_id=pedido_id, payload=procedimentos_json, retorno=retorno_text, status="ERRO_ESTRUTURA_SIRE")
+        return "ERRO_ESTRUTURA_SIRE"
+    cdm_id = str(retorno.get("CDMId") or "")
+    success = str(retorno.get("OutSuccess") or "").lower() == "true" or bool(retorno.get("OutSuccess") is True)
+    hash_integridade = hashlib.sha256(payload_bytes + retorno_text.encode("utf-8")).hexdigest()
+    envio_id = database.new_id("CDM")
+    with database.connect() as conn:
+        conn.execute("""
+            INSERT INTO sire_cdm_envios (
+                id, paciente_id, pedido_id, beneficiario_id, plano_interno_id,
+                percentual_desconto, payload_json, retorno_json, cdm_id, status,
+                hash_integridade, criado_em
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (envio_id, str(paciente.get("id") or ""), pedido_id, beneficiario_id, plano_interno_id, str(percentual), procedimentos_json, retorno_text, cdm_id, "ENVIADO" if success else "RECUSADO", hash_integridade, database.now()))
+        conn.commit()
+    database.audit(usuario="SISTEMA", acao="CDM_AUTOMATICO_EXAME", tabela="sire_cdm_envios", registro_id=envio_id, detalhes=f"Status={'ENVIADO' if success else 'RECUSADO'}; CDMId={cdm_id}; SHA256={hash_integridade}")
+    return "ENVIADO" if success else "RECUSADO"
+
+
+def _procedimento_cdm_from_exame(*, database: Database, exame_nome: str, valor_brl: str) -> dict[str, object] | None:
+    like = f"%{exame_nome.strip()}%"
+    with database.connect() as conn:
+        row = conn.execute("""
+            SELECT codigo_sire, valor_cheio
+            FROM catalogo_exames
+            WHERE ativo = '1' AND (nome LIKE ? OR mne LIKE ?)
+            ORDER BY nome
+            LIMIT 1
+            """, (like, like)).fetchone()
+    if row is None or not str(row["codigo_sire"] or "").strip():
+        return None
+    valor = _brl_to_float_text(valor_brl or str(row["valor_cheio"] or "0,00"))
+    return {"Codigo_CBHPM": str(row["codigo_sire"]).strip(), "Codigo_SubGrupoCBHMP": "", "ValorUnitario": valor, "Quantidade": 1}
+
+
+def _brl_to_float_text(value: str) -> str:
+    clean = value.strip().replace("R$", "").replace(" ", "")
+    if "," in clean:
+        clean = clean.replace(".", "").replace(",", ".")
+    return f"{float(clean):.2f}"
+
+
+def _registrar_cdm_pendente(*, database: Database, paciente_id: str, pedido_id: str, beneficiario_id: str, plano_interno_id: str, motivo: str, payload: dict[str, object]) -> None:
+    payload_json = json.dumps(payload, ensure_ascii=False, sort_keys=True)
+    hash_integridade = hashlib.sha256(payload_json.encode("utf-8")).hexdigest()
+    envio_id = database.new_id("CDM")
+    with database.connect() as conn:
+        conn.execute("""
+            INSERT INTO sire_cdm_envios (
+                id, paciente_id, pedido_id, beneficiario_id, plano_interno_id,
+                percentual_desconto, payload_json, retorno_json, cdm_id, status,
+                hash_integridade, criado_em
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (envio_id, paciente_id, pedido_id, beneficiario_id, plano_interno_id, "", payload_json, motivo, "", "PENDENTE_CONFIGURACAO", hash_integridade, database.now()))
+        conn.commit()
+    database.audit(usuario="SISTEMA", acao="CDM_AUTOMATICO_PENDENTE", tabela="sire_cdm_envios", registro_id=envio_id, detalhes=f"{motivo}; SHA256={hash_integridade}")
+
+
+def _registrar_cdm_erro(*, database: Database, paciente_id: str, pedido_id: str, payload: str, retorno: str, status: str) -> None:
+    hash_integridade = hashlib.sha256((payload + retorno).encode("utf-8")).hexdigest()
+    envio_id = database.new_id("CDM")
+    with database.connect() as conn:
+        conn.execute("""
+            INSERT INTO sire_cdm_envios (
+                id, paciente_id, pedido_id, beneficiario_id, plano_interno_id,
+                percentual_desconto, payload_json, retorno_json, cdm_id, status,
+                hash_integridade, criado_em
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (envio_id, paciente_id, pedido_id, "", "", "", payload, retorno, "", status, hash_integridade, database.now()))
+        conn.commit()
+    database.audit(usuario="SISTEMA", acao="CDM_AUTOMATICO_ERRO", tabela="sire_cdm_envios", registro_id=envio_id, detalhes=f"Status={status}; SHA256={hash_integridade}")
 
 
 def _auth(*, settings: Settings, authorization: str | None, roles: set[str]) -> dict:
