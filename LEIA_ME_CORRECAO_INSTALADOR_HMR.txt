@@ -14,7 +14,7 @@ SERVIDOR
 3. Entre na pasta extraida, onde existe INSTALAR_PRODUCAO_HMR_ADMIN.ps1.
 4. Execute, substituindo DOMINIO\usuario pela conta autorizada:
 
-powershell -NoProfile -ExecutionPolicy Bypass -File ".\INSTALAR_PRODUCAO_HMR_ADMIN.ps1" -Destino "D:\kristal_laboratorial" -ConfigurarServidor -CriarAtalhoDesktop -ServerUrl "https://10.4.169.64:8787" -AuthorizedWindowsUser "DOMINIO\usuario"
+powershell -NoProfile -ExecutionPolicy Bypass -File ".\INSTALAR_PRODUCAO_HMR_ADMIN.ps1" -Destino "D:\kristal_laboratorial" -ConfigurarServidor -SubstituirBancosPeloSeed -ConfirmacaoSubstituicaoBancos "SUBSTITUIR_BANCOS_KRISTAL" -CriarAtalhoDesktop -ServerUrl "https://10.4.169.64:8787" -AuthorizedWindowsUser "DOMINIO\usuario"
 
 O instalador:
 - gera ou preserva a CA e o certificado TLS privado do servidor;
@@ -23,38 +23,44 @@ O instalador:
 - protege a credencial do aplicativo com Windows DPAPI LocalMachine;
 - instala o inicio automatico como SYSTEM;
 - instala o backup diario, com horario padrao de 23:00;
-- preserva bancos e historicos existentes durante atualizacoes.
+- cria backup integral dos bancos existentes antes da substituicao;
+- valida os bancos do pacote pelo manifesto SHA-256 e usa troca com rollback.
 
 A CA publica para instalar nas estacoes sera criada em:
 D:\kristal_laboratorial\certificados\KRISTAL_HMR_CA.cer
 
 Nunca copie os arquivos .key.pem para uma estacao. Eles sao privados do servidor.
 
+OBTER A CHAVE API NO SERVIDOR
+Depois que o servidor estiver instalado, abra o PowerShell como Administrador e execute:
+
+powershell -NoProfile -ExecutionPolicy Bypass -File "D:\kristal_laboratorial\portal_web\EXIBIR_CHAVE_API_ADMIN.ps1" -ConfirmarExibicao
+
+- O comando le a chave real do .env protegido no proprio servidor.
+- Nao envie a chave por e-mail, mensageiro, Git ou arquivo de texto.
+- Feche o PowerShell assim que terminar a configuracao das estacoes.
+
 ESTACAO HMR - PRIMEIRA INSTALACAO
 1. Copie o pacote e KRISTAL_HMR_CA.cer para a estacao.
 2. Abra o PowerShell como Administrador.
 3. Entre na pasta extraida e execute:
 
-powershell -NoProfile -ExecutionPolicy Bypass -File ".\INSTALAR_PRODUCAO_HMR_ADMIN.ps1" -Destino "D:\kristal_laboratorial" -CriarAtalhoDesktop -ServerUrl "https://10.4.169.64:8787" -TrustedCaCertificate ".\KRISTAL_HMR_CA.cer" -AuthorizedWindowsUser "DOMINIO\usuario"
+powershell -NoProfile -ExecutionPolicy Bypass -File ".\INSTALAR_PRODUCAO_HMR_ADMIN.ps1" -Destino "D:\kristal_laboratorial" -CriarAtalhoDesktop -SolicitarApiKey -ServerUrl "https://10.4.169.64:8787" -TrustedCaCertificate ".\KRISTAL_HMR_CA.cer" -AuthorizedWindowsUser "DOMINIO\usuario"
 
 4. Quando solicitado, digite a mesma KRISTAL_API_KEY do servidor. A entrada nao aparece na tela.
 5. O instalador grava somente um blob DPAPI vinculado a maquina e restringe a leitura a SYSTEM, Administradores e a conta informada.
 
 ATUALIZACAO DE ESTACAO
-Repita o comando da estacao. A credencial DPAPI existente e preservada. Nunca copie server_config.json entre computadores; o blob DPAPI e vinculado a maquina que o criou.
+Nas atualizacoes normais, repita o comando sem -SolicitarApiKey; a credencial DPAPI existente sera preservada. Use -SolicitarApiKey somente na primeira instalacao, na rotacao da chave ou para corrigir uma credencial. Nunca copie server_config.json entre computadores; o blob DPAPI e vinculado a maquina que o criou.
 
 DADOS LEGADOS DOS RARS
 - Os RARs originais e SQLs extraidos ficam em dados_legados_kristal.
-- O pacote possui manifesto SHA-256 para verificar a integridade de cada arquivo.
-- A carga deve ser executada uma unica vez no servidor, depois da instalacao:
-
-powershell -NoProfile -ExecutionPolicy Bypass -File ".\scripts\CARREGAR_DADOS_OPERACIONAIS_LEGADOS_KRISTAL.ps1" -Root "D:\kristal_laboratorial"
-
-- Pacientes, catalogo, pedidos, amostras e resultados mapeados entram no banco operacional.
-- Toda linha SQL original tambem permanece na area bruta auditavel com hash SHA-256.
-- O banco corporativo e sincronizado automaticamente com as estacoes.
-- Os arquivos originais permanecem preservados para auditoria e reprocessamento.
-- Nunca execute dois processos de carga ao mesmo tempo.
+- Os bancos ja preparados ficam em data_seed no pacote final.
+- O manifesto SHA-256 valida cada banco antes da instalacao.
+- O instalador do servidor cria backup e somente depois substitui os bancos.
+- Nao execute novamente o carregador bruto no servidor depois de instalar o pacote final.
+- O banco corporativo instalado no servidor e a fonte da sincronizacao das estacoes.
+- Os arquivos originais permanecem preservados para auditoria e reprocessamento controlado.
 
 VALIDACAO OBRIGATORIA
 A instalacao so terminou quando aparecer:

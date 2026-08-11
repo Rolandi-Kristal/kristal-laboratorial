@@ -1,8 +1,11 @@
 param(
   [string]$Destino = 'D:\kristal_laboratorial',
   [switch]$ConfigurarServidor,
+  [switch]$SubstituirBancosPeloSeed,
+  [string]$ConfirmacaoSubstituicaoBancos = '',
   [switch]$CriarAtalhoDesktop,
   [string]$ApiKey = '',
+  [switch]$SolicitarApiKey,
   [string]$ServerUrl = 'https://10.4.169.64:8787',
   [string]$AuthorizedWindowsUser = '',
   [string]$TrustedCaCertificate = ''
@@ -270,6 +273,20 @@ function Sync-PackageDirectory {
 if (-not (Test-Admin)) {
   throw 'Execute este script como Administrador no servidor ou estacao do HMR.'
 }
+if ($SubstituirBancosPeloSeed -and -not $ConfigurarServidor) {
+  throw '-SubstituirBancosPeloSeed exige -ConfigurarServidor.'
+}
+if ($SubstituirBancosPeloSeed -and
+    $ConfirmacaoSubstituicaoBancos -cne 'SUBSTITUIR_BANCOS_KRISTAL') {
+  throw "Para substituir bancos, informe -ConfirmacaoSubstituicaoBancos 'SUBSTITUIR_BANCOS_KRISTAL'."
+}
+
+if ($SolicitarApiKey -and -not [string]::IsNullOrWhiteSpace($ApiKey)) {
+  throw 'Use somente -SolicitarApiKey; nao informe -ApiKey na mesma execucao.'
+}
+if ($SolicitarApiKey -and $ConfigurarServidor) {
+  throw 'O servidor usa automaticamente a chave gerada no .env; -SolicitarApiKey e exclusivo das estacoes.'
+}
 
 if (-not (Test-Path -LiteralPath (Join-Path $AppOrigem 'kristal_laboratorial.exe') -PathType Leaf)) {
   throw "Aplicativo Windows nao encontrado em $AppOrigem"
@@ -314,17 +331,23 @@ foreach ($directory in @('data', 'logs', 'storage', 'backups')) {
 }
 
 if ($ConfigurarServidor -and (Test-Path -LiteralPath $DataSeedOrigem -PathType Container)) {
-  Write-Step -Message 'Instalando bancos-semente somente quando o servidor ainda nao possui banco'
-  foreach ($seedName in @('kristal_laboratorial.db', 'kristal_corporativo.db')) {
-    $seedSource = Join-Path $DataSeedOrigem $seedName
-    $seedDestination = Join-Path (Join-Path $Destino 'data') $seedName
-    if ((Test-Path -LiteralPath $seedSource -PathType Leaf) -and
-        -not (Test-Path -LiteralPath $seedDestination -PathType Leaf)) {
-      Copy-Item -LiteralPath $seedSource -Destination $seedDestination
-      Write-Host "Banco-semente instalado: $seedName" -ForegroundColor Green
-    } elseif (Test-Path -LiteralPath $seedDestination -PathType Leaf) {
-      Write-Host "Banco existente preservado sem sobrescrita: $seedName" -ForegroundColor DarkYellow
-    }
+  Write-Step -Message 'Instalando bancos-semente com validacao SHA-256 e rollback'
+  $seedInstaller = Join-Path $ScriptsOrigem 'instalar_bancos_seed_servidor.ps1'
+  if (-not (Test-Path -LiteralPath $seedInstaller -PathType Leaf)) {
+    throw "Instalador seguro de bancos ausente: $seedInstaller"
+  }
+  $seedArguments = @(
+    '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $seedInstaller,
+    '-PacoteRoot', $PacoteRoot,
+    '-DestinoData', (Join-Path $Destino 'data'),
+    '-BackupRoot', $BackupRoot
+  )
+  if ($SubstituirBancosPeloSeed) {
+    $seedArguments += '-SubstituirExistentes'
+  }
+  & powershell.exe @seedArguments
+  if ($LASTEXITCODE -ne 0) {
+    throw "Falha na instalacao validada dos bancos. Codigo: $LASTEXITCODE"
   }
 }
 
@@ -446,7 +469,7 @@ $authorizedUserGrant = '*' + $authorizedUserSid + ':R'
 if ($LASTEXITCODE -ne 0) {
   throw "Falha ao restringir a configuracao do superusuario: $superEnv"
 }
-$effectiveApiKey = $ApiKey.Trim()
+$effectiveApiKey = if ($SolicitarApiKey) { Read-ApiKeySecurely } else { $ApiKey.Trim() }
 if ([string]::IsNullOrWhiteSpace($effectiveApiKey) -and $ConfigurarServidor) {
   $effectiveApiKey = Get-EnvValue -Path $envPath -Name 'KRISTAL_API_KEY'
 }
