@@ -142,11 +142,17 @@ class CorporateSyncStore:
             )
             conn.commit()
 
-    def push(self, *, client_id: str, records: Iterable[Mapping[str, Any]]) -> dict[str, Any]:
+    def push(
+        self, *, client_id: str, records: Iterable[Mapping[str, Any]]
+    ) -> dict[str, Any]:
         clean_client = self._validate_identifier(client_id, field="client_id")
         normalized = [self._normalize_record(item) for item in records]
         if not normalized:
-            return {"accepted": 0, "versions": [], "server_version": self.current_version()}
+            return {
+                "accepted": 0,
+                "versions": [],
+                "server_version": self.current_version(),
+            }
         if len(normalized) > 500:
             raise CorporateSyncError("Cada lote aceita no máximo 500 registros.")
 
@@ -154,38 +160,78 @@ class CorporateSyncStore:
         now = self.now()
         with closing(self.connect()) as conn:
             conn.execute("BEGIN IMMEDIATE")
+            operation_ids = [item["operation_id"] for item in normalized]
+            operation_placeholders = ",".join("?" for _ in operation_ids)
+            operation_versions = {
+                str(row["operation_id"]): int(row["applied_version"])
+                for row in conn.execute(
+                    "SELECT operation_id, applied_version "
+                    "FROM corporate_sync_operations "
+                    f"WHERE operation_id IN ({operation_placeholders})",
+                    operation_ids,
+                ).fetchall()
+            }
+
+            current_by_key: dict[tuple[str, str], dict[str, Any]] = {}
+            entities = sorted({str(item["entity"]) for item in normalized})
+            for entity in entities:
+                record_ids = sorted(
+                    {
+                        str(item["record_id"])
+                        for item in normalized
+                        if item["entity"] == entity
+                    }
+                )
+                placeholders = ",".join("?" for _ in record_ids)
+                current_rows = conn.execute(
+                    "SELECT entity, record_id, version, sha256, deleted "
+                    "FROM corporate_sync_records "
+                    f"WHERE entity = ? AND record_id IN ({placeholders})",
+                    [entity, *record_ids],
+                ).fetchall()
+                for row in current_rows:
+                    current_by_key[(str(row["entity"]), str(row["record_id"]))] = {
+                        "version": int(row["version"]),
+                        "sha256": str(row["sha256"]),
+                        "deleted": int(row["deleted"]),
+                    }
+
+            sequence = conn.execute(
+                "SELECT next_version FROM corporate_sync_sequence WHERE id = 1"
+            ).fetchone()
+            if sequence is None:
+                conn.rollback()
+                raise CorporateSyncError("Sequência corporativa não inicializada.")
+            next_version = int(sequence["next_version"])
+            initial_next_version = next_version
+            history_values: list[tuple[Any, ...]] = []
+            current_values: list[tuple[Any, ...]] = []
+            operation_values: list[tuple[Any, ...]] = []
+
             for item in normalized:
-                previous_operation = conn.execute(
-                    "SELECT applied_version FROM corporate_sync_operations WHERE operation_id = ?",
-                    (item["operation_id"],),
-                ).fetchone()
-                if previous_operation is not None:
+                operation_id = str(item["operation_id"])
+                previous_version = operation_versions.get(operation_id)
+                if previous_version is not None:
                     versions.append(
                         {
-                            "operation_id": item["operation_id"],
-                            "version": int(previous_operation["applied_version"]),
+                            "operation_id": operation_id,
+                            "version": previous_version,
                         }
                     )
                     continue
 
-                current = conn.execute(
-                    """
-                    SELECT version, sha256, deleted
-                    FROM corporate_sync_records
-                    WHERE entity = ? AND record_id = ?
-                    """,
-                    (item["entity"], item["record_id"]),
-                ).fetchone()
-
+                key = (str(item["entity"]), str(item["record_id"]))
+                current = current_by_key.get(key)
                 if (
                     current is not None
                     and current["sha256"] == item["sha256"]
-                    and int(current["deleted"]) == item["deleted"]
+                    and current["deleted"] == item["deleted"]
                 ):
                     version = int(current["version"])
                 else:
-                    version = self._next_version(conn)
-                    history_values = (
+                    version = next_version
+                    next_version += 1
+                    values = (
                         item["entity"],
                         item["record_id"],
                         item["payload_json"],
@@ -196,48 +242,74 @@ class CorporateSyncStore:
                         now,
                         item["sha256"],
                     )
-                    conn.execute(
-                        """
-                        INSERT INTO corporate_sync_history (
-                            entity, record_id, payload_json, deleted, version,
-                            source_client, client_updated_at, server_updated_at, sha256
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                        """,
-                        history_values,
-                    )
-                    conn.execute(
-                        """
-                        INSERT INTO corporate_sync_records (
-                            entity, record_id, payload_json, deleted, version,
-                            source_client, client_updated_at, server_updated_at, sha256
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                        ON CONFLICT(entity, record_id) DO UPDATE SET
-                            payload_json = excluded.payload_json,
-                            deleted = excluded.deleted,
-                            version = excluded.version,
-                            source_client = excluded.source_client,
-                            client_updated_at = excluded.client_updated_at,
-                            server_updated_at = excluded.server_updated_at,
-                            sha256 = excluded.sha256
-                        """,
-                        history_values,
-                    )
+                    history_values.append(values)
+                    current_values.append(values)
+                    current_by_key[key] = {
+                        "version": version,
+                        "sha256": item["sha256"],
+                        "deleted": item["deleted"],
+                    }
 
-                conn.execute(
+                operation_values.append(
+                    (operation_id, clean_client, version, now)
+                )
+                operation_versions[operation_id] = version
+                versions.append(
+                    {
+                        "operation_id": operation_id,
+                        "version": version,
+                    }
+                )
+
+            if history_values:
+                conn.executemany(
+                    """
+                    INSERT INTO corporate_sync_history (
+                        entity, record_id, payload_json, deleted, version,
+                        source_client, client_updated_at, server_updated_at, sha256
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    history_values,
+                )
+            if current_values:
+                conn.executemany(
+                    """
+                    INSERT INTO corporate_sync_records (
+                        entity, record_id, payload_json, deleted, version,
+                        source_client, client_updated_at, server_updated_at, sha256
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(entity, record_id) DO UPDATE SET
+                        payload_json = excluded.payload_json,
+                        deleted = excluded.deleted,
+                        version = excluded.version,
+                        source_client = excluded.source_client,
+                        client_updated_at = excluded.client_updated_at,
+                        server_updated_at = excluded.server_updated_at,
+                        sha256 = excluded.sha256
+                    """,
+                    current_values,
+                )
+            if operation_values:
+                conn.executemany(
                     """
                     INSERT INTO corporate_sync_operations (
                         operation_id, client_id, applied_version, applied_at
                     ) VALUES (?, ?, ?, ?)
                     """,
-                    (item["operation_id"], clean_client, version, now),
+                    operation_values,
                 )
-                versions.append({"operation_id": item["operation_id"], "version": version})
-
+            if next_version != initial_next_version:
+                conn.execute(
+                    "UPDATE corporate_sync_sequence SET next_version = ? WHERE id = 1",
+                    (next_version,),
+                )
             conn.execute(
                 """
-                INSERT INTO corporate_sync_clients (client_id, last_seen_at, last_pull_version)
-                VALUES (?, ?, 0)
-                ON CONFLICT(client_id) DO UPDATE SET last_seen_at = excluded.last_seen_at
+                INSERT INTO corporate_sync_clients (
+                    client_id, last_seen_at, last_pull_version
+                ) VALUES (?, ?, 0)
+                ON CONFLICT(client_id) DO UPDATE SET
+                    last_seen_at = excluded.last_seen_at
                 """,
                 (clean_client, now),
             )

@@ -218,35 +218,88 @@ def load_schema_index(legacy_root: Path) -> dict[str, dict[str, list[list[str]]]
             variants.append(columns)
     return schemas
 
-def ensure_schema(conn: sqlite3.Connection) -> None:
-    conn.executescript(
-        """
-        CREATE TABLE IF NOT EXISTS legacy_raw_rows (
-            id TEXT PRIMARY KEY,
+def create_raw_rows_table(conn: sqlite3.Connection, table_name: str) -> None:
+    if not re.fullmatch(r"[a-z0-9_]+", table_name):
+        raise RawLoadError(f"Nome de tabela interna invalido: {table_name}")
+    conn.execute(
+        f"""
+        CREATE TABLE {table_name} (
+            id TEXT NOT NULL,
             origem TEXT NOT NULL,
             tabela_legada TEXT NOT NULL,
             indice_linha INTEGER NOT NULL,
             dados_json TEXT NOT NULL,
             hash_integridade TEXT NOT NULL,
-            importado_em TEXT NOT NULL
-        );
+            importado_em TEXT NOT NULL,
+            PRIMARY KEY (origem, indice_linha)
+        ) WITHOUT ROWID
+        """
+    )
+
+
+def ensure_schema(conn: sqlite3.Connection) -> None:
+    conn.execute(
+        """
         CREATE TABLE IF NOT EXISTS legacy_raw_progress (
             origem TEXT PRIMARY KEY,
             status TEXT NOT NULL,
             linhas_brutas INTEGER NOT NULL DEFAULT 0,
             atualizado_em TEXT NOT NULL
-        );
-        CREATE INDEX IF NOT EXISTS idx_legacy_raw_rows_origem ON legacy_raw_rows(origem);
-        CREATE INDEX IF NOT EXISTS idx_legacy_raw_rows_tabela ON legacy_raw_rows(tabela_legada);
-        CREATE INDEX IF NOT EXISTS idx_legacy_raw_rows_hash ON legacy_raw_rows(hash_integridade);
+        )
         """
+    )
+    table_sql = conn.execute(
+        "SELECT sql FROM sqlite_master "
+        "WHERE type = 'table' AND name = 'legacy_raw_rows'"
+    ).fetchone()
+    if table_sql is None:
+        create_raw_rows_table(conn, "legacy_raw_rows")
+    elif "WITHOUT ROWID" not in str(table_sql[0]).upper():
+        conn.execute("DROP INDEX IF EXISTS idx_legacy_raw_rows_origem")
+        conn.execute("DROP INDEX IF EXISTS idx_legacy_raw_rows_tabela")
+        conn.execute("DROP INDEX IF EXISTS idx_legacy_raw_rows_hash")
+        conn.execute("DROP INDEX IF EXISTS idx_legacy_raw_rows_origem_linha")
+        create_raw_rows_table(conn, "legacy_raw_rows_v2")
+        conn.execute(
+            """
+            INSERT OR REPLACE INTO legacy_raw_rows_v2 (
+                id, origem, tabela_legada, indice_linha, dados_json,
+                hash_integridade, importado_em
+            )
+            SELECT id, origem, tabela_legada, indice_linha, dados_json,
+                   hash_integridade, importado_em
+              FROM legacy_raw_rows
+             ORDER BY importado_em, rowid
+            """
+        )
+        conn.execute("DROP TABLE legacy_raw_rows")
+        conn.execute("ALTER TABLE legacy_raw_rows_v2 RENAME TO legacy_raw_rows")
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_legacy_raw_rows_tabela "
+        "ON legacy_raw_rows(tabela_legada)"
+    )
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_legacy_raw_rows_hash "
+        "ON legacy_raw_rows(hash_integridade)"
     )
     conn.commit()
 
-
-def processed_sources(conn: sqlite3.Connection) -> set[str]:
-    rows = conn.execute("SELECT origem FROM legacy_raw_progress WHERE status = 'CONCLUIDO'").fetchall()
-    return {str(row[0]) for row in rows}
+def source_progress(conn: sqlite3.Connection) -> dict[str, tuple[str, int]]:
+    rows = conn.execute(
+        "SELECT origem, status, linhas_brutas FROM legacy_raw_progress"
+    ).fetchall()
+    progress = {
+        str(origem): (str(status), max(0, int(linhas_brutas)))
+        for origem, status, linhas_brutas in rows
+    }
+    persisted_rows = conn.execute(
+        "SELECT origem, MAX(indice_linha) FROM legacy_raw_rows GROUP BY origem"
+    ).fetchall()
+    for origem, max_index in persisted_rows:
+        key = str(origem)
+        status, recorded_index = progress.get(key, ("PROCESSANDO", 0))
+        progress[key] = (status, max(recorded_index, int(max_index or 0)))
+    return progress
 
 
 def load_raw_rows(legacy_root: Path, operational_db: Path) -> RawStats:
@@ -263,58 +316,131 @@ def load_raw_rows(legacy_root: Path, operational_db: Path) -> RawStats:
     with closing(sqlite3.connect(operational_db)) as conn:
         conn.execute("PRAGMA journal_mode=WAL")
         conn.execute("PRAGMA synchronous=NORMAL")
+        conn.execute("PRAGMA temp_store=MEMORY")
+        conn.execute("PRAGMA cache_size=-262144")
         ensure_schema(conn)
-        done = processed_sources(conn)
+        progress = source_progress(conn)
+        conn.execute("DROP INDEX IF EXISTS idx_legacy_raw_rows_origem")
+        conn.execute("DROP INDEX IF EXISTS idx_legacy_raw_rows_tabela")
+        conn.execute("DROP INDEX IF EXISTS idx_legacy_raw_rows_hash")
+        conn.commit()
         for sql_path in sql_files:
             origem = str(sql_path.relative_to(legacy_root))
-            if origem in done:
+            status, resume_at = progress.get(origem, ("PENDENTE", 0))
+            if status == "CONCLUIDO":
                 continue
             line_index = 0
+            pending_rows: list[tuple[str, str, str, int, str, str, str]] = []
+            imported_at = now_iso()
             inherited = schemas.get(sql_path.parent.name.lower(), {})
             for table, columns, values in iter_sql_inserts(sql_path, inherited):
                 line_index += 1
+                if line_index <= resume_at:
+                    continue
                 row = row_to_dict(columns, values)
                 payload_json = json.dumps(row, ensure_ascii=False, sort_keys=True)
-                digest = hashlib.sha256((origem + "|" + table + "|" + str(line_index) + "|" + payload_json).encode("utf-8")).hexdigest()
-                conn.execute(
-                    """
-                    INSERT OR REPLACE INTO legacy_raw_rows (
-                        id, origem, tabela_legada, indice_linha, dados_json, hash_integridade, importado_em
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?)
-                    """,
-                    (stable_id("RAW", origem, table, line_index, digest), origem, table, line_index, payload_json, digest, now_iso()),
+                digest = hashlib.sha256(
+                    (
+                        origem
+                        + "|"
+                        + table
+                        + "|"
+                        + str(line_index)
+                        + "|"
+                        + payload_json
+                    ).encode("utf-8")
+                ).hexdigest()
+                pending_rows.append(
+                    (
+                        stable_id("RAW", origem, table, line_index, digest),
+                        origem,
+                        table,
+                        line_index,
+                        payload_json,
+                        digest,
+                        imported_at,
+                    )
                 )
                 seen_tables.add(table)
                 stats.raw_rows += 1
-                if stats.raw_rows % 5000 == 0:
+                if len(pending_rows) >= 10000:
+                    conn.executemany(
+                        """
+                        INSERT OR IGNORE INTO legacy_raw_rows (
+                            id, origem, tabela_legada, indice_linha, dados_json,
+                            hash_integridade, importado_em
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                        """,
+                        pending_rows,
+                    )
                     conn.execute(
                         """
-                        INSERT OR REPLACE INTO legacy_raw_progress (origem, status, linhas_brutas, atualizado_em)
-                        VALUES (?, ?, ?, ?)
+                        INSERT OR REPLACE INTO legacy_raw_progress (
+                            origem, status, linhas_brutas, atualizado_em
+                        ) VALUES (?, ?, ?, ?)
                         """,
                         (origem, "PROCESSANDO", line_index, now_iso()),
                     )
                     conn.commit()
+                    pending_rows.clear()
+            if pending_rows:
+                conn.executemany(
+                    """
+                    INSERT OR IGNORE INTO legacy_raw_rows (
+                        id, origem, tabela_legada, indice_linha, dados_json,
+                        hash_integridade, importado_em
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    pending_rows,
+                )
             conn.execute(
                 """
-                INSERT OR REPLACE INTO legacy_raw_progress (origem, status, linhas_brutas, atualizado_em)
-                VALUES (?, ?, ?, ?)
+                INSERT OR REPLACE INTO legacy_raw_progress (
+                    origem, status, linhas_brutas, atualizado_em
+                ) VALUES (?, ?, ?, ?)
                 """,
                 (origem, "CONCLUIDO", line_index, now_iso()),
             )
             conn.commit()
+
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_legacy_raw_rows_tabela "
+            "ON legacy_raw_rows(tabela_legada)"
+        )
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_legacy_raw_rows_hash "
+            "ON legacy_raw_rows(hash_integridade)"
+        )
+
+        conn.commit()
     stats.tables = len(seen_tables)
     return stats
 
 
 def write_manifest(legacy_root: Path, operational_db: Path, stats: RawStats) -> None:
+    with closing(sqlite3.connect(operational_db)) as connection:
+        total_rows = int(
+            connection.execute("SELECT COUNT(*) FROM legacy_raw_rows").fetchone()[0]
+        )
+        total_tables = int(
+            connection.execute(
+                "SELECT COUNT(DISTINCT tabela_legada) FROM legacy_raw_rows"
+            ).fetchone()[0]
+        )
+        completed_sources = int(
+            connection.execute(
+                "SELECT COUNT(*) FROM legacy_raw_progress WHERE status = 'CONCLUIDO'"
+            ).fetchone()[0]
+        )
     manifest = {
         "sistema": "KRISTAL LABORATORIAL",
         "tipo": "CARGA_BRUTA_TOTAL_SEM_EXCECAO",
         "banco_operacional": str(operational_db),
         "arquivos_sql_processados": stats.sql_files,
-        "tabelas_com_insert": stats.tables,
-        "linhas_brutas_carregadas": stats.raw_rows,
+        "fontes_concluidas": completed_sources,
+        "tabelas_com_insert": total_tables,
+        "linhas_brutas_carregadas": total_rows,
+        "linhas_nesta_execucao": stats.raw_rows,
         "gerado_em": now_iso(),
     }
     (legacy_root / "manifesto_carga_bruta_total_kristal.json").write_text(

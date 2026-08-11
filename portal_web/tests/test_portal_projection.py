@@ -12,6 +12,7 @@ from pathlib import Path
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 from app.config import Settings
+from app.corporate_sync import CorporateSyncStore
 from app.database import Database
 from app.portal_projection import PortalProjection, PortalProjectionError, SEALED_PREFIX
 from app.security import SecurityService
@@ -46,6 +47,7 @@ class PortalProjectionTests(unittest.TestCase):
             require_tls=False,
         )
         self.database = Database(settings.db_path)
+        self.corporate_db = Path(settings.corporate_db_path)
         self.database.initialize(settings)
         self.projection = PortalProjection(
             database=self.database,
@@ -173,6 +175,55 @@ class PortalProjectionTests(unittest.TestCase):
                 [{"entity": "laudos", "record_id": "LAU-1", "payload": self._seal(report)}]
             )
 
+
+    def test_reconciliation_quarantines_invalid_history_and_continues(self) -> None:
+        store = CorporateSyncStore(str(self.corporate_db))
+        store.initialize()
+        records = [
+            {
+                "operation_id": "OP-VALIDO",
+                "entity": "pacientes",
+                "record_id": "PAC-VALIDO",
+                "payload": {
+                    "id": "PAC-VALIDO",
+                    "nome": "Válido",
+                    "cpf": "52998224725",
+                },
+            },
+            {
+                "operation_id": "OP-INVALIDO",
+                "entity": "pacientes",
+                "record_id": "PAC-INVALIDO",
+                "payload": {
+                    "id": "PAC-INVALIDO",
+                    "nome": "Inválido",
+                    "cpf": "123",
+                },
+            },
+        ]
+        store.push(client_id="CARGA-TESTE", records=records)
+
+        projected = self.projection.reconcile_corporate_database(
+            str(self.corporate_db)
+        )
+        with closing(self.database.connect()) as connection:
+            valid = connection.execute(
+                "SELECT id FROM pacientes WHERE id='PAC-VALIDO'"
+            ).fetchone()
+            invalid = connection.execute(
+                "SELECT id FROM pacientes WHERE id='PAC-INVALIDO'"
+            ).fetchone()
+            error = connection.execute(
+                "SELECT record_id, resolved FROM portal_projection_errors"
+            ).fetchone()
+            checkpoint = connection.execute(
+                "SELECT last_version FROM portal_projection_checkpoint WHERE id=1"
+            ).fetchone()[0]
+        self.assertEqual(projected, 1)
+        self.assertIsNotNone(valid)
+        self.assertIsNone(invalid)
+        self.assertEqual(tuple(error), ("PAC-INVALIDO", 0))
+        self.assertEqual(checkpoint, 2)
 
 if __name__ == "__main__":
     unittest.main()

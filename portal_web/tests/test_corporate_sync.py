@@ -11,9 +11,11 @@ from pathlib import Path
 from fastapi import HTTPException
 
 PORTAL_ROOT = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = PORTAL_ROOT.parent
 if str(PORTAL_ROOT) not in sys.path:
     sys.path.insert(0, str(PORTAL_ROOT))
-
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 from app.corporate_sync import CorporateSyncError, CorporateSyncStore
 from app.routes import (
     _backup_sqlite,
@@ -22,6 +24,7 @@ from app.routes import (
     _validate_backup_time,
     _write_backup_schedule,
 )
+from scripts.preparar_banco_corporativo_kristal import seed
 
 
 class CorporateSyncStoreTests(unittest.TestCase):
@@ -60,6 +63,32 @@ class CorporateSyncStoreTests(unittest.TestCase):
         self.assertEqual(first["versions"], second["versions"])
         self.assertEqual(self.store.current_version(), 1)
 
+    def test_batch_preserves_order_and_duplicate_operation_idempotency(self) -> None:
+        result = self.store.push(
+            client_id="ESTACAO-1",
+            records=[
+                self._record(operation="OP-1", name="Primeiro"),
+                self._record(operation="OP-2", name="Segundo"),
+                self._record(operation="OP-2", name="Não deve substituir"),
+            ],
+        )
+        self.assertEqual(
+            [item["version"] for item in result["versions"]],
+            [1, 2, 2],
+        )
+        current = self.store.pull(
+            client_id="LEITOR",
+            since_version=0,
+            limit=10,
+        )
+        self.assertEqual(
+            current["records"][0]["payload"]["nome"],
+            "Segundo",
+        )
+        self.assertEqual(
+            self.store.history(entity="pacientes")["total"],
+            2,
+        )
     def test_rejects_unauthorized_entity(self) -> None:
         record = self._record()
         record["entity"] = "segredos"
@@ -102,6 +131,40 @@ class CorporateSyncStoreTests(unittest.TestCase):
                     "DELETE FROM corporate_sync_history WHERE version = 1"
                 )
 
+
+class CorporateSeedTests(unittest.TestCase):
+    def test_seed_uses_all_records_and_is_idempotent_across_batches(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            operational = Path(directory) / "operational.db"
+            corporate = Path(directory) / "corporate.db"
+            with closing(sqlite3.connect(operational)) as connection:
+                connection.execute(
+                    "CREATE TABLE pacientes (id TEXT PRIMARY KEY, nome TEXT NOT NULL)"
+                )
+                connection.executemany(
+                    "INSERT INTO pacientes VALUES (?, ?)",
+                    [
+                        (f"PAC-{index:04d}", f"Paciente {index}")
+                        for index in range(1001)
+                    ],
+                )
+                connection.commit()
+
+            first = seed(
+                operational_db=operational,
+                corporate_db=corporate,
+                batch_size=500,
+            )
+            second = seed(
+                operational_db=operational,
+                corporate_db=corporate,
+                batch_size=500,
+            )
+            store = CorporateSyncStore(str(corporate))
+            self.assertEqual(first["pacientes"], 1001)
+            self.assertEqual(second["pacientes"], 1001)
+            self.assertEqual(store.status()["records"], 1001)
+            self.assertEqual(store.current_version(), 1001)
 
 class BackupAndCurrencyTests(unittest.TestCase):
     def test_backup_window_accepts_evening_and_overnight(self) -> None:

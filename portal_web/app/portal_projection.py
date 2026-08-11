@@ -59,6 +59,19 @@ class PortalProjection:
                 """
             )
             conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS portal_projection_errors (
+                    entity TEXT NOT NULL,
+                    record_id TEXT NOT NULL,
+                    version INTEGER NOT NULL,
+                    error_message TEXT NOT NULL,
+                    occurred_at TEXT NOT NULL,
+                    resolved INTEGER NOT NULL DEFAULT 0,
+                    PRIMARY KEY (entity, record_id, version)
+                )
+                """
+            )
+            conn.execute(
                 "INSERT OR IGNORE INTO portal_projection_checkpoint (id, last_version) VALUES (1, 0)"
             )
             conn.commit()
@@ -114,10 +127,11 @@ class PortalProjection:
                         "payload": json.loads(row["payload_json"]),
                         "deleted": bool(row["deleted"]),
                         "sha256": row["sha256"],
+                        "version": int(row["version"]),
                     }
                     for row in rows
                 ]
-                total += self.project(records)
+                total += self._project_reconciliation_records(records)
                 checkpoint = int(rows[-1]["version"])
                 with closing(self.database.connect()) as portal:
                     portal.execute(
@@ -126,6 +140,71 @@ class PortalProjection:
                     )
                     portal.commit()
         return total
+
+    def _project_reconciliation_records(
+        self, records: Iterable[Mapping[str, Any]]
+    ) -> int:
+        normalized = list(records)
+        if not normalized:
+            return 0
+        projected = 0
+        with closing(self.database.connect()) as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            try:
+                for record in normalized:
+                    entity = str(record.get("entity", "")).strip()
+                    record_id = str(record.get("record_id", "")).strip()
+                    version = int(record.get("version", 0))
+                    conn.execute("SAVEPOINT portal_projection_record")
+                    try:
+                        self._project_record(conn, record)
+                    except (
+                        KeyError,
+                        TypeError,
+                        ValueError,
+                        sqlite3.Error,
+                        OSError,
+                    ) as error:
+                        conn.execute("ROLLBACK TO portal_projection_record")
+                        conn.execute("RELEASE portal_projection_record")
+                        conn.execute(
+                            """
+                            INSERT INTO portal_projection_errors (
+                                entity, record_id, version, error_message,
+                                occurred_at, resolved
+                            ) VALUES (?, ?, ?, ?, ?, 0)
+                            ON CONFLICT(entity, record_id, version) DO UPDATE SET
+                                error_message=excluded.error_message,
+                                occurred_at=excluded.occurred_at,
+                                resolved=0
+                            """,
+                            (
+                                entity,
+                                record_id,
+                                version,
+                                str(error)[:1000],
+                                self.database.now(),
+                            ),
+                        )
+                    else:
+                        conn.execute("RELEASE portal_projection_record")
+                        conn.execute(
+                            """
+                            UPDATE portal_projection_errors
+                               SET resolved=1
+                             WHERE entity=? AND record_id=? AND resolved=0
+                            """,
+                            (entity, record_id),
+                        )
+                        projected += 1
+                conn.commit()
+            except sqlite3.Error as error:
+                conn.rollback()
+                raise PortalProjectionError(
+                    f"Falha ao registrar a reconciliação histórica: {error}"
+                ) from error
+        return projected
+
     def _project_record(self, conn: sqlite3.Connection, record: Mapping[str, Any]) -> None:
         entity = str(record.get("entity", "")).strip()
         record_id = str(record.get("record_id", "")).strip()

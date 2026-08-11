@@ -4,10 +4,12 @@ import csv
 import hashlib
 import io
 import json
+import logging
 import os
 import shutil
 import sqlite3
 import subprocess
+import threading
 import urllib.error
 import urllib.request
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
@@ -24,6 +26,8 @@ from app.corporate_sync import CorporateSyncError, CorporateSyncStore
 from app.database import Database
 from app.portal_projection import PortalProjection, PortalProjectionError
 from app.security import SecurityService
+
+LOGGER = logging.getLogger("kristal.portal")
 
 class SyncRecordInput(BaseModel):
     operation_id: str = Field(min_length=1, max_length=200)
@@ -48,6 +52,11 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
     corporate_sync = CorporateSyncStore(settings.corporate_db_path)
     corporate_sync.initialize()
     portal_projection: PortalProjection | None = None
+    app.state.portal_reconciliation = {
+        "status": "DESABILITADA",
+        "projected": 0,
+        "error": "",
+    }
     if len(settings.api_key.strip()) >= 32:
         portal_projection = PortalProjection(
             database=database,
@@ -55,7 +64,38 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
             storage_dir=settings.storage_dir,
         )
         portal_projection.initialize()
-        portal_projection.reconcile_corporate_database(settings.corporate_db_path)
+        app.state.portal_reconciliation = {
+            "status": "PROCESSANDO",
+            "projected": 0,
+            "error": "",
+        }
+
+        def reconcile_portal_history() -> None:
+            try:
+                projected = portal_projection.reconcile_corporate_database(
+                    settings.corporate_db_path
+                )
+            except (PortalProjectionError, sqlite3.Error, OSError, ValueError) as error:
+                app.state.portal_reconciliation = {
+                    "status": "ERRO",
+                    "projected": 0,
+                    "error": str(error)[:1000],
+                }
+                LOGGER.exception(
+                    "Falha na reconciliação histórica do portal KRISTAL."
+                )
+            else:
+                app.state.portal_reconciliation = {
+                    "status": "CONCLUIDA",
+                    "projected": projected,
+                    "error": "",
+                }
+
+        threading.Thread(
+            target=reconcile_portal_history,
+            name="kristal-portal-reconciliation",
+            daemon=True,
+        ).start()
     elif settings.require_tls:
         raise RuntimeError(
             "KRISTAL_API_KEY deve possuir ao menos 32 caracteres no servidor de produção."
@@ -87,8 +127,12 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
         return FileResponse(static_dir / "admin.html")
 
     @app.get("/health")
-    def health() -> dict[str, str]:
-        return {"status": "ok", "app": "KRISTAL LABORATORIAL"}
+    def health() -> dict[str, Any]:
+        return {
+            "status": "ok",
+            "app": "KRISTAL LABORATORIAL",
+            "portal_reconciliation": dict(app.state.portal_reconciliation),
+        }
 
     @app.post("/api/admin/login")
     def admin_login(login: Annotated[str, Form()], senha: Annotated[str, Form()]) -> dict[str, str]:

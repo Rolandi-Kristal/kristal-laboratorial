@@ -54,6 +54,31 @@ class LegacyLoaderTests(unittest.TestCase):
         self.assertEqual(rows[0], ["1", "Nome, Completo", "linha\nseguinte", None])
         self.assertEqual(rows[1], ["2", "D'Ávila", "texto", ""])
 
+    def test_raw_schema_migration_preserves_latest_unique_line(self) -> None:
+        with closing(sqlite3.connect(self.database)) as connection:
+            connection.execute(
+                "CREATE TABLE legacy_raw_rows (id TEXT PRIMARY KEY, origem TEXT, "
+                "tabela_legada TEXT, indice_linha INTEGER, dados_json TEXT, "
+                "hash_integridade TEXT, importado_em TEXT)"
+            )
+            connection.executemany(
+                "INSERT INTO legacy_raw_rows VALUES (?, ?, ?, ?, ?, ?, ?)",
+                [
+                    ("ANTIGO", "fonte", "dados", 1, "{}", "h1", "2026-08-10"),
+                    ("NOVO", "fonte", "dados", 1, "{}", "h2", "2026-08-11"),
+                ],
+            )
+            connection.commit()
+            self.raw.ensure_schema(connection)
+            table_sql = connection.execute(
+                "SELECT sql FROM sqlite_master WHERE name = 'legacy_raw_rows'"
+            ).fetchone()[0]
+            rows = connection.execute(
+                "SELECT id, hash_integridade FROM legacy_raw_rows"
+            ).fetchall()
+        self.assertIn("WITHOUT ROWID", table_sql.upper())
+        self.assertEqual(rows, [("NOVO", "h2")])
+
     def test_operational_load_maps_patient_and_is_idempotent(self) -> None:
         self.write_sql(
             "CREATE TABLE `pacientes` (`Nome` text, `CPF` text, `RegHos` text);\n"
@@ -96,6 +121,58 @@ class LegacyLoaderTests(unittest.TestCase):
             ).fetchone()
         self.assertEqual(total, 2)
         self.assertEqual(status, ("CONCLUIDO", 2))
+
+    def test_raw_load_resumes_an_interrupted_source(self) -> None:
+        self.write_sql(
+            "CREATE TABLE dados (id int, valor text);\n"
+            "INSERT INTO dados VALUES (1,'A'),(2,'B'),(3,'C');\n"
+        )
+        origem = str((self.sql_root / "dados.sql").relative_to(self.root))
+        with closing(sqlite3.connect(self.database)) as connection:
+            self.raw.ensure_schema(connection)
+            connection.execute(
+                "INSERT INTO legacy_raw_rows VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (
+                    "RAW-PRESERVADO",
+                    origem,
+                    "dados",
+                    1,
+                    '{"id":"1","valor":"A"}',
+                    "hash",
+                    "2026-08-11T00:00:00",
+                ),
+            )
+            connection.execute(
+                "INSERT INTO legacy_raw_progress VALUES (?, 'PROCESSANDO', 1, ?)",
+                (origem, "2026-08-11T00:00:00"),
+            )
+            connection.commit()
+
+        stats = self.raw.load_raw_rows(self.root, self.database)
+        with closing(sqlite3.connect(self.database)) as connection:
+            total = connection.execute(
+                "SELECT COUNT(*) FROM legacy_raw_rows"
+            ).fetchone()[0]
+            status = connection.execute(
+                "SELECT status, linhas_brutas FROM legacy_raw_progress"
+            ).fetchone()
+        self.assertEqual(stats.raw_rows, 2)
+        self.assertEqual(total, 3)
+        self.assertEqual(status, ("CONCLUIDO", 3))
+        with closing(sqlite3.connect(self.database)) as connection:
+            with self.assertRaises(sqlite3.IntegrityError):
+                connection.execute(
+                    "INSERT INTO legacy_raw_rows VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    (
+                        "OUTRO-ID",
+                        origem,
+                        "dados",
+                        1,
+                        "{}",
+                        "outro",
+                        "2026-08-11",
+                    ),
+                )
 
     def test_raw_load_uses_indexed_column_names_for_data_only_sql(self) -> None:
         source_key = "fonte12345678901"

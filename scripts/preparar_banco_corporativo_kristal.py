@@ -6,6 +6,7 @@ import hashlib
 import json
 import sqlite3
 import sys
+from contextlib import closing
 from pathlib import Path
 from typing import Any
 
@@ -41,7 +42,7 @@ def seed(*, operational_db: Path, corporate_db: Path, batch_size: int = 500) -> 
     store.initialize()
     totals: dict[str, int] = {}
 
-    with sqlite3.connect(str(operational_db), timeout=30) as source:
+    with closing(sqlite3.connect(str(operational_db), timeout=30)) as source:
         source.row_factory = sqlite3.Row
         source.execute("PRAGMA query_only = ON")
         available = {
@@ -58,11 +59,11 @@ def seed(*, operational_db: Path, corporate_db: Path, batch_size: int = 500) -> 
             if "id" not in columns:
                 continue
             count = 0
-            offset = 0
+            last_id = ""
             while True:
                 rows = source.execute(
-                    f'SELECT * FROM "{entity}" ORDER BY id LIMIT ? OFFSET ?',
-                    (batch_size, offset),
+                    f'SELECT * FROM "{entity}" WHERE id > ? ORDER BY id LIMIT ?',
+                    (last_id, batch_size),
                 ).fetchall()
                 if not rows:
                     break
@@ -71,7 +72,7 @@ def seed(*, operational_db: Path, corporate_db: Path, batch_size: int = 500) -> 
                     payload = {key: _json_value(row[key]) for key in row.keys()}
                     record_id = str(payload.get("id", "")).strip()
                     if not record_id:
-                        raise ValueError(f"Registro sem ID em {entity}, offset {offset}.")
+                        raise ValueError(f"Registro sem ID em {entity}, após {last_id!r}.")
                     records.append(
                         {
                             "operation_id": _stable_operation_id(entity, record_id, payload),
@@ -89,7 +90,7 @@ def seed(*, operational_db: Path, corporate_db: Path, batch_size: int = 500) -> 
                         f"Lote incompleto em {entity}: {accepted}/{len(records)}."
                     )
                 count += len(records)
-                offset += len(rows)
+                last_id = str(rows[-1]["id"])
                 print(f"{entity}: {count} registros processados", flush=True)
             totals[entity] = count
 
