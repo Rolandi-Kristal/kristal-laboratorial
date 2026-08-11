@@ -40,6 +40,13 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "D:\kristal_laboratorial\por
 - Nao envie a chave por e-mail, mensageiro, Git ou arquivo de texto.
 - Feche o PowerShell assim que terminar a configuracao das estacoes.
 
+ROTACAO DE EMERGENCIA DA CHAVE API
+Se a chave for exposta, nao a reutilize. No servidor, abra o PowerShell como Administrador e execute:
+
+powershell -NoProfile -ExecutionPolicy Bypass -File "D:\kristal_laboratorial\portal_web\ROTACIONAR_CHAVE_API_ADMIN.ps1" -ConfirmarRotacao -ServerUrl "https://10.4.169.64:8787"
+
+O script gera uma nova chave criptografica, atualiza o .env e a credencial DPAPI local, reinicia a tarefa do servidor e valida a rota protegida antes de mostrar a nova chave. Depois, execute o instalador de cada estacao com -SolicitarApiKey.
+
 ESTACAO HMR - PRIMEIRA INSTALACAO
 1. Copie o pacote e KRISTAL_HMR_CA.cer para a estacao.
 2. Abra o PowerShell como Administrador.
