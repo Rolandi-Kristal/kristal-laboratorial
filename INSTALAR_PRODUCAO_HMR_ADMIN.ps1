@@ -10,6 +10,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$ExpectedCodeSigningThumbprint = '41A4507029802AC7A0BADBA496F7BD532E03748A'
 
 $PacoteRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $AppOrigem = Join-Path $PacoteRoot 'app_windows'
@@ -476,21 +477,40 @@ $effectiveApiKey = ''
 $protectedApiKey = ''
 Write-Step -Message 'Validando assinatura digital do aplicativo'
 $certificatePath = Join-Path $CertificadosDestino 'KRISTAL_LABORATORIAL_ASSINATURA_PUBLICA.cer'
-if (Test-Path -LiteralPath $certificatePath -PathType Leaf) {
-  Import-Certificate -FilePath $certificatePath -CertStoreLocation Cert:\LocalMachine\Root | Out-Null
-  Import-Certificate -FilePath $certificatePath -CertStoreLocation Cert:\LocalMachine\TrustedPublisher | Out-Null
+if (-not (Test-Path -LiteralPath $certificatePath -PathType Leaf)) {
+  throw "Certificado publico de assinatura ausente: $certificatePath"
 }
+$codeSigningCertificate = [Security.Cryptography.X509Certificates.X509Certificate2]::new($certificatePath)
+if ($codeSigningCertificate.Thumbprint -ne $ExpectedCodeSigningThumbprint) {
+  throw "Certificado de assinatura rejeitado: thumbprint inesperado $($codeSigningCertificate.Thumbprint)."
+}
+if ($codeSigningCertificate.HasPrivateKey) {
+  throw 'Certificado de assinatura rejeitado: o pacote nao pode conter chave privada.'
+}
+if ((Get-Date) -lt $codeSigningCertificate.NotBefore -or (Get-Date) -gt $codeSigningCertificate.NotAfter) {
+  throw 'Certificado de assinatura rejeitado: periodo de validade invalido.'
+}
+Import-Certificate -FilePath $certificatePath -CertStoreLocation Cert:\LocalMachine\Root | Out-Null
+Import-Certificate -FilePath $certificatePath -CertStoreLocation Cert:\LocalMachine\TrustedPublisher | Out-Null
 
 $applicationPath = Join-Path $AppDestino 'kristal_laboratorial.exe'
 $signature = Get-AuthenticodeSignature -FilePath $applicationPath
 if ($signature.Status -ne 'Valid') {
   throw "Assinatura do EXE invalida: $($signature.Status) - $($signature.StatusMessage)"
 }
+if ($null -eq $signature.SignerCertificate -or
+    $signature.SignerCertificate.Thumbprint -ne $ExpectedCodeSigningThumbprint) {
+  throw 'Assinatura do EXE rejeitada: certificado assinante inesperado.'
+}
 if ($ConfigurarServidor) {
   $serverApplicationPath = Join-Path $ServerDestino 'KRISTAL_SERVIDOR.exe'
   $serverSignature = Get-AuthenticodeSignature -FilePath $serverApplicationPath
   if ($serverSignature.Status -ne 'Valid') {
     throw "Assinatura do servidor invalida: $($serverSignature.Status) - $($serverSignature.StatusMessage)"
+  }
+  if ($null -eq $serverSignature.SignerCertificate -or
+      $serverSignature.SignerCertificate.Thumbprint -ne $ExpectedCodeSigningThumbprint) {
+    throw 'Assinatura do servidor rejeitada: certificado assinante inesperado.'
   }
 }
 
