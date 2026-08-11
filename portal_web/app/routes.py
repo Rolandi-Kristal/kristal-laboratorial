@@ -43,6 +43,17 @@ class SyncPushRequest(BaseModel):
     records: list[SyncRecordInput] = Field(max_length=500)
 
 
+def _reject_machine_tombstones(records: list[SyncRecordInput]) -> None:
+    if any(item.deleted for item in records):
+        raise HTTPException(
+            status_code=403,
+            detail=(
+                "Tombstone recusado: a chave da estação não autoriza exclusão. "
+                "Use arquivamento lógico autenticado pelo SUPER_USUARIO."
+            ),
+        )
+
+
 class BackupScheduleInput(BaseModel):
     horario: str = Field(min_length=5, max_length=5)
 
@@ -475,6 +486,7 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
         auth: dict = Depends(admin_auth),
         motivo: Annotated[str, Form()] = "Arquivamento lógico permanente.",
     ) -> dict[str, str]:
+        require_super(auth)
         with database.connect() as conn:
             row = conn.execute("SELECT id FROM exames WHERE id = ?", (exame_id,)).fetchone()
             if row is None:
@@ -947,6 +959,7 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
         request: SyncPushRequest,
         _: None = Depends(api_auth),
     ) -> dict[str, Any]:
+        _reject_machine_tombstones(request.records)
         try:
             records = [
                 {

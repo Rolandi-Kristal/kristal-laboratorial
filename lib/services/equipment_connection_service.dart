@@ -61,9 +61,9 @@ class EquipmentConnectionService {
     required AuthSession session,
     required String id,
   }) async {
-    if (!session.isAdmin) {
+    if (!session.isSuperUser) {
       throw StateError(
-        'Somente Superusuário ou Administrador pode arquivar configuração.',
+        'Somente o Superusuário pode arquivar configuração.',
       );
     }
     await _repo.archiveWithoutDelete(

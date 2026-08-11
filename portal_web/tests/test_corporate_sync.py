@@ -18,9 +18,11 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 from app.corporate_sync import CorporateSyncError, CorporateSyncStore
 from app.routes import (
+    SyncRecordInput,
     _backup_sqlite,
     _normalize_brl_or_400,
     _read_backup_schedule,
+    _reject_machine_tombstones,
     _validate_backup_time,
     _write_backup_schedule,
 )
@@ -130,6 +132,35 @@ class CorporateSyncStoreTests(unittest.TestCase):
                 conn.execute(
                     "DELETE FROM corporate_sync_history WHERE version = 1"
                 )
+
+    def test_machine_api_rejects_tombstone_without_superuser_authorization(self) -> None:
+        record = SyncRecordInput(
+            operation_id="OP-DELETE-1",
+            entity="pacientes",
+            record_id="PAC-1",
+            payload={"id": "PAC-1"},
+            deleted=True,
+        )
+
+        with self.assertRaises(HTTPException) as raised:
+            _reject_machine_tombstones([record])
+
+        self.assertEqual(raised.exception.status_code, 403)
+        self.assertIn("não autoriza exclusão", str(raised.exception.detail))
+
+    def test_machine_api_accepts_regular_upsert(self) -> None:
+        record = SyncRecordInput(
+            operation_id="OP-UPSERT-1",
+            entity="pacientes",
+            record_id="PAC-1",
+            payload={"id": "PAC-1", "nome": "Paciente"},
+            deleted=False,
+        )
+
+        _reject_machine_tombstones([record])
+
+    def test_machine_api_accepts_empty_batch(self) -> None:
+        _reject_machine_tombstones([])
 
 
 class CorporateSeedTests(unittest.TestCase):

@@ -257,19 +257,15 @@ class LabRepository {
     String usuario = 'sistema',
   }) async {
     final String safeTable = _safeTable(table);
-
-    if (neverDeleteTables.contains(safeTable)) {
-      await archiveWithoutDelete(safeTable, id, usuario: usuario);
-      return;
-    }
-
-    final Database db = await _database;
     if (id.trim().isEmpty) {
       return;
     }
-    await db.delete(safeTable, where: 'id = ?', whereArgs: <Object?>[id]);
-    await audit(
-        usuario: usuario, acao: 'DELETE', tabela: safeTable, registroId: id);
+    await archiveWithoutDelete(
+      safeTable,
+      id,
+      usuario: usuario,
+      motivo: 'Retenção permanente: exclusão física bloqueada.',
+    );
   }
 
   Future<int> count(String table,

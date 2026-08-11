@@ -31,7 +31,8 @@ class PermissionService {
     final String perfil = session.perfil.toUpperCase();
 
     if (perfil == 'ADMINISTRADOR') {
-      return permission != KristalPermission.restaurarBackup;
+      return permission != KristalPermission.restaurarBackup &&
+          permission != KristalPermission.excluirRegistro;
     }
 
     if (perfil == 'RECEPCAO') {
