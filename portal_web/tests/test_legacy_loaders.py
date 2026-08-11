@@ -122,6 +122,71 @@ class LegacyLoaderTests(unittest.TestCase):
             ).fetchone()[0]
         self.assertEqual(stats.raw_rows, 1)
         self.assertEqual(json.loads(payload), {"Nome": "PACIENTE TESTE", "RegHos": "42"})
+    def test_raw_load_selects_schema_variant_by_row_width(self) -> None:
+        source_key = "fonte12345678901"
+        self.sql_root.rename(self.sql_root.parent / source_key)
+        self.sql_root = self.sql_root.parent / source_key
+        self.write_sql(
+            "INSERT INTO `log` VALUES ('TIPO','2026-08-11','DESCRICAO');\n"
+            "INSERT INTO `log` VALUES ('1','LOCAL','USR','42','DATA','TEXTO','RASTRO','JUST');\n"
+        )
+        index_path = self.root / "kristal_dados_legados.sqlite3"
+        variants = [
+            ["comp", "ip", "arquivo", "tipo", "ant", "nova", "erro", "descr", "data"],
+            ["tipo", "data", "descricao"],
+            ["SequenciaLog", "LocalLog", "CodigoUsuario", "NumPac", "DataCadastroLog", "TextoLog", "LocalRastreabilidade", "JustificativaID"],
+        ]
+        with closing(sqlite3.connect(index_path)) as connection:
+            connection.execute(
+                "CREATE TABLE legacy_table_schemas ("
+                "id INTEGER PRIMARY KEY, source_sha256 TEXT, table_name TEXT, columns_json TEXT)"
+            )
+            connection.executemany(
+                "INSERT INTO legacy_table_schemas "
+                "(source_sha256, table_name, columns_json) VALUES (?, 'log', ?)",
+                [(source_key + "0" * 59, json.dumps(columns)) for columns in variants],
+            )
+            connection.commit()
+
+        self.raw.load_raw_rows(self.root, self.database)
+        with closing(sqlite3.connect(self.database)) as connection:
+            payloads = [
+                json.loads(row[0])
+                for row in connection.execute(
+                    "SELECT dados_json FROM legacy_raw_rows ORDER BY indice_linha"
+                ).fetchall()
+            ]
+        self.assertEqual(payloads[0]["descricao"], "DESCRICAO")
+        self.assertEqual(payloads[1]["NumPac"], "42")
+        self.assertEqual(payloads[1]["JustificativaID"], "JUST")
+
+    def test_raw_load_uses_positional_keys_for_ambiguous_equal_width_schemas(self) -> None:
+        source_key = "fonte12345678901"
+        self.sql_root.rename(self.sql_root.parent / source_key)
+        self.sql_root = self.sql_root.parent / source_key
+        self.write_sql("INSERT INTO `log` VALUES ('A','B');\n")
+        index_path = self.root / "kristal_dados_legados.sqlite3"
+        with closing(sqlite3.connect(index_path)) as connection:
+            connection.execute(
+                "CREATE TABLE legacy_table_schemas ("
+                "id INTEGER PRIMARY KEY, source_sha256 TEXT, table_name TEXT, columns_json TEXT)"
+            )
+            connection.executemany(
+                "INSERT INTO legacy_table_schemas "
+                "(source_sha256, table_name, columns_json) VALUES (?, 'log', ?)",
+                [
+                    (source_key + "0" * 59, json.dumps(["primeiro", "segundo"])),
+                    (source_key + "0" * 59, json.dumps(["campo_a", "campo_b"])),
+                ],
+            )
+            connection.commit()
+
+        self.raw.load_raw_rows(self.root, self.database)
+        with closing(sqlite3.connect(self.database)) as connection:
+            payload = json.loads(
+                connection.execute("SELECT dados_json FROM legacy_raw_rows").fetchone()[0]
+            )
+        self.assertEqual(payload, {"0": "A", "1": "B"})
     def test_loaders_reject_missing_or_empty_sources(self) -> None:
         missing = self.root / "inexistente"
         with self.assertRaises(self.operational.OperationalLoadError):

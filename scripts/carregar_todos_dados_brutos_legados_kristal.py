@@ -141,7 +141,7 @@ def row_to_dict(columns: list[str], values: list[str | None]) -> dict[str, str |
 
 def iter_sql_inserts(
     sql_path: Path,
-    inherited_columns: dict[str, list[str]] | None = None,
+    inherited_columns: dict[str, list[list[str]]] | None = None,
 ) -> Iterator[tuple[str, list[str], list[str | None]]]:
     insert_re = re.compile(
         r"INSERT\s+INTO\s+`?([^`\s(]+)`?\s*(?:\((.*?)\))?\s+VALUES\s*(.*)\s*;\s*$",
@@ -152,7 +152,8 @@ def iter_sql_inserts(
         re.IGNORECASE | re.DOTALL,
     )
     statement: list[str] = []
-    columns_by_table: dict[str, list[str]] = dict(inherited_columns or {})
+    columns_by_table: dict[str, list[str]] = {}
+    inherited = inherited_columns or {}
     with sql_path.open("r", encoding="utf-8", errors="replace") as handle:
         for line in handle:
             stripped = line.strip()
@@ -173,20 +174,28 @@ def iter_sql_inserts(
                 continue
             table = insert_match.group(1).lower()
             columns_raw = insert_match.group(2) or ""
-            columns = [
+            explicit_columns = [
                 part.strip().strip("`")
                 for part in columns_raw.split(",")
                 if part.strip()
-            ] or columns_by_table.get(table, [])
+            ]
             for row in split_insert_values(insert_match.group(3)):
+                columns = explicit_columns or columns_by_table.get(table, [])
+                if not columns:
+                    compatible = [
+                        variant
+                        for variant in inherited.get(table, [])
+                        if len(variant) == len(row)
+                    ]
+                    columns = compatible[0] if len(compatible) == 1 else []
                 yield table, columns, row
 
 
-def load_schema_index(legacy_root: Path) -> dict[str, dict[str, list[str]]]:
+def load_schema_index(legacy_root: Path) -> dict[str, dict[str, list[list[str]]]]:
     index_path = legacy_root / "kristal_dados_legados.sqlite3"
     if not index_path.is_file():
         return {}
-    schemas: dict[str, dict[str, list[str]]] = {}
+    schemas: dict[str, dict[str, list[list[str]]]] = {}
     with closing(sqlite3.connect(index_path)) as connection:
         rows = connection.execute(
             "SELECT source_sha256, table_name, columns_json "
@@ -204,10 +213,9 @@ def load_schema_index(legacy_root: Path) -> dict[str, dict[str, list[str]]]:
         if not isinstance(decoded, list) or not all(isinstance(item, str) for item in decoded):
             raise RawLoadError(f"Esquema invalido para {source_key}/{table}.")
         columns = [item for item in decoded if item]
-        existing = schemas.setdefault(source_key, {}).get(table)
-        if existing is not None and existing != columns:
-            raise RawLoadError(f"Esquemas divergentes para {source_key}/{table}.")
-        schemas[source_key][table] = columns
+        variants = schemas.setdefault(source_key, {}).setdefault(table, [])
+        if columns not in variants:
+            variants.append(columns)
     return schemas
 
 def ensure_schema(conn: sqlite3.Connection) -> None:
