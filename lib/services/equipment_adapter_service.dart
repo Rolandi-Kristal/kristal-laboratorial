@@ -29,7 +29,7 @@ class EquipmentProfile {
       'porta': porta,
       'ip': ip,
       'baudRate': baudRate?.toString() ?? '',
-      'ativo': '1',
+      'ativo': '0',
       'criadoEm': DateTime.now().toIso8601String(),
     };
   }

@@ -91,7 +91,7 @@
         <form id="catalogoForm">
           <input type="hidden" name="id" id="catalogoId">
           <label>MNE</label><input name="mne" id="catalogoMne" required>
-          <label>Código SIRE</label><input name="codigo_sire" id="catalogoCodigoSire">
+          <label>Código SIRE</label><input name="codigo_sire" id="catalogoCodigoSire"><label>Subgrupo CBHPM</label><input name="codigo_subgrupo_cbhpm" id="catalogoCodigoSubgrupoCbhpm">
           <label>Nome do exame</label><input name="nome" id="catalogoNome" required>
           <label>Setor</label><input name="setor" id="catalogoSetor">
           <label>Material</label><input name="material" id="catalogoMaterial">
@@ -136,7 +136,7 @@
       <div class="card wide"><h2>Pacientes Cadastrados</h2><input id="pacienteSearch" placeholder="Buscar paciente, CPF, PREC-CP ou identidade militar"><button id="buscarPacientesBtn">Buscar pacientes</button><div id="pacienteList" class="list"></div></div>
       <div class="card wide"><h2>Catálogo Cadastrado</h2><input id="catalogoSearch" placeholder="Buscar MNE, código SIRE, exame, setor ou material"><button id="buscarCatalogoBtn">Buscar catálogo</button><div id="catalogoList" class="list"></div></div>
       <div class="card wide"><h2>Consulta de Laudos</h2><input id="adminSearch" placeholder="Buscar paciente, CPF, PREC-CP ou exame"><div class="row"><button id="buscarHistoricoBtn">Buscar histórico</button><button id="buscarRecentesBtn" class="secondary">Buscar recentes</button></div><div id="adminList" class="list"></div></div>
-      <div class="card wide"><h2>Servidor</h2><label>Chave API do servidor</label><input id="serverApiKey" type="password" placeholder="KRISTAL_API_KEY"><label>Horário do backup automático</label><input id="backupHorario" type="time" value="23:00" step="60"><p class="msg">Janela permitida: 18:00 até 03:59. Padrão: 23:00.</p><div class="row"><button id="salvarServerApiKeyBtn" class="secondary">Salvar chave API</button><button id="testarServerStatusBtn">Testar status protegido</button><button id="backupManualServidorBtn">Backup manual do servidor</button><button id="salvarBackupHorarioBtn" class="admin-edit-only">Salvar horário automático</button></div><p id="serverMsg" class="msg"></p></div>
+      <div class="card wide"><h2>Servidor</h2><label>Chave API do servidor</label><input id="serverApiKey" type="password" placeholder="KRISTAL_API_KEY"><label>Horário do backup automático</label><input id="backupHorario" type="time" value="23:00" step="60"><p class="msg">Janela permitida: 18:00 até 03:59. Padrão: 23:00.</p><div class="row"><button id="salvarServerApiKeyBtn" class="secondary">Usar chave nesta sessão</button><button id="testarServerStatusBtn">Testar status protegido</button><button id="backupManualServidorBtn">Backup manual do servidor</button><button id="salvarBackupHorarioBtn" class="admin-edit-only">Salvar horário automático</button></div><p id="serverMsg" class="msg"></p></div>
       <div class="card wide hidden" id="superDangerPanel"><h2>Superusuário</h2><p class="msg">Arquivamento lógico: os dados permanecem no banco para auditoria e consulta futura.</p><label>Confirmação</label><input id="confirmacaoExclusaoTotal" placeholder="EXCLUIR TODOS OS DADOS"><button id="excluirTudoBtn" class="secondary">Arquivar dados cadastrados</button><p id="excluirTudoMsg" class="msg"></p></div>
     </section>
   </main>

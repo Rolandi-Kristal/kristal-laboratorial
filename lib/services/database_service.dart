@@ -516,6 +516,14 @@ class DatabaseService {
           table: 'exames', column: 'valorIndenizar20', definition: 'TEXT');
       await _ensureColumn(db,
           table: 'exames', column: 'codigoCadebens', definition: 'TEXT');
+      await _ensureColumn(db,
+          table: 'exames', column: 'codigoSire', definition: 'TEXT');
+      await _ensureColumn(db,
+          table: 'exames', column: 'codigoSubGrupoCbhpm', definition: 'TEXT');
+      await _ensureColumn(db,
+          table: 'exames', column: 'unidade', definition: 'TEXT');
+      await _ensureColumn(db,
+          table: 'exames', column: 'equipamento', definition: 'TEXT');
     }
 
     if (await _tableExists(db, 'pedidos')) {
@@ -541,6 +549,22 @@ class DatabaseService {
       await _ensureColumn(db,
           table: 'resultados',
           column: 'mensagemBrutaEquipamento',
+          definition: 'TEXT');
+      await _ensureColumn(db,
+          table: 'resultados', column: 'codigoEquipamento', definition: 'TEXT');
+      await _ensureColumn(db,
+          table: 'resultados',
+          column: 'mapeamentoEquipamentoId',
+          definition: 'TEXT');
+      await _ensureColumn(db,
+          table: 'resultados',
+          column: 'hashMensagemEquipamento',
+          definition: 'TEXT');
+      await _ensureColumn(db,
+          table: 'resultados', column: 'equipamentoId', definition: 'TEXT');
+      await _ensureColumn(db,
+          table: 'resultados',
+          column: 'protocoloEquipamento',
           definition: 'TEXT');
     }
 
@@ -679,28 +703,64 @@ class DatabaseService {
       CREATE INDEX IF NOT EXISTS idx_equipment_connections_ativo
       ON equipment_connections(ativo, arquivado)
     ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS equipment_test_mappings (
+        id TEXT PRIMARY KEY,
+        equipmentId TEXT NOT NULL,
+        sourceCode TEXT NOT NULL,
+        examId TEXT NOT NULL,
+        systemCode TEXT NOT NULL,
+        ativo TEXT DEFAULT '1',
+        criadoEm TEXT,
+        atualizadoEm TEXT,
+        ativoConsultaRecente TEXT DEFAULT '1',
+        arquivado TEXT DEFAULT '0',
+        excluidoFisicamente TEXT DEFAULT '0',
+        bloqueioExclusao TEXT DEFAULT '1',
+        arquivadoEm TEXT,
+        motivoArquivamento TEXT,
+        UNIQUE(equipmentId, sourceCode)
+      )
+    ''');
+
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_equipment_test_mappings_lookup
+      ON equipment_test_mappings(equipmentId, sourceCode, ativo, arquivado)
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS equipment_messages (
+        id TEXT PRIMARY KEY,
+        equipmentId TEXT NOT NULL,
+        protocolo TEXT NOT NULL,
+        direcao TEXT NOT NULL,
+        sampleId TEXT,
+        payload TEXT NOT NULL,
+        sha256 TEXT NOT NULL,
+        status TEXT NOT NULL,
+        erro TEXT,
+        criadoEm TEXT NOT NULL,
+        processadoEm TEXT,
+        ativoConsultaRecente TEXT DEFAULT '1',
+        arquivado TEXT DEFAULT '0',
+        excluidoFisicamente TEXT DEFAULT '0',
+        bloqueioExclusao TEXT DEFAULT '1',
+        arquivadoEm TEXT,
+        motivoArquivamento TEXT
+      )
+    ''');
+
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_equipment_messages_equipment
+      ON equipment_messages(equipmentId, criadoEm)
+    ''');
   }
 
   Future<void> _ensurePermanentRetentionColumns(Database db) async {
     final List<String> protectedTables = <String>[
-      'pacientes',
-      'pedidos',
-      'amostras',
-      'resultados',
-      'laudos',
-      'exames',
-      'equipamentos',
-      'materiais',
-      'estoque',
-      'calibracoes',
-      'manutencoes',
-      'controle_qualidade',
-      'atendimentos',
-      'agendamentos',
-      'cadebens_integracao',
+      ...AppConstants.protectedClinicalTables,
       'configuracoes',
-      'auditoria',
-      'equipment_connections',
     ];
 
     for (final String table in protectedTables) {

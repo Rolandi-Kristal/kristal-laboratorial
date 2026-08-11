@@ -1,16 +1,17 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../core/app_constants.dart';
+import '../security/kristal_crypto_service.dart';
 import 'database_service.dart';
 
 class LabRepository {
   LabRepository();
 
-  static const List<String> neverDeleteTables = AppConstants.protectedClinicalTables;
+  static const List<String> neverDeleteTables =
+      AppConstants.protectedClinicalTables;
 
   static const Set<String> _sensitiveFields = <String>{
     'cpf',
@@ -26,6 +27,8 @@ class LabRepository {
     'anamnese',
     'resultado',
     'valor',
+    'payload',
+    'mensagembruta',
   };
 
   Future<Database> get _database async {
@@ -51,7 +54,8 @@ class LabRepository {
   static String newId(String prefix) {
     final DateTime now = DateTime.now();
     final String digest = sha1
-        .convert(utf8.encode('$prefix|${now.toIso8601String()}|${now.microsecondsSinceEpoch}'))
+        .convert(utf8.encode(
+            '$prefix|${now.toIso8601String()}|${now.microsecondsSinceEpoch}'))
         .toString()
         .substring(0, 10);
     return '$prefix-${now.microsecondsSinceEpoch}-$digest';
@@ -79,8 +83,11 @@ class LabRepository {
   Future<List<String>> columns(String table) async {
     final Database db = await _database;
     final String safeTable = _safeTable(table);
-    final List<Map<String, Object?>> info = await db.rawQuery('PRAGMA table_info($safeTable)');
-    return info.map((Map<String, Object?> row) => row['name'].toString()).toList();
+    final List<Map<String, Object?>> info =
+        await db.rawQuery('PRAGMA table_info($safeTable)');
+    return info
+        .map((Map<String, Object?> row) => row['name'].toString())
+        .toList();
   }
 
   Future<List<Map<String, dynamic>>> all(
@@ -101,7 +108,7 @@ class LabRepository {
         orderBy: _safeOrderBy(orderBy),
         limit: limit,
       );
-      return rows.map(_decryptRow).toList();
+      return Future.wait(rows.map(_decryptRow));
     } on DatabaseException {
       return <Map<String, dynamic>>[];
     }
@@ -165,10 +172,12 @@ class LabRepository {
     row['id'] = id;
 
     final String now = DateTime.now().toIso8601String();
-    if (tableColumns.contains('criadoEm') && (row['criadoEm']?.toString().trim().isEmpty ?? true)) {
+    if (tableColumns.contains('criadoEm') &&
+        (row['criadoEm']?.toString().trim().isEmpty ?? true)) {
       row['criadoEm'] = now;
     }
-    if (tableColumns.contains('criado_em') && (row['criado_em']?.toString().trim().isEmpty ?? true)) {
+    if (tableColumns.contains('criado_em') &&
+        (row['criado_em']?.toString().trim().isEmpty ?? true)) {
       row['criado_em'] = now;
     }
     if (tableColumns.contains('atualizadoEm')) {
@@ -180,7 +189,7 @@ class LabRepository {
 
     await db.insert(
       safeTable,
-      _encryptRow(row),
+      await _encryptRow(row),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
 
@@ -197,7 +206,8 @@ class LabRepository {
     String table,
     String id, {
     String usuario = 'sistema',
-    String motivo = 'Registro preservado permanentemente para consulta histórica.',
+    String motivo =
+        'Registro preservado permanentemente para consulta histórica.',
   }) async {
     if (id.trim().isEmpty) {
       return;
@@ -228,7 +238,8 @@ class LabRepository {
     }
 
     if (updates.isNotEmpty) {
-      await db.update(safeTable, updates, where: 'id = ?', whereArgs: <Object?>[id]);
+      await db.update(safeTable, updates,
+          where: 'id = ?', whereArgs: <Object?>[id]);
     }
 
     await audit(
@@ -257,13 +268,16 @@ class LabRepository {
       return;
     }
     await db.delete(safeTable, where: 'id = ?', whereArgs: <Object?>[id]);
-    await audit(usuario: usuario, acao: 'DELETE', tabela: safeTable, registroId: id);
+    await audit(
+        usuario: usuario, acao: 'DELETE', tabela: safeTable, registroId: id);
   }
 
-  Future<int> count(String table, {String? where, List<Object?>? whereArgs}) async {
+  Future<int> count(String table,
+      {String? where, List<Object?>? whereArgs}) async {
     final Database db = await _database;
     final String safeTable = _safeTable(table);
-    final String clause = where == null || where.trim().isEmpty ? '' : ' WHERE $where';
+    final String clause =
+        where == null || where.trim().isEmpty ? '' : ' WHERE $where';
 
     try {
       final List<Map<String, Object?>> result = await db.rawQuery(
@@ -336,28 +350,23 @@ class LabRepository {
     }
   }
 
-  Map<String, dynamic> _encryptRow(Map<String, dynamic> row) {
+  Future<Map<String, dynamic>> _encryptRow(Map<String, dynamic> row) async {
     final Map<String, dynamic> output = Map<String, dynamic>.from(row);
     for (final MapEntry<String, dynamic> entry in output.entries.toList()) {
       if (entry.value is String && _isSensitiveField(entry.key)) {
-        final String value = entry.value as String;
-        if (value.startsWith(AppConstants.cryptoPrefix)) {
-          continue;
-        }
-        output[entry.key] = _encryptText(value);
+        output[entry.key] = await KristalCryptoService.instance
+            .encryptString(entry.value as String);
       }
     }
     return output;
   }
 
-  Map<String, dynamic> _decryptRow(Map<String, dynamic> row) {
+  Future<Map<String, dynamic>> _decryptRow(Map<String, dynamic> row) async {
     final Map<String, dynamic> output = Map<String, dynamic>.from(row);
     for (final MapEntry<String, dynamic> entry in output.entries.toList()) {
       if (entry.value is String && _isSensitiveField(entry.key)) {
-        final String value = entry.value as String;
-        if (value.startsWith(AppConstants.cryptoPrefix)) {
-          output[entry.key] = _decryptText(value);
-        }
+        output[entry.key] = await KristalCryptoService.instance
+            .decryptString(entry.value as String);
       }
     }
     return output;
@@ -365,44 +374,9 @@ class LabRepository {
 
   bool _isSensitiveField(String field) {
     final String normalized = field.toLowerCase();
-    return _sensitiveFields.any((String sensitive) => normalized.contains(sensitive.toLowerCase()));
-  }
-
-  String _encryptText(String plainText) {
-    if (plainText.isEmpty) {
-      return plainText;
-    }
-
-    final Uint8List input = Uint8List.fromList(utf8.encode(plainText));
-    final Uint8List key = Uint8List.fromList(sha256.convert(utf8.encode(AppConstants.masterPassword)).bytes);
-    final Uint8List output = Uint8List(input.length);
-
-    for (int i = 0; i < input.length; i++) {
-      output[i] = input[i] ^ key[i % key.length];
-    }
-
-    return '${AppConstants.cryptoPrefix}${base64UrlEncode(output)}';
-  }
-
-  String _decryptText(String cipherText) {
-    if (!cipherText.startsWith(AppConstants.cryptoPrefix)) {
-      return cipherText;
-    }
-
-    try {
-      final String payload = cipherText.substring(AppConstants.cryptoPrefix.length);
-      final Uint8List input = base64Url.decode(payload);
-      final Uint8List key = Uint8List.fromList(sha256.convert(utf8.encode(AppConstants.masterPassword)).bytes);
-      final Uint8List output = Uint8List(input.length);
-
-      for (int i = 0; i < input.length; i++) {
-        output[i] = input[i] ^ key[i % key.length];
-      }
-
-      return utf8.decode(output);
-    } on FormatException {
-      return cipherText;
-    }
+    return _sensitiveFields.any(
+      (String sensitive) => normalized.contains(sensitive.toLowerCase()),
+    );
   }
 
   Map<String, dynamic> _maskAudit(Map<String, dynamic> row) {

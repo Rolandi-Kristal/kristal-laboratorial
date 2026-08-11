@@ -1,6 +1,7 @@
 import 'config_service.dart';
 import 'lab_repository.dart';
 import 'laudo_hash_service.dart';
+import 'pdf_laudo_service.dart';
 
 class LaudoAutomaticoService {
   LaudoAutomaticoService._();
@@ -52,6 +53,10 @@ class LaudoAutomaticoService {
             'Resultado ${resultado['valor'] ?? ''} ${resultado['unidade'] ?? ''}. Referencia: ${resultado['referencia'] ?? ''}.',
         'observacao': resultado['observacao']?.toString() ?? '',
       };
+      laudo['hash'] = LaudoHashService.gerarHash(laudo);
+      final String arquivoPath =
+          await PdfLaudoService.instance.salvarLaudoPdf(laudo);
+      laudo['arquivoPath'] = arquivoPath;
       laudo['hash'] = LaudoHashService.gerarHash(laudo);
       await _repo.upsert('laudos', laudo);
       criados++;

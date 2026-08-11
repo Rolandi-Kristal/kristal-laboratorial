@@ -30,6 +30,8 @@ ALLOWED_SYNC_ENTITIES: frozenset[str] = frozenset(
         "atendimentos",
         "historico_exames_pacientes",
         "equipment_connections",
+        "equipment_test_mappings",
+        "equipment_messages",
     }
 )
 
@@ -82,6 +84,19 @@ class CorporateSyncStore:
                     PRIMARY KEY (entity, record_id)
                 );
 
+                CREATE TABLE IF NOT EXISTS corporate_sync_history (
+                    history_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    entity TEXT NOT NULL,
+                    record_id TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    deleted INTEGER NOT NULL DEFAULT 0,
+                    version INTEGER NOT NULL UNIQUE,
+                    source_client TEXT NOT NULL,
+                    client_updated_at TEXT,
+                    server_updated_at TEXT NOT NULL,
+                    sha256 TEXT NOT NULL
+                );
+
                 CREATE TABLE IF NOT EXISTS corporate_sync_operations (
                     operation_id TEXT PRIMARY KEY,
                     client_id TEXT NOT NULL,
@@ -100,6 +115,29 @@ class CorporateSyncStore:
 
                 CREATE INDEX IF NOT EXISTS idx_corporate_sync_entity_version
                 ON corporate_sync_records(entity, version);
+
+                CREATE INDEX IF NOT EXISTS idx_corporate_history_entity_record
+                ON corporate_sync_history(entity, record_id, version DESC);
+
+                INSERT OR IGNORE INTO corporate_sync_history (
+                    entity, record_id, payload_json, deleted, version,
+                    source_client, client_updated_at, server_updated_at, sha256
+                )
+                SELECT entity, record_id, payload_json, deleted, version,
+                       source_client, client_updated_at, server_updated_at, sha256
+                FROM corporate_sync_records;
+
+                CREATE TRIGGER IF NOT EXISTS trg_corporate_history_no_update
+                BEFORE UPDATE ON corporate_sync_history
+                BEGIN
+                    SELECT RAISE(ABORT, 'corporate_sync_history is immutable');
+                END;
+
+                CREATE TRIGGER IF NOT EXISTS trg_corporate_history_no_delete
+                BEFORE DELETE ON corporate_sync_history
+                BEGIN
+                    SELECT RAISE(ABORT, 'corporate_sync_history is immutable');
+                END;
                 """
             )
             conn.commit()
@@ -147,6 +185,26 @@ class CorporateSyncStore:
                     version = int(current["version"])
                 else:
                     version = self._next_version(conn)
+                    history_values = (
+                        item["entity"],
+                        item["record_id"],
+                        item["payload_json"],
+                        item["deleted"],
+                        version,
+                        clean_client,
+                        item["client_updated_at"],
+                        now,
+                        item["sha256"],
+                    )
+                    conn.execute(
+                        """
+                        INSERT INTO corporate_sync_history (
+                            entity, record_id, payload_json, deleted, version,
+                            source_client, client_updated_at, server_updated_at, sha256
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """,
+                        history_values,
+                    )
                     conn.execute(
                         """
                         INSERT INTO corporate_sync_records (
@@ -162,17 +220,7 @@ class CorporateSyncStore:
                             server_updated_at = excluded.server_updated_at,
                             sha256 = excluded.sha256
                         """,
-                        (
-                            item["entity"],
-                            item["record_id"],
-                            item["payload_json"],
-                            item["deleted"],
-                            version,
-                            clean_client,
-                            item["client_updated_at"],
-                            now,
-                            item["sha256"],
-                        ),
+                        history_values,
                     )
 
                 conn.execute(
@@ -255,13 +303,78 @@ class CorporateSyncStore:
     def status(self) -> dict[str, Any]:
         with closing(self.connect()) as conn:
             record_count = int(conn.execute("SELECT COUNT(*) FROM corporate_sync_records").fetchone()[0])
+            history_count = int(conn.execute("SELECT COUNT(*) FROM corporate_sync_history").fetchone()[0])
             client_count = int(conn.execute("SELECT COUNT(*) FROM corporate_sync_clients").fetchone()[0])
         return {
             "status": "ok",
             "records": record_count,
+            "history_records": history_count,
             "clients": client_count,
             "server_version": self.current_version(),
             "database": self.db_path,
+        }
+
+    def history(
+        self,
+        *,
+        entity: str | None = None,
+        record_id: str | None = None,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> dict[str, Any]:
+        if entity is not None and entity not in ALLOWED_SYNC_ENTITIES:
+            raise CorporateSyncError("Entidade não autorizada para consulta.")
+        clean_record_id = (
+            self._validate_identifier(record_id, field="record_id")
+            if record_id is not None
+            else None
+        )
+        safe_limit = min(max(limit, 1), 1000)
+        safe_offset = max(offset, 0)
+        clauses: list[str] = []
+        parameters: list[Any] = []
+        if entity is not None:
+            clauses.append("entity = ?")
+            parameters.append(entity)
+        if clean_record_id is not None:
+            clauses.append("record_id = ?")
+            parameters.append(clean_record_id)
+        where = " WHERE " + " AND ".join(clauses) if clauses else ""
+        with closing(self.connect()) as conn:
+            total = int(
+                conn.execute(
+                    f"SELECT COUNT(*) FROM corporate_sync_history{where}",
+                    parameters,
+                ).fetchone()[0]
+            )
+            rows = conn.execute(
+                f"""
+                SELECT entity, record_id, payload_json, deleted, version,
+                       source_client, client_updated_at, server_updated_at, sha256
+                FROM corporate_sync_history{where}
+                ORDER BY version DESC
+                LIMIT ? OFFSET ?
+                """,
+                [*parameters, safe_limit, safe_offset],
+            ).fetchall()
+        return {
+            "records": [
+                {
+                    "entity": row["entity"],
+                    "record_id": row["record_id"],
+                    "payload": json.loads(row["payload_json"]),
+                    "deleted": bool(row["deleted"]),
+                    "version": int(row["version"]),
+                    "source_client": row["source_client"],
+                    "client_updated_at": row["client_updated_at"],
+                    "server_updated_at": row["server_updated_at"],
+                    "sha256": row["sha256"],
+                }
+                for row in rows
+            ],
+            "total": total,
+            "limit": safe_limit,
+            "offset": safe_offset,
         }
 
     def current_version(self) -> int:
@@ -297,8 +410,12 @@ class CorporateSyncStore:
         if str(payload.get("id", "")) != record_id:
             raise CorporateSyncError("O ID do payload deve coincidir com record_id.")
         payload_json = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
-        if len(payload_json.encode("utf-8")) > 1_000_000:
-            raise CorporateSyncError("Registro excede o limite de 1 MB.")
+        payload_size = len(payload_json.encode("utf-8"))
+        payload_limit = 22_000_000 if entity == "laudos" else 1_000_000
+        if payload_size > payload_limit:
+            raise CorporateSyncError(
+                f"Registro {entity} excede o limite de {payload_limit} bytes."
+            )
         deleted = 1 if bool(item.get("deleted", False)) else 0
         digest = hashlib.sha256(
             (entity + "\n" + record_id + "\n" + str(deleted) + "\n" + payload_json).encode("utf-8")

@@ -96,6 +96,7 @@ class _FinanceiroSireScreenState extends State<FinanceiroSireScreen> {
             quantity: 1,
             performedAt: DateTime.now(),
             codigoCbhpm: exam.sireCode,
+            codigoSubGrupoCbhpm: exam.sireSubgroupCode,
           ),
         )
         .toList(growable: false);

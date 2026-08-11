@@ -40,26 +40,10 @@ class _LaudosScreenState extends State<LaudosScreen> {
     });
   }
 
-  Future<void> _criarLaudoTeste() async {
-    final String now = DateTime.now().toIso8601String();
-
-    await repo.upsert('laudos', <String, dynamic>{
-      'id': 'LAUDO-${DateTime.now().millisecondsSinceEpoch}',
-      'pacienteId': 'PACIENTE-TESTE',
-      'pedidoId': 'PEDIDO-TESTE',
-      'hash': '',
-      'status': 'DIGITADO',
-      'arquivoPath': '',
-      'criadoEm': now,
-      'liberadoEm': '',
-    });
-
-    await _load();
-  }
-
   Future<void> _laudarTodos() async {
     try {
-      final int total = await LaudoAutomaticoService.instance.laudarTodosRegistrados();
+      final int total =
+          await LaudoAutomaticoService.instance.laudarTodosRegistrados();
       await _load();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -157,7 +141,6 @@ class _LaudosScreenState extends State<LaudosScreen> {
             onPressed: _laudarTodos,
             icon: const Icon(Icons.playlist_add_check),
           ),
-          IconButton(onPressed: _criarLaudoTeste, icon: const Icon(Icons.add)),
           IconButton(onPressed: _load, icon: const Icon(Icons.refresh)),
         ],
       ),

@@ -1,5 +1,12 @@
 include: package:flutter_lints/flutter.yaml
 analyzer:
+  exclude:
+    - build/**
+    - dados_legados_kristal/**
+    - dist_final/**
+    - instalacao_local/**
+    - logs/**
+    - portal_web/**
   errors:
     prefer_const_constructors: ignore
     deprecated_member_use: ignore

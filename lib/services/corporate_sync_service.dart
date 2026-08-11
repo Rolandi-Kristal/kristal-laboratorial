@@ -4,7 +4,10 @@ import 'dart:io';
 import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import '../security/kristal_crypto_service.dart';
+import 'corporate_payload_crypto_service.dart';
 import 'database_service.dart';
+import 'lab_repository.dart';
 import 'server_config_service.dart';
 
 class CorporateSyncResult {
@@ -38,8 +41,11 @@ class CorporateSyncService {
     'cadebens_integracao',
     'atendimentos',
     'historico_exames_pacientes',
-    'equipment_connections'
+    'equipment_connections',
+    'equipment_test_mappings',
+    'equipment_messages'
   ];
+  final LabRepository _repository = LabRepository();
   bool _running = false;
 
   Future<void> ensureSchema() async {
@@ -140,12 +146,40 @@ class CorporateSyncService {
       var deleted = row['operation'] == 'DELETE';
       Map<String, Object?> payload = {'id': id};
       if (!deleted) {
-        final found =
-            await db.query(table, where: 'id=?', whereArgs: [id], limit: 1);
-        if (found.isEmpty) {
+        final Map<String, dynamic>? found =
+            await _repository.findById(table, id);
+        if (found == null) {
           deleted = true;
         } else {
-          payload = Map.from(found.first);
+          final Map<String, Object?> material =
+              Map<String, Object?>.from(found);
+          if (table == 'laudos' &&
+              found['status']?.toString().toUpperCase() == 'LIBERADO') {
+            final String path = found['arquivoPath']?.toString().trim() ?? '';
+            if (path.isNotEmpty) {
+              final File report = File(path);
+              if (!await report.exists()) {
+                throw StateError('PDF liberado não encontrado: $path');
+              }
+              final int size = await report.length();
+              if (size <= 0 || size > 15 * 1024 * 1024) {
+                throw StateError('PDF liberado fora do limite de 15 MB.');
+              }
+              final List<int> bytes = await report.readAsBytes();
+              if (bytes.length < 5 ||
+                  utf8.decode(bytes.sublist(0, 5)) != '%PDF-') {
+                throw const FormatException(
+                    'Arquivo do laudo não é PDF válido.');
+              }
+              material['pdfBase64'] = base64Encode(bytes);
+              material['pdfSha256'] = sha256.convert(bytes).toString();
+            }
+          }
+          payload = await CorporatePayloadCryptoService.instance.seal(
+            recordId: id,
+            payload: material,
+            apiKey: key,
+          );
         }
       }
       final operation = '$client:$qid';
@@ -203,7 +237,7 @@ class CorporateSyncService {
         try {
           for (final raw in records) {
             if (raw is! Map) throw const FormatException('Registro inválido.');
-            await _apply(txn, Map<String, dynamic>.from(raw));
+            await _apply(txn, Map<String, dynamic>.from(raw), key);
           }
           version =
               int.tryParse(answer['next_version']?.toString() ?? '') ?? version;
@@ -218,7 +252,11 @@ class CorporateSyncService {
     return total;
   }
 
-  Future<void> _apply(Transaction txn, Map<String, dynamic> row) async {
+  Future<void> _apply(
+    Transaction txn,
+    Map<String, dynamic> row,
+    String apiKey,
+  ) async {
     final table = row['entity']?.toString() ?? '',
         id = row['record_id']?.toString() ?? '',
         raw = row['payload'];
@@ -234,10 +272,20 @@ class CorporateSyncService {
     if (sha256.convert(utf8.encode(material)).toString() != row['sha256']) {
       throw const FormatException('Hash inválido.');
     }
+    final Map<String, Object?> opened =
+        await CorporatePayloadCryptoService.instance.open(
+      recordId: id,
+      payload: payload,
+      apiKey: apiKey,
+    );
+    final Map<String, dynamic> encrypted =
+        await KristalCryptoService.instance.encryptSensitiveFields(
+      Map<String, dynamic>.from(opened),
+    );
     final info = await txn.rawQuery('PRAGMA table_info($table)');
     final columns = info.map((e) => e['name'].toString()).toSet();
     final data = <String, Object?>{
-      for (final e in payload.entries)
+      for (final e in encrypted.entries)
         if (columns.contains(e.key)) e.key: e.value
     };
     data['id'] = id;
@@ -321,7 +369,7 @@ class CorporateSyncService {
     final uri = Uri.tryParse(c.localServerUrl.trim());
     if (uri != null && uri.hasScheme && uri.host.isNotEmpty) return uri;
     return Uri(
-        scheme: 'http',
+        scheme: 'https',
         host: c.servidorLocalHost,
         port: int.tryParse(c.servidorLocalPorta) ?? 8787);
   }

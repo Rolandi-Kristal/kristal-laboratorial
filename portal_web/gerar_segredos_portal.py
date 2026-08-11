@@ -105,18 +105,10 @@ def main() -> None:
             lines.append(f'{key}={values[key]}')
         ENV_PATH.write_text('\n'.join(lines) + '\n', encoding='utf-8')
 
-    if not SECRET_FILE.exists():
-        SECRET_FILE.write_text(
-            'KRISTAL LABORATORIAL - SEGREDOS INICIAIS\n'
-            'Guarde este arquivo em local seguro e restrito.\n'
-            'Nao envie este arquivo por e-mail, chat ou pasta compartilhada.\n\n'
-            f'Admin login: {values["KRISTAL_ADMIN_LOGIN"]}\n'
-            f'Superusuario senha: {values["KRISTAL_SUPERUSER_PASSWORD"]}\n'
-            f'API key: {values["KRISTAL_API_KEY"]}\n',
-            encoding='utf-8',
-        )
+    if SECRET_FILE.exists():
+        SECRET_FILE.unlink()
 
-    print('Segredos do portal verificados. Arquivo restrito: ' + str(SECRET_FILE))
+    print('Segredos do portal verificados no .env; nenhum arquivo auxiliar em texto aberto foi mantido.')
 
 
 if __name__ == '__main__':

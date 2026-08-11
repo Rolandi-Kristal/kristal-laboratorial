@@ -6,6 +6,7 @@ class LabExamDefinition {
     required this.material,
     required this.sireCode,
     required this.synonyms,
+    this.sireSubgroupCode = '',
     this.unit = '',
     this.reference = '',
     this.requiresFasting = false,
@@ -21,6 +22,7 @@ class LabExamDefinition {
   final String sector;
   final String material;
   final String sireCode;
+  final String sireSubgroupCode;
   final List<String> synonyms;
   final String unit;
   final String reference;
@@ -37,6 +39,7 @@ class LabExamDefinition {
     String? sector,
     String? material,
     String? sireCode,
+    String? sireSubgroupCode,
     List<String>? synonyms,
     String? unit,
     String? reference,
@@ -53,6 +56,7 @@ class LabExamDefinition {
       sector: sector ?? this.sector,
       material: material ?? this.material,
       sireCode: sireCode ?? this.sireCode,
+      sireSubgroupCode: sireSubgroupCode ?? this.sireSubgroupCode,
       synonyms: synonyms ?? this.synonyms,
       unit: unit ?? this.unit,
       reference: reference ?? this.reference,
@@ -72,6 +76,7 @@ class LabExamDefinition {
       'sector': sector,
       'material': material,
       'sireCode': sireCode,
+      'sireSubgroupCode': sireSubgroupCode,
       'synonyms': synonyms,
       'unit': unit,
       'reference': reference,
@@ -104,6 +109,7 @@ class LabExamDefinition {
       sector: json['sector']?.toString() ?? '',
       material: json['material']?.toString() ?? '',
       sireCode: json['sireCode']?.toString() ?? '',
+      sireSubgroupCode: json['sireSubgroupCode']?.toString() ?? '',
       synonyms: parsedSynonyms,
       unit: json['unit']?.toString() ?? '',
       reference: json['reference']?.toString() ?? '',

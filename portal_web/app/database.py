@@ -132,6 +132,7 @@ class Database:
                     id TEXT PRIMARY KEY,
                     mne TEXT NOT NULL,
                     codigo_sire TEXT,
+                    codigo_subgrupo_cbhpm TEXT,
                     nome TEXT NOT NULL,
                     setor TEXT,
                     material TEXT,
@@ -222,6 +223,11 @@ class Database:
                 conn,
                 table="pacientes",
                 columns={"identidade_militar": "TEXT"},
+            )
+            self._ensure_columns(
+                conn,
+                table="catalogo_exames",
+                columns={"codigo_subgrupo_cbhpm": "TEXT"},
             )
             self._ensure_columns(
                 conn,

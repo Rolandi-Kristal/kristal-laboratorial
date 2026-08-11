@@ -1,4 +1,4 @@
-# Cohospedagem com KRISTAL OPERACIONAL`r`n`r`n## Servidor real definido`r`n`r`n- IP: `10.4.169.64` `r`n- KRISTAL LABORATORIAL: `http://10.4.169.64:8787`
+# Cohospedagem com KRISTAL OPERACIONAL`r`n`r`n## Servidor real definido`r`n`r`n- IP: `10.4.169.64` `r`n- KRISTAL LABORATORIAL: `https://10.4.169.64:8787`
 
 A KRISTAL LABORATORIAL esta preparada para rodar no mesmo servidor da KRISTAL OPERACIONAL.
 
@@ -17,7 +17,7 @@ Exemplo:
 
 ```text
 http://IP_DO_SERVIDOR:PORTA_OPERACIONAL
-http://10.4.169.64:8787
+https://10.4.169.64:8787
 ```
 
 ## Isolamento

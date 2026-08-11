@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import '../core/app_constants.dart';
+import 'windows_data_protection_service.dart';
 
 class ServerConfig {
   const ServerConfig({
@@ -61,11 +62,16 @@ class ServerConfig {
   final String sireExternalPath;
 
   bool get isLocal => modo.toUpperCase() == 'LOCAL';
-  bool get isCloud => modo.toUpperCase() == 'NUVEM' || modo.toUpperCase() == 'CLOUD';
+  bool get isCloud =>
+      modo.toUpperCase() == 'NUVEM' || modo.toUpperCase() == 'CLOUD';
   bool get isNuvem => isCloud;
-  bool get isHybrid => modo.toUpperCase() == 'HIBRIDO' || modo.toUpperCase() == 'HÍBRIDO' || modo.toUpperCase() == 'HYBRID';
+  bool get isHybrid =>
+      modo.toUpperCase() == 'HIBRIDO' ||
+      modo.toUpperCase() == 'HÍBRIDO' ||
+      modo.toUpperCase() == 'HYBRID';
   bool get isHibrido => isHybrid;
-  bool get syncEnabledBool => syncEnabled == '1' || syncEnabled.toLowerCase() == 'true';
+  bool get syncEnabledBool =>
+      syncEnabled == '1' || syncEnabled.toLowerCase() == 'true';
   bool get usarCriptografiaBool =>
       usarCriptografia == '1' || usarCriptografia.toLowerCase() == 'true';
   bool get sincronizacaoAtivaBool =>
@@ -163,36 +169,48 @@ class ServerConfig {
     }
 
     final String mode = value('modo', value('connectionMode', 'LOCAL'));
-    final String host = value('servidorLocalHost', AppConstants.servidorLocalHost);
-    final String port = value('servidorLocalPorta', AppConstants.servidorLocalPorta);
+    final String host =
+        value('servidorLocalHost', AppConstants.servidorLocalHost);
+    final String port =
+        value('servidorLocalPorta', AppConstants.servidorLocalPorta);
     final String cloudUrl = value('cloudBaseUrl', value('nuvemBaseUrl', ''));
 
     return ServerConfig(
       modo: mode,
-      localDbPath: value('localDbPath', value('bancoLocalPath', AppConstants.bancoLocalPath)),
-      localBackupPath: value('localBackupPath', value('backupLocalPath', AppConstants.backupLocalPath)),
+      localDbPath: value(
+          'localDbPath', value('bancoLocalPath', AppConstants.bancoLocalPath)),
+      localBackupPath: value('localBackupPath',
+          value('backupLocalPath', AppConstants.backupLocalPath)),
       cloudBaseUrl: cloudUrl,
       cloudApiToken: value('cloudApiToken', value('nuvemApiKey', '')),
-      syncEnabled: _normalBool(value('syncEnabled', value('sincronizacaoAtiva', '1'))),
-      syncIntervalMinutes: value('syncIntervalMinutes', value('intervaloMinutos', '15')),
+      syncEnabled:
+          _normalBool(value('syncEnabled', value('sincronizacaoAtiva', '1'))),
+      syncIntervalMinutes:
+          value('syncIntervalMinutes', value('intervaloMinutos', '15')),
       lastSyncAt: value('lastSyncAt', value('ultimaSincronizacao', '')),
       observacao: value('observacao', ''),
-      bancoLocalPath: value('bancoLocalPath', value('localDbPath', AppConstants.bancoLocalPath)),
-      backupLocalPath: value('backupLocalPath', value('localBackupPath', AppConstants.backupLocalPath)),
+      bancoLocalPath: value(
+          'bancoLocalPath', value('localDbPath', AppConstants.bancoLocalPath)),
+      backupLocalPath: value('backupLocalPath',
+          value('localBackupPath', AppConstants.backupLocalPath)),
       servidorLocalHost: host,
       servidorLocalPorta: port,
       nuvemBaseUrl: value('nuvemBaseUrl', cloudUrl),
       nuvemApiKey: value('nuvemApiKey', value('cloudApiToken', '')),
       usarCriptografia: _normalBool(value('usarCriptografia', '1')),
-      sincronizacaoAtiva: _normalBool(value('sincronizacaoAtiva', value('syncEnabled', '1'))),
-      intervaloMinutos: value('intervaloMinutos', value('syncIntervalMinutes', '15')),
-      ultimaSincronizacao: value('ultimaSincronizacao', value('lastSyncAt', '')),
+      sincronizacaoAtiva:
+          _normalBool(value('sincronizacaoAtiva', value('syncEnabled', '1'))),
+      intervaloMinutos:
+          value('intervaloMinutos', value('syncIntervalMinutes', '15')),
+      ultimaSincronizacao:
+          value('ultimaSincronizacao', value('lastSyncAt', '')),
       connectionMode: value('connectionMode', mode),
-      localServerUrl: value('localServerUrl', 'http://$host:$port'),
+      localServerUrl: value('localServerUrl', 'https://$host:$port'),
       cloudServerUrl: value('cloudServerUrl', cloudUrl),
       portalUrl: value('portalUrl', AppConstants.portalPacienteUrl),
       sirePath: value('sirePath', AppConstants.kristalSireShortcutPath),
-      sireExternalPath: value('sireExternalPath', AppConstants.kristalSireExternalShortcutPath),
+      sireExternalPath: value(
+          'sireExternalPath', AppConstants.kristalSireExternalShortcutPath),
     );
   }
 
@@ -224,22 +242,43 @@ class ServerConfigService {
   }
 
   Future<ServerConfig> carregar() async {
-    final File file = File(AppConstants.serverConfigPath());
-
-    if (!await file.exists()) {
-      await salvar(config: ServerConfig.defaults);
-      return ServerConfig.defaults;
-    }
-
-    try {
-      final Object? decoded = jsonDecode(await file.readAsString());
-      if (decoded is Map<String, Object?>) {
-        return ServerConfig.fromJson(decoded);
+    for (final String path in AppConstants.serverConfigPaths()) {
+      final File file = File(path);
+      if (!await file.exists()) {
+        continue;
       }
-    } on FileSystemException {
-      return ServerConfig.defaults;
-    } on FormatException {
-      return ServerConfig.defaults;
+
+      try {
+        final Object? decoded = jsonDecode(await file.readAsString());
+        if (decoded is Map<String, Object?>) {
+          final ServerConfig config = ServerConfig.fromJson(decoded);
+          final String protectedApiKey =
+              decoded['apiKeyProtegida']?.toString().trim() ?? '';
+          if (protectedApiKey.isEmpty) {
+            return config;
+          }
+          try {
+            final String apiKey =
+                WindowsDataProtectionService.decryptMachineSecret(
+              protectedApiKey,
+            );
+            return config.copyWith(
+              cloudApiToken: apiKey,
+              nuvemApiKey: apiKey,
+            );
+          } on WindowsDataProtectionException catch (error) {
+            return config.copyWith(
+              cloudApiToken: '',
+              nuvemApiKey: '',
+              observacao: error.message,
+            );
+          }
+        }
+      } on FileSystemException {
+        continue;
+      } on FormatException {
+        continue;
+      }
     }
 
     return ServerConfig.defaults;

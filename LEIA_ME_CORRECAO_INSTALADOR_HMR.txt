@@ -1,20 +1,70 @@
-CORRECAO DO INSTALADOR KRISTAL LABORATORIAL - HMR
+INSTALACAO CORPORATIVA KRISTAL LABORATORIAL - HMR
 
-1. No servidor, encerre o instalador antigo com Ctrl+C.
-2. Copie INSTALAR_PRODUCAO_HMR_ADMIN.ps1 para:
-   D:\kristal_laboratorial\INSTALAR_PRODUCAO_HMR_ADMIN.ps1
-3. Abra o Windows PowerShell como Administrador.
-4. Execute:
+REQUISITOS
+- Executar o PowerShell como Administrador.
+- Servidor oficial: https://10.4.169.64:8787
+- Destino oficial no servidor e nas estacoes: D:\kristal_laboratorial
+- A chave API nunca deve ser escrita no comando, em texto aberto ou no Git.
+- Cada estacao deve informar explicitamente a conta Windows autorizada.
+- Instalar primeiro o servidor; depois instalar as estacoes com a CA publica gerada no servidor.
 
-   cd "D:\kristal_laboratorial"
-   powershell -NoProfile -ExecutionPolicy Bypass -File ".\INSTALAR_PRODUCAO_HMR_ADMIN.ps1" -Destino "D:\kristal_laboratorial" -ConfigurarServidor -CriarAtalhoDesktop
+SERVIDOR
+1. Extraia o pacote de producao em D:\kristal_laboratorial_atualizacao.
+2. Abra o PowerShell como Administrador.
+3. Entre na pasta extraida, onde existe INSTALAR_PRODUCAO_HMR_ADMIN.ps1.
+4. Execute, substituindo DOMINIO\usuario pela conta autorizada:
 
-5. Aguarde a mensagem:
-   KRISTAL LABORATORIAL instalada e atualizada com sucesso.
+powershell -NoProfile -ExecutionPolicy Bypass -File ".\INSTALAR_PRODUCAO_HMR_ADMIN.ps1" -Destino "D:\kristal_laboratorial" -ConfigurarServidor -CriarAtalhoDesktop -ServerUrl "https://10.4.169.64:8787" -AuthorizedWindowsUser "DOMINIO\usuario"
 
-6. Somente depois da mensagem de sucesso, carregue os dados:
+O instalador:
+- gera ou preserva a CA e o certificado TLS privado do servidor;
+- exige HTTPS em producao;
+- gera ou preserva a KRISTAL_API_KEY;
+- protege a credencial do aplicativo com Windows DPAPI LocalMachine;
+- instala o inicio automatico como SYSTEM;
+- instala o backup diario, com horario padrao de 23:00;
+- preserva bancos e historicos existentes durante atualizacoes.
 
-   powershell -NoProfile -ExecutionPolicy Bypass -File ".\scripts\CARREGAR_DADOS_OPERACIONAIS_LEGADOS_KRISTAL.ps1" -Root "D:\kristal_laboratorial"
+A CA publica para instalar nas estacoes sera criada em:
+D:\kristal_laboratorial\certificados\KRISTAL_HMR_CA.cer
 
-O instalador corrigido detecta origem e destino iguais, preserva os dados
-operacionais e impede a copia recursiva da pasta de backups.
+Nunca copie os arquivos .key.pem para uma estacao. Eles sao privados do servidor.
+
+ESTACAO HMR - PRIMEIRA INSTALACAO
+1. Copie o pacote e KRISTAL_HMR_CA.cer para a estacao.
+2. Abra o PowerShell como Administrador.
+3. Entre na pasta extraida e execute:
+
+powershell -NoProfile -ExecutionPolicy Bypass -File ".\INSTALAR_PRODUCAO_HMR_ADMIN.ps1" -Destino "D:\kristal_laboratorial" -CriarAtalhoDesktop -ServerUrl "https://10.4.169.64:8787" -TrustedCaCertificate ".\KRISTAL_HMR_CA.cer" -AuthorizedWindowsUser "DOMINIO\usuario"
+
+4. Quando solicitado, digite a mesma KRISTAL_API_KEY do servidor. A entrada nao aparece na tela.
+5. O instalador grava somente um blob DPAPI vinculado a maquina e restringe a leitura a SYSTEM, Administradores e a conta informada.
+
+ATUALIZACAO DE ESTACAO
+Repita o comando da estacao. A credencial DPAPI existente e preservada. Nunca copie server_config.json entre computadores; o blob DPAPI e vinculado a maquina que o criou.
+
+DADOS LEGADOS DOS RARS
+- Os RARs originais e SQLs extraidos ficam em dados_legados_kristal.
+- O pacote possui manifesto SHA-256 para verificar a integridade de cada arquivo.
+- A carga deve ser executada uma unica vez no servidor, depois da instalacao:
+
+powershell -NoProfile -ExecutionPolicy Bypass -File ".\scripts\CARREGAR_DADOS_OPERACIONAIS_LEGADOS_KRISTAL.ps1" -Root "D:\kristal_laboratorial"
+
+- Pacientes, catalogo, pedidos, amostras e resultados mapeados entram no banco operacional.
+- Toda linha SQL original tambem permanece na area bruta auditavel com hash SHA-256.
+- O banco corporativo e sincronizado automaticamente com as estacoes.
+- Os arquivos originais permanecem preservados para auditoria e reprocessamento.
+- Nunca execute dois processos de carga ao mesmo tempo.
+
+VALIDACAO OBRIGATORIA
+A instalacao so terminou quando aparecer:
+KRISTAL LABORATORIAL instalada e atualizada com sucesso.
+
+Em seguida, valide:
+- https://10.4.169.64:8787/health
+- certificado HTTPS confiavel e correspondente ao IP 10.4.169.64;
+- status de sincronizacao no aplicativo;
+- backup manual no menu Servidor;
+- horario automatico configurado;
+- contadores de pacientes, pedidos, amostras e resultados;
+- interfaceamento de cada equipamento homologado em bancada.

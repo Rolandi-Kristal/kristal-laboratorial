@@ -1,5 +1,5 @@
 param(
-  [string]$Root = 'D:\KRISTAL LABORATORIAL SISTEMA\kristal_laboratorial'
+  [string]$Root = 'D:\kristal_laboratorial'
 )
 
 $ErrorActionPreference = 'Stop'

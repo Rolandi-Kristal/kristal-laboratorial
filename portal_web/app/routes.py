@@ -22,6 +22,7 @@ from pydantic import BaseModel, Field
 from app.config import Settings
 from app.corporate_sync import CorporateSyncError, CorporateSyncStore
 from app.database import Database
+from app.portal_projection import PortalProjection, PortalProjectionError
 from app.security import SecurityService
 
 class SyncRecordInput(BaseModel):
@@ -46,6 +47,19 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
     app = FastAPI(title="KRISTAL LABORATORIAL Portal Web", version="1.0.0")
     corporate_sync = CorporateSyncStore(settings.corporate_db_path)
     corporate_sync.initialize()
+    portal_projection: PortalProjection | None = None
+    if len(settings.api_key.strip()) >= 32:
+        portal_projection = PortalProjection(
+            database=database,
+            api_key=settings.api_key,
+            storage_dir=settings.storage_dir,
+        )
+        portal_projection.initialize()
+        portal_projection.reconcile_corporate_database(settings.corporate_db_path)
+    elif settings.require_tls:
+        raise RuntimeError(
+            "KRISTAL_API_KEY deve possuir ao menos 32 caracteres no servidor de produção."
+        )
     static_dir = Path(__file__).resolve().parent.parent / "static"
     app.mount("/assets", StaticFiles(directory=static_dir / "assets"), name="assets")
 
@@ -528,7 +542,7 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
         with database.connect() as conn:
             rows = conn.execute(
                 """
-                SELECT id, mne, codigo_sire, nome, setor, material, metodo, unidade,
+                SELECT id, mne, codigo_sire, codigo_subgrupo_cbhpm, nome, setor, material, metodo, unidade,
                        referencia, valor_cheio, valor_indenizar_20, equipamento, ativo,
                        criado_em, atualizado_em
                 FROM catalogo_exames
@@ -546,6 +560,7 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
         auth: dict = Depends(admin_auth),
         id: Annotated[str | None, Form()] = None,
         codigo_sire: Annotated[str | None, Form()] = None,
+        codigo_subgrupo_cbhpm: Annotated[str | None, Form()] = None,
         setor: Annotated[str | None, Form()] = None,
         material: Annotated[str | None, Form()] = None,
         metodo: Annotated[str | None, Form()] = None,
@@ -570,13 +585,13 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
                 conn.execute(
                     """
                     INSERT INTO catalogo_exames (
-                        id, mne, codigo_sire, nome, setor, material, metodo, unidade,
+                        id, mne, codigo_sire, codigo_subgrupo_cbhpm, nome, setor, material, metodo, unidade,
                         referencia, valor_cheio, valor_indenizar_20, equipamento, ativo,
                         criado_em, atualizado_em
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
-                        catalogo_id, mne_clean, codigo_sire or "", nome_clean, setor or "",
+                        catalogo_id, mne_clean, codigo_sire or "", codigo_subgrupo_cbhpm or "", nome_clean, setor or "",
                         material or "", metodo or "", unidade or "", referencia or "",
                         _normalize_brl_or_400(valor_cheio or "0"), _normalize_brl_or_400(valor_indenizar_20 or "0"), equipamento or "",
                         ativo_clean, now, now,
@@ -587,13 +602,13 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
                 conn.execute(
                     """
                     UPDATE catalogo_exames
-                    SET mne = ?, codigo_sire = ?, nome = ?, setor = ?, material = ?, metodo = ?,
+                    SET mne = ?, codigo_sire = ?, codigo_subgrupo_cbhpm = ?, nome = ?, setor = ?, material = ?, metodo = ?,
                         unidade = ?, referencia = ?, valor_cheio = ?, valor_indenizar_20 = ?,
                         equipamento = ?, ativo = ?, atualizado_em = ?
                     WHERE id = ?
                     """,
                     (
-                        mne_clean, codigo_sire or "", nome_clean, setor or "", material or "",
+                        mne_clean, codigo_sire or "", codigo_subgrupo_cbhpm or "", nome_clean, setor or "", material or "",
                         metodo or "", unidade or "", referencia or "", _normalize_brl_or_400(valor_cheio or "0"),
                         _normalize_brl_or_400(valor_indenizar_20 or "0"), equipamento or "", ativo_clean, now, catalogo_id,
                     ),
@@ -900,8 +915,14 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
                 }
                 for item in request.records
             ]
-            return corporate_sync.push(client_id=request.client_id, records=records)
-        except CorporateSyncError as error:
+            result = corporate_sync.push(client_id=request.client_id, records=records)
+            if portal_projection is None:
+                raise PortalProjectionError(
+                    "Projeção do portal indisponível: KRISTAL_API_KEY inválida."
+                )
+            result["portal_projected"] = portal_projection.project(records)
+            return result
+        except (CorporateSyncError, PortalProjectionError) as error:
             raise HTTPException(status_code=400, detail=str(error)) from error
 
     @app.get("/api/server/sync/pull")
@@ -917,12 +938,43 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
                 since_version=since_version,
                 limit=limit,
             )
-        except CorporateSyncError as error:
+        except (CorporateSyncError, PortalProjectionError) as error:
             raise HTTPException(status_code=400, detail=str(error)) from error
 
     @app.get("/api/server/sync/status")
     def corporate_sync_status(_: None = Depends(api_auth)) -> dict[str, Any]:
         return corporate_sync.status()
+
+    @app.get("/api/server/sync/history")
+    def corporate_sync_history(
+        entity: str | None = Query(default=None),
+        record_id: str | None = Query(default=None, max_length=200),
+        limit: int = Query(default=100, ge=1, le=1000),
+        offset: int = Query(default=0, ge=0),
+        auth: dict = Depends(admin_auth),
+        _: None = Depends(api_auth),
+    ) -> dict[str, Any]:
+        try:
+            result = corporate_sync.history(
+                entity=entity,
+                record_id=record_id,
+                limit=limit,
+                offset=offset,
+            )
+            database.audit(
+                usuario=auth.get("login", "admin"),
+                acao="CONSULTAR_HISTORICO_SINCRONIZACAO",
+                tabela="corporate_sync_history",
+                registro_id=record_id or entity or "ALL",
+                detalhes=json.dumps(
+                    {"total": result["total"], "limit": limit, "offset": offset},
+                    ensure_ascii=False,
+                    sort_keys=True,
+                ),
+            )
+            return result
+        except (CorporateSyncError, PortalProjectionError) as error:
+            raise HTTPException(status_code=400, detail=str(error)) from error
 
     @app.get("/api/server/backup/config")
     def consultar_horario_backup(
@@ -946,8 +998,9 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
                 status_code=501,
                 detail="O agendamento automático requer o servidor Windows de produção.",
             )
-        script_path = Path(__file__).resolve().parent.parent / "instalar_backup_automatico_windows.ps1"
-        if not script_path.is_file():
+        try:
+            script_path = _resolve_operational_script("instalar_backup_automatico_windows.ps1")
+        except FileNotFoundError:
             raise HTTPException(status_code=500, detail="Instalador da tarefa de backup não encontrado.")
         powershell = shutil.which("powershell.exe")
         if not powershell:
@@ -989,10 +1042,18 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
 
     @app.get("/api/server/status")
     def server_status(_: None = Depends(api_auth)) -> dict[str, str]:
+        production_ready = (
+            settings.require_tls
+            and len(settings.api_key.strip()) >= 32
+            and len(settings.secret_key.strip()) >= 64
+            and bool(settings.sire_username.strip())
+            and bool(settings.sire_password.strip())
+            and portal_projection is not None
+        )
         return {
             "status": "ok",
             "app": "KRISTAL LABORATORIAL",
-            "fase": "PRODUCAO_CONFIGURAVEL",
+            "fase": "PRODUCAO" if production_ready else "PRODUCAO_PENDENTE_CONFIGURACAO",
             "db_path": settings.db_path,
             "storage_dir": settings.storage_dir,
             "backup_dir": settings.backup_dir,
@@ -1091,12 +1152,7 @@ def create_app(*, settings: Settings, database: Database) -> FastAPI:
             raise HTTPException(status_code=400, detail=f"procedimentos_json inválido: {error.msg}") from error
         if not isinstance(procedimentos, list) or not procedimentos:
             raise HTTPException(status_code=400, detail="procedimentos_json deve ser uma lista não vazia.")
-        for item in procedimentos:
-            if not isinstance(item, dict):
-                raise HTTPException(status_code=400, detail="Cada procedimento deve ser objeto JSON.")
-            for required_key in ("Codigo_CBHPM", "Codigo_SubGrupoCBHMP", "ValorUnitario", "Quantidade"):
-                if required_key not in item:
-                    raise HTTPException(status_code=400, detail=f"Campo obrigatório ausente: {required_key}.")
+        _validate_cdm_procedures(procedimentos)
 
         payload_bytes = json.dumps(procedimentos, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
         request_url = _sire_post_cdm_url(
@@ -1261,23 +1317,62 @@ def _procedimento_cdm_from_exame(*, database: Database, exame_nome: str, valor_b
     like = f"%{exame_nome.strip()}%"
     with database.connect() as conn:
         row = conn.execute("""
-            SELECT codigo_sire, valor_cheio
+            SELECT codigo_sire, codigo_subgrupo_cbhpm, valor_cheio
             FROM catalogo_exames
             WHERE ativo = '1' AND (nome LIKE ? OR mne LIKE ?)
             ORDER BY nome
             LIMIT 1
             """, (like, like)).fetchone()
-    if row is None or not str(row["codigo_sire"] or "").strip():
+    if (
+        row is None
+        or not str(row["codigo_sire"] or "").strip()
+        or not str(row["codigo_subgrupo_cbhpm"] or "").strip()
+    ):
         return None
     valor = _brl_to_float_text(valor_brl or str(row["valor_cheio"] or "0,00"))
-    return {"Codigo_CBHPM": str(row["codigo_sire"]).strip(), "Codigo_SubGrupoCBHMP": "", "ValorUnitario": valor, "Quantidade": 1}
+    return {
+        "Codigo_CBHPM": str(row["codigo_sire"]).strip(),
+        "Codigo_SubGrupoCBHMP": str(row["codigo_subgrupo_cbhpm"]).strip(),
+        "ValorUnitario": valor,
+        "Quantidade": 1,
+    }
 
 
 def _brl_to_float_text(value: str) -> str:
     clean = value.strip().replace("R$", "").replace(" ", "")
     if "," in clean:
         clean = clean.replace(".", "").replace(",", ".")
-    return f"{float(clean):.2f}"
+    try:
+        number = Decimal(clean).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    except InvalidOperation as error:
+        raise ValueError("Valor monetário inválido para o CDM.") from error
+    if number <= 0:
+        raise ValueError("ValorUnitario do CDM deve ser positivo.")
+    return format(number, ".2f")
+
+
+def _validate_cdm_procedures(procedures: list[object]) -> None:
+    for index, item in enumerate(procedures, start=1):
+        if not isinstance(item, dict):
+            raise HTTPException(status_code=400, detail=f"Procedimento {index} deve ser objeto JSON.")
+        for key in ("Codigo_CBHPM", "Codigo_SubGrupoCBHMP"):
+            if not str(item.get(key) or "").strip():
+                raise HTTPException(status_code=400, detail=f"Procedimento {index}: {key} é obrigatório.")
+        try:
+            value = Decimal(str(item.get("ValorUnitario") or "").replace(",", "."))
+        except InvalidOperation as error:
+            raise HTTPException(status_code=400, detail=f"Procedimento {index}: ValorUnitario inválido.") from error
+        if not value.is_finite() or value <= 0:
+            raise HTTPException(status_code=400, detail=f"Procedimento {index}: ValorUnitario deve ser positivo.")
+        quantity = item.get("Quantidade")
+        if isinstance(quantity, bool):
+            raise HTTPException(status_code=400, detail=f"Procedimento {index}: Quantidade inválida.")
+        try:
+            parsed_quantity = int(str(quantity))
+        except (TypeError, ValueError) as error:
+            raise HTTPException(status_code=400, detail=f"Procedimento {index}: Quantidade inválida.") from error
+        if parsed_quantity <= 0 or str(quantity).strip() != str(parsed_quantity):
+            raise HTTPException(status_code=400, detail=f"Procedimento {index}: Quantidade deve ser inteiro positivo.")
 
 
 def _registrar_cdm_pendente(*, database: Database, paciente_id: str, pedido_id: str, beneficiario_id: str, plano_interno_id: str, motivo: str, payload: dict[str, object]) -> None:
@@ -1531,6 +1626,21 @@ def _validate_backup_time(value: str) -> str:
         raise HTTPException(status_code=400, detail="O backup deve permanecer entre 18:00 e 03:59.")
     return f"{hour:02d}:{minute:02d}"
 
+
+def _resolve_operational_script(
+    script_name: str,
+    *,
+    search_roots: tuple[Path, ...] | None = None,
+) -> Path:
+    clean_name = script_name.strip()
+    if not clean_name or Path(clean_name).name != clean_name:
+        raise ValueError("Nome de script operacional inválido.")
+    roots = search_roots or (Path.cwd(), Path(__file__).resolve().parent.parent)
+    for root in roots:
+        candidate = root.resolve() / clean_name
+        if candidate.is_file():
+            return candidate
+    raise FileNotFoundError(clean_name)
 
 def _read_backup_schedule(*, settings: Settings) -> str:
     path = Path(settings.backup_schedule_file)

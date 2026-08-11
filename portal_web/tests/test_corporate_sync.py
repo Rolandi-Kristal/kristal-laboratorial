@@ -73,6 +73,36 @@ class CorporateSyncStoreTests(unittest.TestCase):
             self.store.push(client_id="ESTACAO-1", records=[record])
 
 
+    def test_history_preserves_every_changed_version(self) -> None:
+        self.store.push(client_id="ESTACAO-1", records=[self._record()])
+        self.store.push(
+            client_id="ESTACAO-1",
+            records=[self._record(operation="OP-2", name="Paciente Atualizado")],
+        )
+
+        status = self.store.status()
+        self.assertEqual(status["records"], 1)
+        self.assertEqual(status["history_records"], 2)
+        history = self.store.history(entity="pacientes", record_id="PAC-1")
+        self.assertEqual(history["total"], 2)
+        self.assertEqual(
+            [item["payload"]["nome"] for item in history["records"]],
+            ["Paciente Atualizado", "Paciente"],
+        )
+
+    def test_history_is_immutable_at_database_level(self) -> None:
+        self.store.push(client_id="ESTACAO-1", records=[self._record()])
+        with closing(self.store.connect()) as conn:
+            with self.assertRaises(sqlite3.IntegrityError):
+                conn.execute(
+                    "UPDATE corporate_sync_history SET deleted = 1 WHERE version = 1"
+                )
+            with self.assertRaises(sqlite3.IntegrityError):
+                conn.execute(
+                    "DELETE FROM corporate_sync_history WHERE version = 1"
+                )
+
+
 class BackupAndCurrencyTests(unittest.TestCase):
     def test_backup_window_accepts_evening_and_overnight(self) -> None:
         self.assertEqual(_validate_backup_time("23:00"), "23:00")

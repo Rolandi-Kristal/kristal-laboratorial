@@ -2,6 +2,7 @@ import 'audit_service.dart';
 import 'auth_service.dart';
 import 'lab_repository.dart';
 import 'laudo_hash_service.dart';
+import 'pdf_laudo_service.dart';
 
 class LaudoLiberacaoService {
   LaudoLiberacaoService._();
@@ -30,6 +31,9 @@ class LaudoLiberacaoService {
     final Map<String, dynamic> atualizado = Map<String, dynamic>.from(laudo);
     atualizado['status'] = 'LIBERADO';
     atualizado['liberadoEm'] = DateTime.now().toIso8601String();
+    atualizado['hash'] = LaudoHashService.gerarHash(atualizado);
+    atualizado['arquivoPath'] =
+        await PdfLaudoService.instance.salvarLaudoPdf(atualizado);
     atualizado['hash'] = LaudoHashService.gerarHash(atualizado);
 
     await _repo.upsert('laudos', atualizado);
@@ -61,6 +65,9 @@ class LaudoLiberacaoService {
     final Map<String, dynamic> atualizado = Map<String, dynamic>.from(laudo);
     atualizado['status'] = 'CANCELADO';
     atualizado['observacao'] = motivo;
+    atualizado['hash'] = LaudoHashService.gerarHash(atualizado);
+    atualizado['arquivoPath'] =
+        await PdfLaudoService.instance.salvarLaudoPdf(atualizado);
     atualizado['hash'] = LaudoHashService.gerarHash(atualizado);
 
     await _repo.upsert('laudos', atualizado);

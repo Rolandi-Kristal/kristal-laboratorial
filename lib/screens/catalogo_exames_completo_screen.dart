@@ -371,6 +371,7 @@ class _ExamDialogState extends State<_ExamDialog> {
   late final TextEditingController _sector;
   late final TextEditingController _material;
   late final TextEditingController _sireCode;
+  late final TextEditingController _sireSubgroupCode;
   late final TextEditingController _unit;
   late final TextEditingController _reference;
   late final TextEditingController _synonyms;
@@ -387,6 +388,8 @@ class _ExamDialogState extends State<_ExamDialog> {
     _sector = TextEditingController(text: exam?.sector ?? '');
     _material = TextEditingController(text: exam?.material ?? '');
     _sireCode = TextEditingController(text: exam?.sireCode ?? '');
+    _sireSubgroupCode =
+        TextEditingController(text: exam?.sireSubgroupCode ?? '');
     _unit = TextEditingController(text: exam?.unit ?? '');
     _reference = TextEditingController(text: exam?.reference ?? '');
     _synonyms = TextEditingController(text: exam?.synonyms.join('|') ?? '');
@@ -402,6 +405,7 @@ class _ExamDialogState extends State<_ExamDialog> {
     _sector.dispose();
     _material.dispose();
     _sireCode.dispose();
+    _sireSubgroupCode.dispose();
     _unit.dispose();
     _reference.dispose();
     _synonyms.dispose();
@@ -423,6 +427,7 @@ class _ExamDialogState extends State<_ExamDialog> {
               _field(_sector, 'Setor'),
               _field(_material, 'Material'),
               _field(_sireCode, 'Código SIRE'),
+              _field(_sireSubgroupCode, 'Subgrupo CBHPM'),
               _field(_unit, 'Unidade'),
               _field(_reference, 'Referência'),
               _field(_synonyms, 'Sinônimos separados por |'),
@@ -485,6 +490,7 @@ class _ExamDialogState extends State<_ExamDialog> {
         sector: _sector.text.trim(),
         material: _material.text.trim(),
         sireCode: _sireCode.text.trim(),
+        sireSubgroupCode: _sireSubgroupCode.text.trim(),
         synonyms: _synonyms.text
             .split('|')
             .map((String value) => value.trim())

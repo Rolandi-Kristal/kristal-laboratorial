@@ -82,6 +82,10 @@ senha admin.txt
 /exports/
 /certificados/
 /build/
+/dados_legados_kristal/
+/dist_final/
+/instalacao_local/
+/logs/
 /.dart_tool/
 portal_web/.env
 portal_web/.env.*

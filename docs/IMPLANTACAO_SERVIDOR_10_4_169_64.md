@@ -6,7 +6,7 @@ A KRISTAL LABORATORIAL deve ser instalada no mesmo computador servidor da KRISTA
 
 - IP do servidor: `10.4.169.64`
 - URL base da KRISTAL OPERACIONAL: `http://10.4.169.64`
-- URL base da KRISTAL LABORATORIAL: `http://10.4.169.64:8787`
+- URL base da KRISTAL LABORATORIAL: `https://10.4.169.64:8787`
 - Pasta da KRISTAL LABORATORIAL no servidor: `D:\kristal_laboratorial`
 - Pasta do servidor web LABORATORIAL: `D:\kristal_laboratorial\portal_web`
 - Porta LABORATORIAL padrao: `8787`
@@ -20,10 +20,10 @@ Nao copie arquivos da KRISTAL OPERACIONAL para dentro da pasta da LABORATORIAL.
 
 ## Enderecos finais
 
-- Portal do paciente: `http://10.4.169.64:8787`
-- Painel administrativo: `http://10.4.169.64:8787/admin.html`
-- Health check: `http://10.4.169.64:8787/health`
-- Status API protegido: `http://10.4.169.64:8787/api/server/status`
+- Portal do paciente: `https://10.4.169.64:8787`
+- Painel administrativo: `https://10.4.169.64:8787/admin.html`
+- Health check: `https://10.4.169.64:8787/health`
+- Status API protegido: `https://10.4.169.64:8787/api/server/status`
 
 ## Instalacao no servidor 10.4.169.64
 
@@ -92,6 +92,6 @@ powershell -ExecutionPolicy Bypass -File D:\kristal_laboratorial\portal_web\conf
 
 Na tela `Servidor / Nuvem` do aplicativo, configurar:
 
-- Servidor local: `http://10.4.169.64:8787`
-- Portal do paciente: `http://10.4.169.64:8787`
+- Servidor local: `https://10.4.169.64:8787`
+- Portal do paciente: `https://10.4.169.64:8787`
 - Chave API: usar `KRISTAL_API_KEY` gerada no `.env` do servidor.

@@ -31,10 +31,10 @@ KRISTAL_PORTAL_PORT=8787
 
 Substitua `10.4.169.64` pelo IP ja usado no apontamento do servidor operacional:
 
-- Portal do paciente: `http://10.4.169.64:8787`
-- Painel administrativo: `http://10.4.169.64:8787/admin.html`
-- Health check: `http://10.4.169.64:8787/health`
-- Status API protegido: `http://10.4.169.64:8787/api/server/status`
+- Portal do paciente: `https://10.4.169.64:8787`
+- Painel administrativo: `https://10.4.169.64:8787/admin.html`
+- Health check: `https://10.4.169.64:8787/health`
+- Status API protegido: `https://10.4.169.64:8787/api/server/status`
 
 ## Inicializacao do servidor KRISTAL LABORATORIAL
 

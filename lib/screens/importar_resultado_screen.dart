@@ -1,6 +1,11 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
 
+import 'package:flutter/material.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+
+import '../models/equipment_connection_config.dart';
 import '../services/auth_service.dart';
+import '../services/equipment_connection_service.dart';
 import '../services/result_import_service.dart';
 
 class ImportarResultadoScreen extends StatefulWidget {
@@ -12,15 +17,25 @@ class ImportarResultadoScreen extends StatefulWidget {
   });
 
   @override
-  State<ImportarResultadoScreen> createState() => _ImportarResultadoScreenState();
+  State<ImportarResultadoScreen> createState() =>
+      _ImportarResultadoScreenState();
 }
 
 class _ImportarResultadoScreenState extends State<ImportarResultadoScreen> {
   final TextEditingController entrada = TextEditingController();
   final TextEditingController saida = TextEditingController();
 
-  String protocolo = 'ASTM';
+  List<EquipmentConnectionConfig> equipments =
+      const <EquipmentConnectionConfig>[];
+  String? equipmentId;
   bool importing = false;
+  bool loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEquipments();
+  }
 
   @override
   void dispose() {
@@ -29,24 +44,46 @@ class _ImportarResultadoScreenState extends State<ImportarResultadoScreen> {
     super.dispose();
   }
 
+  Future<void> _loadEquipments() async {
+    final List<EquipmentConnectionConfig> data =
+        await EquipmentConnectionService.instance.listar();
+    final List<EquipmentConnectionConfig> active =
+        data.where((EquipmentConnectionConfig item) => item.isAtivo).toList();
+    if (!mounted) return;
+    setState(() {
+      equipments = active;
+      equipmentId = active.isEmpty ? null : active.first.id;
+      loading = false;
+    });
+  }
+
   Future<void> _importar() async {
     if (importing) return;
+    final EquipmentConnectionConfig? equipment =
+        equipments.where((item) => item.id == equipmentId).firstOrNull;
+    if (equipment == null) {
+      saida.text = 'Selecione um equipamento ativo e configurado.';
+      return;
+    }
 
     setState(() => importing = true);
-
     try {
       final Map<String, dynamic> resultado =
           await ResultImportService.instance.importarMensagem(
-        protocolo: protocolo,
+        equipmentId: equipment.id,
+        protocolo: equipment.protocolo,
         mensagem: entrada.text,
         usuario: widget.session.login,
       );
-
-      saida.text = resultado.entries
-          .map((MapEntry<String, dynamic> e) => '${e.key}: ${e.value}')
-          .join('\n');
-    } catch (e) {
-      saida.text = 'Erro ao importar: $e';
+      saida.text = const JsonEncoder.withIndent('  ').convert(resultado);
+    } on ArgumentError catch (error) {
+      saida.text = 'Entrada inválida: ${error.message}';
+    } on FormatException catch (error) {
+      saida.text = 'Mensagem incompatível: ${error.message}';
+    } on StateError catch (error) {
+      saida.text = 'Importação bloqueada: ${error.message}';
+    } on DatabaseException catch (error) {
+      saida.text = 'Falha ao persistir o resultado: $error';
     } finally {
       if (mounted) setState(() => importing = false);
     }
@@ -57,24 +94,36 @@ class _ImportarResultadoScreenState extends State<ImportarResultadoScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Importar Resultado de Equipamento'),
+        actions: <Widget>[
+          IconButton(
+            tooltip: 'Atualizar equipamentos',
+            onPressed: loading ? null : _loadEquipments,
+            icon: const Icon(Icons.refresh),
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(18),
         children: <Widget>[
           DropdownButtonFormField<String>(
-            value: protocolo,
+            value: equipmentId,
+            isExpanded: true,
             decoration: const InputDecoration(
-              labelText: 'Protocolo',
+              labelText: 'Equipamento e protocolo',
+              prefixIcon: Icon(Icons.precision_manufacturing),
               border: OutlineInputBorder(),
             ),
-            items: const <DropdownMenuItem<String>>[
-              DropdownMenuItem(value: 'ASTM', child: Text('ASTM')),
-              DropdownMenuItem(value: 'HL7', child: Text('HL7 ORU')),
-            ],
-            onChanged: (String? value) {
-              if (value == null) return;
-              setState(() => protocolo = value);
-            },
+            items: equipments
+                .map(
+                  (EquipmentConnectionConfig item) => DropdownMenuItem<String>(
+                    value: item.id,
+                    child: Text('${item.nome} • ${item.protocolo}'),
+                  ),
+                )
+                .toList(),
+            onChanged: loading
+                ? null
+                : (String? value) => setState(() => equipmentId = value),
           ),
           const SizedBox(height: 12),
           TextField(
@@ -82,13 +131,14 @@ class _ImportarResultadoScreenState extends State<ImportarResultadoScreen> {
             minLines: 8,
             maxLines: 14,
             decoration: const InputDecoration(
-              labelText: 'Mensagem recebida',
+              labelText: 'Mensagem recebida do equipamento',
               border: OutlineInputBorder(),
             ),
           ),
           const SizedBox(height: 12),
           ElevatedButton.icon(
-            onPressed: importing ? null : _importar,
+            onPressed:
+                importing || loading || equipments.isEmpty ? null : _importar,
             icon: importing
                 ? const SizedBox(
                     width: 18,
@@ -105,7 +155,7 @@ class _ImportarResultadoScreenState extends State<ImportarResultadoScreen> {
             minLines: 8,
             maxLines: 14,
             decoration: const InputDecoration(
-              labelText: 'Resultado importado',
+              labelText: 'Rastreabilidade da importação',
               border: OutlineInputBorder(),
             ),
           ),

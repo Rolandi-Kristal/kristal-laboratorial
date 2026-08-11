@@ -24,6 +24,9 @@ class Settings:
     corporate_db_path: str
     operational_db_path: str
     backup_schedule_file: str
+    tls_cert_file: str
+    tls_key_file: str
+    require_tls: bool
 
     @staticmethod
     def _load_env_file(path: str = ".env") -> None:
@@ -59,4 +62,8 @@ class Settings:
             corporate_db_path=os.getenv("KRISTAL_CORPORATE_DB_PATH", "../data/kristal_corporativo.db"),
             operational_db_path=os.getenv("KRISTAL_OPERATIONAL_DB_PATH", "../data/kristal_laboratorial.db"),
             backup_schedule_file=os.getenv("KRISTAL_BACKUP_SCHEDULE_FILE", "data/backup_schedule.json"),
+            tls_cert_file=os.getenv("KRISTAL_TLS_CERT_FILE", "").strip(),
+            tls_key_file=os.getenv("KRISTAL_TLS_KEY_FILE", "").strip(),
+            require_tls=os.getenv("KRISTAL_REQUIRE_TLS", "0").strip().lower()
+            in {"1", "sim", "true", "yes"},
         )

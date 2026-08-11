@@ -61,8 +61,8 @@ Servidor definido:
 
 - IP: `10.4.169.64`
 - Pasta: `D:\kristal_laboratorial`
-- Portal: `http://10.4.169.64:8787`
-- Admin: `http://10.4.169.64:8787/admin.html`
+- Portal: `https://10.4.169.64:8787`
+- Admin: `https://10.4.169.64:8787/admin.html`
 
 ## Chave API
 

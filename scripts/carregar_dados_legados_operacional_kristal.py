@@ -7,6 +7,7 @@ import json
 import re
 import sqlite3
 from collections.abc import Iterator
+from contextlib import closing
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -566,7 +567,7 @@ def import_result(conn: sqlite3.Connection, origem: str, table: str, row: dict[s
         "pedidoId": stable_id("PED", patient, exam),
         "amostraId": stable_id("AMO", patient, exam, sample),
         "exameId": stable_id("EXA", exam, exam),
-        "valor": normalize_money(value),
+        "valor": text(value),
         "unidade": text(row.get("Unidade") or row.get("unidade")),
         "referencia": text(row.get("Referencia") or row.get("referencia")),
         "critico": text(row.get("critico") or "NÃO"),
@@ -611,7 +612,7 @@ def load_sql_files(legacy_root: Path, operational_db: Path) -> LoadStats:
 
     operational_db.parent.mkdir(parents=True, exist_ok=True)
     stats = LoadStats(sql_files=len(sql_files))
-    with sqlite3.connect(operational_db) as conn:
+    with closing(sqlite3.connect(operational_db)) as conn:
         conn.execute("PRAGMA journal_mode=WAL")
         conn.execute("PRAGMA synchronous=NORMAL")
         ensure_schema(conn)
@@ -659,7 +660,7 @@ def write_manifest(path: Path, stats: LoadStats, operational_db: Path) -> None:
 
 def export_counts_csv(operational_db: Path, output: Path) -> None:
     tables = ["pacientes", "exames", "pedidos", "amostras", "resultados", "legacy_operational_manifest"]
-    with sqlite3.connect(operational_db) as conn, output.open("w", newline="", encoding="utf-8") as handle:
+    with closing(sqlite3.connect(operational_db)) as conn, output.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.writer(handle, delimiter=";")
         writer.writerow(["tabela", "total"])
         for table in tables:

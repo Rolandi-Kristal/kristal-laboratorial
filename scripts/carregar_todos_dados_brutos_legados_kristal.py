@@ -6,6 +6,7 @@ import json
 import re
 import sqlite3
 from collections.abc import Iterator
+from contextlib import closing
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -138,7 +139,10 @@ def row_to_dict(columns: list[str], values: list[str | None]) -> dict[str, str |
     return {column: values[index] if index < len(values) else None for index, column in enumerate(columns)}
 
 
-def iter_sql_inserts(sql_path: Path) -> Iterator[tuple[str, list[str], list[str | None]]]:
+def iter_sql_inserts(
+    sql_path: Path,
+    inherited_columns: dict[str, list[str]] | None = None,
+) -> Iterator[tuple[str, list[str], list[str | None]]]:
     insert_re = re.compile(
         r"INSERT\s+INTO\s+`?([^`\s(]+)`?\s*(?:\((.*?)\))?\s+VALUES\s*(.*)\s*;\s*$",
         re.IGNORECASE | re.DOTALL,
@@ -148,7 +152,7 @@ def iter_sql_inserts(sql_path: Path) -> Iterator[tuple[str, list[str], list[str 
         re.IGNORECASE | re.DOTALL,
     )
     statement: list[str] = []
-    columns_by_table: dict[str, list[str]] = {}
+    columns_by_table: dict[str, list[str]] = dict(inherited_columns or {})
     with sql_path.open("r", encoding="utf-8", errors="replace") as handle:
         for line in handle:
             stripped = line.strip()
@@ -177,6 +181,34 @@ def iter_sql_inserts(sql_path: Path) -> Iterator[tuple[str, list[str], list[str 
             for row in split_insert_values(insert_match.group(3)):
                 yield table, columns, row
 
+
+def load_schema_index(legacy_root: Path) -> dict[str, dict[str, list[str]]]:
+    index_path = legacy_root / "kristal_dados_legados.sqlite3"
+    if not index_path.is_file():
+        return {}
+    schemas: dict[str, dict[str, list[str]]] = {}
+    with closing(sqlite3.connect(index_path)) as connection:
+        rows = connection.execute(
+            "SELECT source_sha256, table_name, columns_json "
+            "FROM legacy_table_schemas ORDER BY id"
+        ).fetchall()
+    for source_sha256, table_name, columns_json in rows:
+        source_key = str(source_sha256).lower()[:16]
+        table = str(table_name).lower()
+        try:
+            decoded = json.loads(str(columns_json))
+        except json.JSONDecodeError as error:
+            raise RawLoadError(
+                f"Esquema JSON corrompido para {source_key}/{table}: {error}"
+            ) from error
+        if not isinstance(decoded, list) or not all(isinstance(item, str) for item in decoded):
+            raise RawLoadError(f"Esquema invalido para {source_key}/{table}.")
+        columns = [item for item in decoded if item]
+        existing = schemas.setdefault(source_key, {}).get(table)
+        if existing is not None and existing != columns:
+            raise RawLoadError(f"Esquemas divergentes para {source_key}/{table}.")
+        schemas[source_key][table] = columns
+    return schemas
 
 def ensure_schema(conn: sqlite3.Connection) -> None:
     conn.executescript(
@@ -219,7 +251,8 @@ def load_raw_rows(legacy_root: Path, operational_db: Path) -> RawStats:
     operational_db.parent.mkdir(parents=True, exist_ok=True)
     stats = RawStats(sql_files=len(sql_files))
     seen_tables: set[str] = set()
-    with sqlite3.connect(operational_db) as conn:
+    schemas = load_schema_index(legacy_root)
+    with closing(sqlite3.connect(operational_db)) as conn:
         conn.execute("PRAGMA journal_mode=WAL")
         conn.execute("PRAGMA synchronous=NORMAL")
         ensure_schema(conn)
@@ -229,7 +262,8 @@ def load_raw_rows(legacy_root: Path, operational_db: Path) -> RawStats:
             if origem in done:
                 continue
             line_index = 0
-            for table, columns, values in iter_sql_inserts(sql_path):
+            inherited = schemas.get(sql_path.parent.name.lower(), {})
+            for table, columns, values in iter_sql_inserts(sql_path, inherited):
                 line_index += 1
                 row = row_to_dict(columns, values)
                 payload_json = json.dumps(row, ensure_ascii=False, sort_keys=True)

@@ -1,5 +1,9 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:path/path.dart' as p;
 import 'package:printing/printing.dart';
 
 import '../core/app_constants.dart';
@@ -10,8 +14,26 @@ class PdfLaudoService {
 
   static final PdfLaudoService instance = PdfLaudoService._();
 
-  Future<void> gerarLaudoPdf(Map<String, dynamic> laudo) async {
-    final pw.Document doc = pw.Document();
+  Future<Uint8List> gerarBytes(Map<String, dynamic> laudo) async {
+    final String windowsDirectory =
+        Platform.environment['WINDIR']?.trim() ?? r'C:\Windows';
+    final File regularFile =
+        File(p.join(windowsDirectory, 'Fonts', 'arial.ttf'));
+    final File boldFile =
+        File(p.join(windowsDirectory, 'Fonts', 'arialbd.ttf'));
+    if (!await regularFile.exists() || !await boldFile.exists()) {
+      throw StateError(
+        'Fontes Unicode Arial não encontradas no Windows. A geração do laudo foi interrompida.',
+      );
+    }
+    final Uint8List regularBytes = await regularFile.readAsBytes();
+    final Uint8List boldBytes = await boldFile.readAsBytes();
+    final pw.Document doc = pw.Document(
+      theme: pw.ThemeData.withFont(
+        base: pw.Font.ttf(ByteData.sublistView(regularBytes)),
+        bold: pw.Font.ttf(ByteData.sublistView(boldBytes)),
+      ),
+    );
     final String hash = LaudoHashService.gerarHash(laudo);
     final String codigo = LaudoHashService.gerarCodigoValidacao(laudo);
 
@@ -133,6 +155,29 @@ class PdfLaudoService {
       ),
     );
 
-    await Printing.layoutPdf(onLayout: (_) async => doc.save());
+    return doc.save();
+  }
+
+  Future<String> salvarLaudoPdf(Map<String, dynamic> laudo) async {
+    final String id = laudo['id']?.toString().trim() ?? '';
+    if (id.isEmpty || RegExp(r'[^A-Za-z0-9._-]').hasMatch(id)) {
+      throw ArgumentError('ID do laudo inválido para geração do PDF.');
+    }
+    final Uint8List bytes = await gerarBytes(laudo);
+    if (bytes.length < 5 || String.fromCharCodes(bytes.take(5)) != '%PDF-') {
+      throw const FormatException('Gerador retornou conteúdo PDF inválido.');
+    }
+    final Directory directory = Directory(
+      p.join(AppConstants.dataDirectoryPath, 'laudos'),
+    );
+    await directory.create(recursive: true);
+    final File destination = File(p.join(directory.path, '$id.pdf'));
+    await destination.writeAsBytes(bytes, flush: true);
+    return destination.path;
+  }
+
+  Future<void> gerarLaudoPdf(Map<String, dynamic> laudo) async {
+    final Uint8List bytes = await gerarBytes(laudo);
+    await Printing.layoutPdf(onLayout: (_) async => bytes);
   }
 }

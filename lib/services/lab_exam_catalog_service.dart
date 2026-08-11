@@ -8,6 +8,7 @@ import '../core/app_constants.dart';
 import '../models/lab_exam_definition.dart';
 import 'audit_service.dart';
 import 'auth_service.dart';
+import 'database_service.dart';
 
 class LabExamCatalogImportResult {
   const LabExamCatalogImportResult({
@@ -420,8 +421,6 @@ class LabExamCatalogService {
         isCriticalTrackable: true),
   ];
 
-  List<LabExamDefinition>? _cache;
-
   Future<List<LabExamDefinition>> load({bool includeDeleted = false}) async {
     final List<LabExamDefinition> items = await _loadMerged();
     return items
@@ -471,7 +470,7 @@ class LabExamCatalogService {
     return items.where((LabExamDefinition exam) {
       final String text = _normalize(
         '${exam.code} ${exam.name} ${exam.sector} ${exam.material} '
-        '${exam.sireCode} ${exam.synonyms.join(' ')}',
+        '${exam.sireCode} ${exam.sireSubgroupCode} ${exam.synonyms.join(' ')}',
       );
       return text.contains(normalized);
     }).toList(growable: false);
@@ -504,6 +503,7 @@ class LabExamCatalogService {
       items.add(normalized);
     }
     await _saveAll(items);
+    await _persistExam(normalized);
     await _audit(session, 'SALVAR_CATALOGO_EXAME', code, name);
   }
 
@@ -655,6 +655,10 @@ class LabExamCatalogService {
           material: row['material'] ?? '',
           sireCode:
               row['codigosire'] ?? row['codigo_sire'] ?? row['sire'] ?? '',
+          sireSubgroupCode: row['codigosubgrupocbhpm'] ??
+              row['codigo_subgrupo_cbhpm'] ??
+              row['subgrupocbhpm'] ??
+              '',
           synonyms: (row['sinonimos'] ?? row['synonyms'] ?? '')
               .split('|')
               .map((String value) => value.trim())
@@ -723,13 +727,11 @@ class LabExamCatalogService {
     );
     items[index] = updated;
     await _saveAll(items);
+    await _persistExam(updated);
     await _audit(session, action, normalizedCode, updated.name);
   }
 
   Future<List<LabExamDefinition>> _loadMerged() async {
-    if (_cache != null) {
-      return List<LabExamDefinition>.from(_cache!);
-    }
     final Map<String, LabExamDefinition> byCode = <String, LabExamDefinition>{
       for (final LabExamDefinition exam in _seed) exam.code.toUpperCase(): exam,
     };
@@ -752,10 +754,29 @@ class LabExamCatalogService {
         }
       }
     }
+    final database = await DatabaseService.instance.database;
+    final rows = await database.query('exames');
+    for (final row in rows) {
+      final code = row['codigo']?.toString().trim() ?? '';
+      final name = row['nome']?.toString().trim() ?? '';
+      if (code.isEmpty || name.isEmpty) continue;
+      byCode[code.toUpperCase()] = LabExamDefinition(
+        code: code,
+        name: name,
+        sector: row['setor']?.toString() ?? '',
+        material: row['material']?.toString() ?? '',
+        sireCode: row['codigoSire']?.toString() ?? '',
+        sireSubgroupCode: row['codigoSubGrupoCbhpm']?.toString() ?? '',
+        synonyms: const <String>[],
+        unit: row['unidade']?.toString() ?? '',
+        reference: row['referencia']?.toString() ?? '',
+        active: row['ativo']?.toString() != '0',
+        updatedAt: row['criadoEm']?.toString() ?? '',
+      );
+    }
     final List<LabExamDefinition> merged = byCode.values.toList(growable: true)
       ..sort((LabExamDefinition a, LabExamDefinition b) =>
           a.name.compareTo(b.name));
-    _cache = merged;
     return List<LabExamDefinition>.from(merged);
   }
 
@@ -773,7 +794,42 @@ class LabExamCatalogService {
       ),
       encoding: utf8,
     );
-    _cache = normalized;
+  }
+
+  Future<void> _persistExam(LabExamDefinition exam) async {
+    final database = await DatabaseService.instance.database;
+    final rows = await database.query(
+      'exames',
+      columns: <String>['id'],
+      where: 'UPPER(codigo) = ?',
+      whereArgs: <Object?>[exam.code.toUpperCase()],
+      limit: 1,
+    );
+    final id = rows.isEmpty
+        ? 'EXAME-${sha256.convert(utf8.encode(exam.code.toUpperCase())).toString().substring(0, 24)}'
+        : rows.first['id'].toString();
+    final data = <String, Object?>{
+      'id': id,
+      'codigo': exam.code,
+      'nome': exam.name,
+      'setor': exam.sector,
+      'material': exam.material,
+      'metodo': '',
+      'referencia': exam.reference,
+      'ativo': exam.active && !exam.deleted ? '1' : '0',
+      'criadoEm': exam.updatedAt.isEmpty
+          ? DateTime.now().toIso8601String()
+          : exam.updatedAt,
+      'codigoSire': exam.sireCode,
+      'codigoSubGrupoCbhpm': exam.sireSubgroupCode,
+      'unidade': exam.unit,
+    };
+    if (rows.isEmpty) {
+      await database.insert('exames', data);
+    } else {
+      await database
+          .update('exames', data, where: 'id = ?', whereArgs: <Object?>[id]);
+    }
   }
 
   Future<File> _catalogFile() async {

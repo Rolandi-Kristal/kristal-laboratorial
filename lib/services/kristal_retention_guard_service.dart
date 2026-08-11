@@ -1,26 +1,15 @@
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import '../core/app_constants.dart';
+
 class KristalRetentionGuardService {
   KristalRetentionGuardService._();
 
   static final KristalRetentionGuardService instance =
       KristalRetentionGuardService._();
 
-  static const Set<String> protectedTables = <String>{
-    'pacientes',
-    'pedidos',
-    'amostras',
-    'resultados',
-    'laudos',
-    'historico_exames_pacientes',
-    'anexos',
-    'auditoria',
-    'etiquetas',
-    'faturamento',
-    'integracoes',
-    'equipamentos',
-    'worklists',
-  };
+  static final Set<String> protectedTables =
+      Set<String>.unmodifiable(AppConstants.protectedClinicalTables);
 
   Future<int> arquivarSemExcluir({
     required Database database,

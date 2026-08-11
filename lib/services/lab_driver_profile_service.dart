@@ -42,7 +42,7 @@ class LabDriverProfile {
       'porta': '',
       'ip': '',
       'baudRate': '',
-      'ativo': '1',
+      'ativo': '0',
       'criadoEm': DateTime.now().toIso8601String(),
     };
   }
@@ -62,7 +62,7 @@ class LabDriverProfile {
       'arquivoDriver': arquivoDriver,
       'arquivoConfig': arquivoConfig,
       'observacao': observacao,
-      'status': 'CADASTRADO',
+      'status': 'PENDENTE_HOMOLOGACAO',
       'criadoEm': DateTime.now().toIso8601String(),
     };
   }

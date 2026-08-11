@@ -47,10 +47,7 @@ OBR|1|$sampleId||$exams
   }
 
   Map<String, dynamic> parseResultadoAstm(String raw) {
-    final List<String> lines = raw
-        .split(RegExp(r'[\r\n]+'))
-        .where((String e) => e.trim().isNotEmpty)
-        .toList();
+    final List<String> lines = _framedRecords(raw);
 
     final List<Map<String, String>> resultados = <Map<String, String>>[];
     String sampleId = '';
@@ -85,10 +82,7 @@ OBR|1|$sampleId||$exams
   }
 
   Map<String, dynamic> parseResultadoHl7(String raw) {
-    final List<String> lines = raw
-        .split(RegExp(r'[\r\n]+'))
-        .where((String e) => e.trim().isNotEmpty)
-        .toList();
+    final List<String> lines = _framedRecords(raw);
 
     final List<Map<String, String>> resultados = <Map<String, String>>[];
     String sampleId = '';
@@ -208,5 +202,28 @@ OBR|1|$sampleId||$exams
     }
 
     return parseResultadoAstm(raw);
+  }
+
+  List<String> _framedRecords(String raw) {
+    if (raw.isEmpty) {
+      throw const FormatException('Mensagem de equipamento vazia.');
+    }
+    final List<String> records = <String>[];
+    for (final String chunk in raw.split(RegExp(r'[\r\n\x03\x04\x1c]+'))) {
+      String record = chunk
+          .replaceFirst(RegExp(r'^[\x00-\x1f]+'), '')
+          .replaceFirst(RegExp(r'[\x00-\x1f]+$'), '');
+      if (record.length >= 3 &&
+          RegExp(r'^[0-7][HPLORQCM]').hasMatch(record) &&
+          record[2] == '|') {
+        record = record.substring(1);
+      }
+      final bool astmRecord = record.length >= 2 && record[1] == '|';
+      final bool hl7Segment = RegExp(r'^[A-Z0-9]{3}\|').hasMatch(record);
+      if (astmRecord || hl7Segment) {
+        records.add(record);
+      }
+    }
+    return records;
   }
 }
