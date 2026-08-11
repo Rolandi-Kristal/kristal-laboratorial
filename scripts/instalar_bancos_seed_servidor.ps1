@@ -2,7 +2,8 @@ param(
   [Parameter(Mandatory = $true)][string]$PacoteRoot,
   [Parameter(Mandatory = $true)][string]$DestinoData,
   [Parameter(Mandatory = $true)][string]$BackupRoot,
-  [switch]$SubstituirExistentes
+  [switch]$SubstituirExistentes,
+  [switch]$SomenteCorporativo
 )
 
 Set-StrictMode -Version Latest
@@ -69,7 +70,13 @@ function Assert-Hash {
   }
 }
 
-foreach ($databaseName in @('kristal_laboratorial.db', 'kristal_corporativo.db')) {
+$databaseNames = if ($SomenteCorporativo) {
+  @('kristal_corporativo.db')
+} else {
+  @('kristal_laboratorial.db', 'kristal_corporativo.db')
+}
+
+foreach ($databaseName in $databaseNames) {
   $relativePath = 'data_seed\' + $databaseName
   $source = Join-Path $dataSeed $databaseName
   $destination = Join-Path $destinationRoot $databaseName

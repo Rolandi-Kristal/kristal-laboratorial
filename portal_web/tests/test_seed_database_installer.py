@@ -46,6 +46,7 @@ class SeedDatabaseInstallerTests(unittest.TestCase):
         backup: Path,
         *,
         replace: bool = False,
+        corporate_only: bool = False,
     ) -> subprocess.CompletedProcess[str]:
         command = [
             "powershell.exe",
@@ -63,6 +64,8 @@ class SeedDatabaseInstallerTests(unittest.TestCase):
         ]
         if replace:
             command.append("-SubstituirExistentes")
+        if corporate_only:
+            command.append("-SomenteCorporativo")
         return subprocess.run(command, check=False, capture_output=True, text=True)
 
     def test_installs_seed_when_database_does_not_exist(self) -> None:
@@ -114,6 +117,19 @@ class SeedDatabaseInstallerTests(unittest.TestCase):
             missing_backup = self._run(package, destination, backup, replace=True)
             self.assertNotEqual(missing_backup.returncode, 0)
             self.assertIn("Backup obrigatorio", missing_backup.stderr)
+
+    def test_installs_only_corporate_database_when_requested(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            package, destination, backup = self._environment(Path(temporary))
+            result = self._run(
+                package,
+                destination,
+                backup,
+                corporate_only=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue((destination / "kristal_corporativo.db").is_file())
+            self.assertFalse((destination / "kristal_laboratorial.db").exists())
 
 
 if __name__ == "__main__":
