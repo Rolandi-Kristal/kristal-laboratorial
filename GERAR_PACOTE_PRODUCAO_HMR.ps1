@@ -36,6 +36,12 @@ New-Item -ItemType Directory -Path $package -Force | Out-Null
 
 Copy-Directory -Source (Join-Path $compiled 'app_windows') -Destination (Join-Path $package 'app_windows')
 Copy-Directory -Source (Join-Path $compiled 'server_windows') -Destination (Join-Path $package 'server_windows')
+Copy-Directory -Source (Join-Path $compiled 'CERTIFICADO_INSTALACAO_MAQUINAS') -Destination (Join-Path $package 'CERTIFICADO_INSTALACAO_MAQUINAS')
+$certificateZip = Join-Path $compiled 'CERTIFICADO_INSTALACAO_MAQUINAS.zip'
+if (-not (Test-Path -LiteralPath $certificateZip -PathType Leaf)) {
+  throw "Pacote de certificado publico ausente: $certificateZip"
+}
+Copy-Item -LiteralPath $certificateZip -Destination (Join-Path $package 'CERTIFICADO_INSTALACAO_MAQUINAS.zip') -Force
 Copy-Directory -Source (Join-Path $project 'portal_web') -Destination (Join-Path $package 'portal_web') -Extra @(
   '/XF', '.env', '*.db', '*.sqlite', '*.sqlite3', '*.log', '*.pid',
   'SEGREDOS_INICIAIS_ADMIN.txt', 'senha admin.txt', '*.pyc',
