@@ -138,9 +138,11 @@ class _LeituraEtiquetaScreenState extends State<LeituraEtiquetaScreen> {
               border: OutlineInputBorder(),
             ),
             items: const <DropdownMenuItem<String>>[
-              DropdownMenuItem(value: 'LASER_USB', child: Text('Leitor laser/USB')),
+              DropdownMenuItem(
+                  value: 'LASER_USB', child: Text('Leitor laser/USB')),
               DropdownMenuItem(value: 'MANUAL', child: Text('Inserção manual')),
-              DropdownMenuItem(value: 'IMAGEM', child: Text('Imagem da etiqueta')),
+              DropdownMenuItem(
+                  value: 'IMAGEM', child: Text('Imagem da etiqueta')),
             ],
             onChanged: (String? value) {
               if (value == null) return;
@@ -148,20 +150,37 @@ class _LeituraEtiquetaScreenState extends State<LeituraEtiquetaScreen> {
             },
           ),
           const SizedBox(height: 12),
-          _field(controller: pacienteController, label: 'Paciente ID', icon: Icons.person),
+          _field(
+              controller: pacienteController,
+              label: 'Paciente ID',
+              icon: Icons.person),
           const SizedBox(height: 12),
-          _field(controller: pedidoController, label: 'Pedido ID', icon: Icons.assignment),
+          _field(
+              controller: pedidoController,
+              label: 'Pedido ID',
+              icon: Icons.assignment),
           const SizedBox(height: 12),
-          _field(controller: exameController, label: 'Exame ID', icon: Icons.biotech),
+          _field(
+              controller: exameController,
+              label: 'Exame ID',
+              icon: Icons.biotech),
           const SizedBox(height: 12),
-          _field(controller: imagemController, label: 'Caminho da imagem', icon: Icons.image),
+          _field(
+              controller: imagemController,
+              label: 'Caminho da imagem',
+              icon: Icons.image),
           const SizedBox(height: 12),
-          _field(controller: observacaoController, label: 'Observação', minLines: 2, maxLines: 4),
+          _field(
+              controller: observacaoController,
+              label: 'Observação',
+              minLines: 2,
+              maxLines: 4),
           const SizedBox(height: 18),
           ElevatedButton.icon(
             onPressed: salvando ? null : _salvar,
             icon: const Icon(Icons.save),
-            label: Text(salvando ? 'Salvando...' : 'Vincular etiqueta ao exame'),
+            label:
+                Text(salvando ? 'Salvando...' : 'Vincular etiqueta ao exame'),
           ),
         ],
       ),

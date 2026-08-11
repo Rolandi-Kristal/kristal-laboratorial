@@ -91,7 +91,9 @@ class KristalOperationalRecord {
     if (normalized == '1' || normalized == 'true' || normalized == 'sim') {
       return true;
     }
-    if (normalized == '0' || normalized == 'false' || normalized == 'não' ||
+    if (normalized == '0' ||
+        normalized == 'false' ||
+        normalized == 'não' ||
         normalized == 'nao') {
       return false;
     }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -58,12 +59,15 @@ class ServerConnectionService {
           port,
           timeout: const Duration(seconds: 3),
         );
-
         await socket.close();
         checks.add('Servidor local respondeu em $host:$port');
-      } catch (_) {
+      } on SocketException catch (error) {
         checks.add(
-          'Host/porta configurados, mas sem resposta no teste: $host:$port',
+          'Servidor local sem resposta em $host:$port: ${error.message}',
+        );
+      } on TimeoutException catch (error) {
+        checks.add(
+          'Tempo esgotado ao testar $host:$port: ${error.message ?? error}',
         );
       }
     }
@@ -84,7 +88,7 @@ class ServerConnectionService {
   Future<ServerConnectionResult> testarNuvem(ServerConfig config) async {
     final Uri? baseUri = Uri.tryParse(config.nuvemBaseUrl.trim());
 
-    if (baseUri == null || !baseUri.hasScheme || !baseUri.hasAuthority) {
+    if (baseUri == null || baseUri.scheme != 'https' || !baseUri.hasAuthority) {
       return const ServerConnectionResult(
         ok: false,
         message: 'URL da nuvem inválida.',
@@ -95,40 +99,50 @@ class ServerConnectionService {
       path: p.url.join(baseUri.path, 'health'),
     );
 
+    final HttpClient client = HttpClient()
+      ..connectionTimeout = const Duration(seconds: 8);
     try {
-      final HttpClient client = HttpClient()
-        ..connectionTimeout = const Duration(seconds: 8);
-
       final HttpClientRequest request = await client.getUrl(healthUri);
-
       if (config.nuvemApiKey.trim().isNotEmpty) {
         request.headers.set(
-          HttpHeaders.authorizationHeader,
-          'Bearer ${config.nuvemApiKey.trim()}',
+          'X-API-Key',
+          config.nuvemApiKey.trim(),
         );
       }
-
       final HttpClientResponse response = await request.close();
       final String body = await response.transform(utf8.decoder).join();
-
-      client.close(force: true);
-
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return ServerConnectionResult(
           ok: true,
           message: 'Nuvem respondeu HTTP ${response.statusCode}: $body',
         );
       }
-
       return ServerConnectionResult(
         ok: false,
         message: 'Nuvem respondeu HTTP ${response.statusCode}: $body',
       );
-    } catch (e) {
+    } on SocketException catch (error) {
       return ServerConnectionResult(
         ok: false,
-        message: 'Falha no teste de nuvem: $e',
+        message: 'Falha de rede no teste de nuvem: ${error.message}',
       );
+    } on HandshakeException catch (error) {
+      return ServerConnectionResult(
+        ok: false,
+        message: 'Falha TLS no teste de nuvem: ${error.message}',
+      );
+    } on HttpException catch (error) {
+      return ServerConnectionResult(
+        ok: false,
+        message: 'Falha HTTP no teste de nuvem: ${error.message}',
+      );
+    } on FormatException catch (error) {
+      return ServerConnectionResult(
+        ok: false,
+        message: 'Resposta inválida da nuvem: ${error.message}',
+      );
+    } finally {
+      client.close(force: true);
     }
   }
 
@@ -149,8 +163,8 @@ class ServerConnectionService {
       await backupDir.create(recursive: true);
     }
 
-    final String sourcePath =
-        await DatabaseExportSnapshotService.instance.exportarSnapshotCriptografado(
+    final String sourcePath = await DatabaseExportSnapshotService.instance
+        .exportarSnapshotCriptografado(
       usuario: usuario,
     );
 

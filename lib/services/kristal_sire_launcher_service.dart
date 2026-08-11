@@ -6,8 +6,10 @@ class KristalSireLauncherService {
   const KristalSireLauncherService();
 
   Future<bool> isKristalSireInstalled() async {
-    final bool shortcutExists = await File(AppConstants.kristalSireShortcutPath).exists();
-    final bool coreExists = await File(AppConstants.kristalSireCoreExecutablePath).exists();
+    final bool shortcutExists =
+        await File(AppConstants.kristalSireShortcutPath).exists();
+    final bool coreExists =
+        await File(AppConstants.kristalSireCoreExecutablePath).exists();
     return shortcutExists && coreExists;
   }
 
@@ -39,7 +41,8 @@ class KristalSireLauncherService {
     final Directory directory =
         Directory(AppConstants.kristalSireExportDirectoryPath);
     await directory.create(recursive: true);
-    await Process.run('explorer.exe', <String>[directory.path], runInShell: true);
+    await Process.run('explorer.exe', <String>[directory.path],
+        runInShell: true);
   }
 
   Future<void> _openShortcutOrCore({

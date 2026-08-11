@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../services/auth_service.dart';
 import '../services/seed_service.dart';
+import '../services/log_service.dart';
 
 class SeedScreen extends StatefulWidget {
   final AuthSession session;
@@ -41,12 +43,18 @@ class _SeedScreenState extends State<SeedScreen> {
         mensagem =
             'Base inicial instalada: exames básicos, equipamentos e materiais.';
       });
-    } catch (e) {
+    } on DatabaseException catch (e, stackTrace) {
+      await LogService.instance.error('SEED_DATABASE', e, stackTrace);
       if (!mounted) return;
-
-      setState(() {
-        mensagem = 'Erro ao instalar base inicial: $e';
-      });
+      setState(() => mensagem = 'Erro ao instalar base inicial: $e');
+    } on StateError catch (e, stackTrace) {
+      await LogService.instance.error('SEED_STATE', e, stackTrace);
+      if (!mounted) return;
+      setState(() => mensagem = 'Erro ao instalar base inicial: $e');
+    } on ArgumentError catch (e, stackTrace) {
+      await LogService.instance.error('SEED_INPUT', e, stackTrace);
+      if (!mounted) return;
+      setState(() => mensagem = 'Erro ao instalar base inicial: $e');
     } finally {
       if (mounted) setState(() => running = false);
     }

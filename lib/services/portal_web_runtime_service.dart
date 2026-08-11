@@ -11,8 +11,8 @@ class PortalWebRuntimeService {
 
   String get portalDir => p.join(Directory.current.path, 'portal_web');
   String get mainPath => p.join(portalDir, 'main.py');
-  String get urlPaciente => 'http://127.0.0.1:8787';
-  String get urlAdmin => 'http://127.0.0.1:8787/admin.html';
+  String get urlPaciente => 'https://127.0.0.1:8787';
+  String get urlAdmin => 'https://127.0.0.1:8787/admin.html';
 
   bool get isRunning => _process != null;
 
@@ -55,8 +55,12 @@ class PortalWebRuntimeService {
         return 'Portal web respondendo em /health.';
       }
       return 'Portal web respondeu HTTP ${response.statusCode}.';
-    } catch (e) {
-      return 'Portal web nao respondeu: $e';
+    } on SocketException catch (error) {
+      return 'Portal web sem conexão: ${error.message}';
+    } on HandshakeException catch (error) {
+      return 'Certificado TLS do portal não confiável: ${error.message}';
+    } on HttpException catch (error) {
+      return 'Falha HTTP no portal web: ${error.message}';
     } finally {
       client.close(force: true);
     }

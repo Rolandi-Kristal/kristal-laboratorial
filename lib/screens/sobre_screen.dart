@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../core/kristal_operational_rules.dart';
 
-
 import '../core/app_constants.dart';
 
 class SobreScreen extends StatelessWidget {

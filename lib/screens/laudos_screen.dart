@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../services/auth_service.dart';
 import '../services/lab_repository.dart';
 import '../services/laudo_automatico_service.dart';
 import '../services/laudo_liberacao_service.dart';
+import '../services/log_service.dart';
 import '../services/pdf_laudo_service.dart';
 
 class LaudosScreen extends StatefulWidget {
@@ -49,11 +53,17 @@ class _LaudosScreenState extends State<LaudosScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('$total laudo(s) gerado(s).')),
       );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Falha ao laudar exames: $e')),
-      );
+    } on DatabaseException catch (e, stackTrace) {
+      await _laudoFailure(
+          'AUTO_DATABASE', e, stackTrace, 'Falha ao laudar exames');
+    } on FileSystemException catch (e, stackTrace) {
+      await _laudoFailure('AUTO_FILE', e, stackTrace, 'Falha ao laudar exames');
+    } on StateError catch (e, stackTrace) {
+      await _laudoFailure(
+          'AUTO_STATE', e, stackTrace, 'Falha ao laudar exames');
+    } on ArgumentError catch (e, stackTrace) {
+      await _laudoFailure(
+          'AUTO_INPUT', e, stackTrace, 'Falha ao laudar exames');
     }
   }
 
@@ -65,12 +75,13 @@ class _LaudosScreenState extends State<LaudosScreen> {
       );
 
       await _load();
-    } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Falha ao liberar: $e')),
-      );
+    } on DatabaseException catch (e, stackTrace) {
+      await _laudoFailure(
+          'RELEASE_DATABASE', e, stackTrace, 'Falha ao liberar');
+    } on FileSystemException catch (e, stackTrace) {
+      await _laudoFailure('RELEASE_FILE', e, stackTrace, 'Falha ao liberar');
+    } on StateError catch (e, stackTrace) {
+      await _laudoFailure('RELEASE_STATE', e, stackTrace, 'Falha ao liberar');
     }
   }
 
@@ -111,12 +122,13 @@ class _LaudosScreenState extends State<LaudosScreen> {
           motivo: motivo.text.trim(),
         );
         await _load();
-      } catch (e) {
-        if (!mounted) return;
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Falha ao cancelar: $e')),
-        );
+      } on DatabaseException catch (e, stackTrace) {
+        await _laudoFailure(
+            'CANCEL_DATABASE', e, stackTrace, 'Falha ao cancelar');
+      } on FileSystemException catch (e, stackTrace) {
+        await _laudoFailure('CANCEL_FILE', e, stackTrace, 'Falha ao cancelar');
+      } on StateError catch (e, stackTrace) {
+        await _laudoFailure('CANCEL_STATE', e, stackTrace, 'Falha ao cancelar');
       }
     }
 
@@ -125,6 +137,19 @@ class _LaudosScreenState extends State<LaudosScreen> {
 
   Future<void> _gerarPdf(Map<String, dynamic> laudo) {
     return PdfLaudoService.instance.gerarLaudoPdf(laudo);
+  }
+
+  Future<void> _laudoFailure(
+    String operation,
+    Object error,
+    StackTrace stackTrace,
+    String message,
+  ) async {
+    await LogService.instance.error('LAUDO_$operation', error, stackTrace);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('$message: $error')),
+    );
   }
 
   @override

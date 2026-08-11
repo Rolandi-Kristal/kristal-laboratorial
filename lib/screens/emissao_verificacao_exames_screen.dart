@@ -101,7 +101,8 @@ class _EmissaoVerificacaoExamesScreenState
     final Map<String, dynamic> updated = Map<String, dynamic>.from(row);
     updated['status'] = 'CANCELADO';
     updated['observacao'] = 'Cancelado pela tela de emissao/verificacao.';
-    await repo.upsert(row['origem'] == 'laudo' ? 'laudos' : 'resultados', updated);
+    await repo.upsert(
+        row['origem'] == 'laudo' ? 'laudos' : 'resultados', updated);
     await _load();
   }
 
@@ -138,7 +139,8 @@ class _EmissaoVerificacaoExamesScreenState
             _barButton('Anexos', Icons.attach_file, _load),
             const Spacer(),
             _barButton('Ajuda', Icons.help, () {
-              setState(() => status = 'Selecione um exame para PDF ou verificacao.');
+              setState(
+                  () => status = 'Selecione um exame para PDF ou verificacao.');
             }),
           ],
         ),
@@ -236,7 +238,8 @@ class _EmissaoVerificacaoExamesScreenState
     return loading
         ? const Center(child: CircularProgressIndicator())
         : data.isEmpty
-            ? const Center(child: Text('Nenhum exame para emissao/verificacao.'))
+            ? const Center(
+                child: Text('Nenhum exame para emissao/verificacao.'))
             : SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: DataTable(
@@ -252,14 +255,17 @@ class _EmissaoVerificacaoExamesScreenState
                     return DataRow(
                       cells: <DataCell>[
                         DataCell(Text(guia.text.isEmpty ? '-' : guia.text)),
-                        DataCell(Text(row['exameId']?.toString().isNotEmpty == true
-                            ? row['exameId'].toString()
-                            : row['id']?.toString() ?? '')),
+                        DataCell(Text(
+                            row['exameId']?.toString().isNotEmpty == true
+                                ? row['exameId'].toString()
+                                : row['id']?.toString() ?? '')),
                         DataCell(Text(
                           '${row['pacienteId'] ?? ''} ${row['pedidoId'] ?? ''}',
                         )),
                         DataCell(Text(row['status']?.toString() ?? '')),
-                        DataCell(Text(row['valor']?.toString() ?? row['valorCheio']?.toString() ?? '')),
+                        DataCell(Text(row['valor']?.toString() ??
+                            row['valorCheio']?.toString() ??
+                            '')),
                         DataCell(
                           Wrap(
                             spacing: 6,

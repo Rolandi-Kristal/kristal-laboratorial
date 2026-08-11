@@ -22,26 +22,27 @@ class EquipamentoModel {
   });
 
   Map<String, dynamic> toMap() => {
-    'id': id,
-    'nome': nome,
-    'fabricante': fabricante,
-    'modelo': modelo,
-    'protocolo': protocolo,
-    'conexao': conexao,
-    'porta': porta,
-    'ip': ip,
-    'ativo': ativo,
-  };
+        'id': id,
+        'nome': nome,
+        'fabricante': fabricante,
+        'modelo': modelo,
+        'protocolo': protocolo,
+        'conexao': conexao,
+        'porta': porta,
+        'ip': ip,
+        'ativo': ativo,
+      };
 
-  factory EquipamentoModel.fromMap(Map<String, dynamic> map) => EquipamentoModel(
-    id: (map['id'] ?? '').toString(),
-    nome: (map['nome'] ?? '').toString(),
-    fabricante: (map['fabricante'] ?? '').toString(),
-    modelo: (map['modelo'] ?? '').toString(),
-    protocolo: (map['protocolo'] ?? '').toString(),
-    conexao: (map['conexao'] ?? '').toString(),
-    porta: (map['porta'] ?? '').toString(),
-    ip: (map['ip'] ?? '').toString(),
-    ativo: (map['ativo'] ?? '').toString(),
-  );
+  factory EquipamentoModel.fromMap(Map<String, dynamic> map) =>
+      EquipamentoModel(
+        id: (map['id'] ?? '').toString(),
+        nome: (map['nome'] ?? '').toString(),
+        fabricante: (map['fabricante'] ?? '').toString(),
+        modelo: (map['modelo'] ?? '').toString(),
+        protocolo: (map['protocolo'] ?? '').toString(),
+        conexao: (map['conexao'] ?? '').toString(),
+        porta: (map['porta'] ?? '').toString(),
+        ip: (map['ip'] ?? '').toString(),
+        ativo: (map['ativo'] ?? '').toString(),
+      );
 }

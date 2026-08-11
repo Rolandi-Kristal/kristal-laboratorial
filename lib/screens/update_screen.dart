@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../services/auth_service.dart';
 import '../services/update_service.dart';
+import '../services/log_service.dart';
 
 class UpdateScreen extends StatefulWidget {
   final AuthSession session;
@@ -67,12 +71,18 @@ class _UpdateScreenState extends State<UpdateScreen> {
       });
 
       await _load();
-    } catch (e) {
+    } on FileSystemException catch (e, stackTrace) {
+      await LogService.instance.error('UPDATE_PACKAGE_FILE', e, stackTrace);
       if (!mounted) return;
-
-      setState(() {
-        mensagem = 'Erro ao registrar pacote: $e';
-      });
+      setState(() => mensagem = 'Erro ao registrar pacote: $e');
+    } on StateError catch (e, stackTrace) {
+      await LogService.instance.error('UPDATE_PACKAGE_STATE', e, stackTrace);
+      if (!mounted) return;
+      setState(() => mensagem = 'Erro ao registrar pacote: $e');
+    } on MissingPluginException catch (e, stackTrace) {
+      await LogService.instance.error('UPDATE_PACKAGE_PLUGIN', e, stackTrace);
+      if (!mounted) return;
+      setState(() => mensagem = 'Erro ao registrar pacote: $e');
     }
   }
 
@@ -132,7 +142,8 @@ class _UpdateScreenState extends State<UpdateScreen> {
                 child: ListTile(
                   leading: const Icon(Icons.archive),
                   title: Text('Versão: ${package.version}'),
-                  subtitle: Text('${package.path}\nRegistrado em: ${package.createdAt}'),
+                  subtitle: Text(
+                      '${package.path}\nRegistrado em: ${package.createdAt}'),
                   isThreeLine: true,
                 ),
               ),

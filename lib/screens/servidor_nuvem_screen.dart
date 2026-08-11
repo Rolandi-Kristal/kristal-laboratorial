@@ -62,7 +62,7 @@ class _ServidorNuvemScreenState extends State<ServidorNuvemScreen> {
         _mode = config.modo.isEmpty ? 'LOCAL' : config.modo;
         _localUrlController.text = config.localServerUrl.isNotEmpty
             ? config.localServerUrl
-            : 'http://${config.servidorLocalHost}:${config.servidorLocalPorta}';
+            : 'https://${config.servidorLocalHost}:${config.servidorLocalPorta}';
         _cloudUrlController.text = config.cloudServerUrl.isNotEmpty
             ? config.cloudServerUrl
             : config.nuvemBaseUrl;
@@ -116,9 +116,9 @@ class _ServidorNuvemScreenState extends State<ServidorNuvemScreen> {
     final ServerConfig current = await _currentConfig();
     final String localUrl = _localUrlController.text.trim();
 
-    if (!_isValidHttpUrl(localUrl)) {
+    if (!_isValidHttpsUrl(localUrl)) {
       setState(() {
-        _status = 'Servidor local inválido. Use http://IP:PORTA ou https://IP.';
+        _status = 'Servidor local inválido. Use https://IP:PORTA.';
       });
       return;
     }
@@ -131,7 +131,7 @@ class _ServidorNuvemScreenState extends State<ServidorNuvemScreen> {
         connectionMode: _mode,
         localServerUrl: localUrl,
         servidorLocalHost: uri.host,
-        servidorLocalPorta: uri.hasPort ? uri.port.toString() : '80',
+        servidorLocalPorta: uri.hasPort ? uri.port.toString() : '443',
       ),
     );
 
@@ -144,9 +144,9 @@ class _ServidorNuvemScreenState extends State<ServidorNuvemScreen> {
     final ServerConfig current = await _currentConfig();
     final String cloudUrl = _cloudUrlController.text.trim();
 
-    if (cloudUrl.isNotEmpty && !_isValidHttpUrl(cloudUrl)) {
+    if (cloudUrl.isNotEmpty && !_isValidHttpsUrl(cloudUrl)) {
       setState(() {
-        _status = 'Servidor em nuvem inválido. Use http:// ou https://.';
+        _status = 'Servidor em nuvem inválido. Use HTTPS.';
       });
       return;
     }
@@ -170,9 +170,9 @@ class _ServidorNuvemScreenState extends State<ServidorNuvemScreen> {
     final ServerConfig current = await _currentConfig();
     final String portalUrl = _portalUrlController.text.trim();
 
-    if (!_isValidHttpUrl(portalUrl)) {
+    if (!_isValidHttpsUrl(portalUrl)) {
       setState(() {
-        _status = 'Portal do paciente inválido. Use http:// ou https://.';
+        _status = 'Portal do paciente inválido. Use HTTPS.';
       });
       return;
     }
@@ -238,7 +238,7 @@ class _ServidorNuvemScreenState extends State<ServidorNuvemScreen> {
     }
 
     final String baseUrl = _localUrlController.text.trim();
-    if (!_isValidHttpUrl(baseUrl)) {
+    if (!_isValidHttpsUrl(baseUrl)) {
       setState(() {
         _status = 'URL do servidor local inválida.';
       });
@@ -362,7 +362,7 @@ class _ServidorNuvemScreenState extends State<ServidorNuvemScreen> {
   }
 
   Future<void> _testUrl({required String url, required String label}) async {
-    if (!_isValidHttpUrl(url)) {
+    if (!_isValidHttpsUrl(url)) {
       setState(() {
         _status = 'URL do $label inválida.';
       });
@@ -399,11 +399,11 @@ class _ServidorNuvemScreenState extends State<ServidorNuvemScreen> {
     }
   }
 
-  bool _isValidHttpUrl(String value) {
+  bool _isValidHttpsUrl(String value) {
     final Uri? uri = Uri.tryParse(value);
     return uri != null &&
         uri.hasScheme &&
-        (uri.scheme == 'http' || uri.scheme == 'https') &&
+        uri.scheme == 'https' &&
         uri.host.isNotEmpty;
   }
 

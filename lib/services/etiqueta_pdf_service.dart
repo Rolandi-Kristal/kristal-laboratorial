@@ -57,11 +57,13 @@ class EtiquetaPdfService {
                   drawText: false,
                 ),
                 pw.SizedBox(height: 4),
-                pw.Text('Paciente: $pacienteId', style: const pw.TextStyle(fontSize: 7)),
+                pw.Text('Paciente: $pacienteId',
+                    style: const pw.TextStyle(fontSize: 7)),
                 pw.Text('Pedido: $pedidoId | Exame: $exameId',
                     style: const pw.TextStyle(fontSize: 7)),
                 if (material.isNotEmpty)
-                  pw.Text('Material: $material', style: const pw.TextStyle(fontSize: 7)),
+                  pw.Text('Material: $material',
+                      style: const pw.TextStyle(fontSize: 7)),
               ],
             ),
           );

@@ -419,10 +419,20 @@ class SireIntegrationService {
     required String username,
     required String password,
   }) async {
-    final HttpClientRequest request = await _authorizedRequest(
-        method: 'GET', uri: uri, username: username, password: password);
-    final HttpClientResponse response = await request.close();
-    return _decodeObjectResponse(response);
+    final HttpClient client = HttpClient()
+      ..connectionTimeout = const Duration(seconds: 30);
+    try {
+      final HttpClientRequest request = await _authorizedRequest(
+        client: client,
+        method: 'GET',
+        uri: uri,
+        username: username,
+        password: password,
+      );
+      return _decodeObjectResponse(await request.close());
+    } finally {
+      client.close(force: true);
+    }
   }
 
   Future<Map<String, dynamic>> _postJson({
@@ -431,15 +441,26 @@ class SireIntegrationService {
     required String password,
     required Object body,
   }) async {
-    final HttpClientRequest request = await _authorizedRequest(
-        method: 'POST', uri: uri, username: username, password: password);
-    request.headers.contentType = ContentType.json;
-    request.write(jsonEncode(body));
-    final HttpClientResponse response = await request.close();
-    return _decodeObjectResponse(response);
+    final HttpClient client = HttpClient()
+      ..connectionTimeout = const Duration(seconds: 30);
+    try {
+      final HttpClientRequest request = await _authorizedRequest(
+        client: client,
+        method: 'POST',
+        uri: uri,
+        username: username,
+        password: password,
+      );
+      request.headers.contentType = ContentType.json;
+      request.write(jsonEncode(body));
+      return _decodeObjectResponse(await request.close());
+    } finally {
+      client.close(force: true);
+    }
   }
 
   Future<HttpClientRequest> _authorizedRequest({
+    required HttpClient client,
     required String method,
     required Uri uri,
     required String username,
@@ -448,8 +469,7 @@ class SireIntegrationService {
     if (username.trim().isEmpty || password.isEmpty) {
       throw ArgumentError('Usuário e senha do SIRE são obrigatórios.');
     }
-    final HttpClient client = HttpClient();
-    client.connectionTimeout = const Duration(seconds: 30);
+
     final HttpClientRequest request = await client.openUrl(method, uri);
     final String token =
         base64Encode(utf8.encode('${username.trim()}:$password'));

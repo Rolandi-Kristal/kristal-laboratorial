@@ -18,22 +18,22 @@ class ExameItemModel {
   });
 
   Map<String, dynamic> toMap() => {
-    'id': id,
-    'exameId': exameId,
-    'nome': nome,
-    'unidade': unidade,
-    'referencia': referencia,
-    'loinc': loinc,
-    'ordem': ordem,
-  };
+        'id': id,
+        'exameId': exameId,
+        'nome': nome,
+        'unidade': unidade,
+        'referencia': referencia,
+        'loinc': loinc,
+        'ordem': ordem,
+      };
 
   factory ExameItemModel.fromMap(Map<String, dynamic> map) => ExameItemModel(
-    id: (map['id'] ?? '').toString(),
-    exameId: (map['exameId'] ?? '').toString(),
-    nome: (map['nome'] ?? '').toString(),
-    unidade: (map['unidade'] ?? '').toString(),
-    referencia: (map['referencia'] ?? '').toString(),
-    loinc: (map['loinc'] ?? '').toString(),
-    ordem: (map['ordem'] ?? '').toString(),
-  );
+        id: (map['id'] ?? '').toString(),
+        exameId: (map['exameId'] ?? '').toString(),
+        nome: (map['nome'] ?? '').toString(),
+        unidade: (map['unidade'] ?? '').toString(),
+        referencia: (map['referencia'] ?? '').toString(),
+        loinc: (map['loinc'] ?? '').toString(),
+        ordem: (map['ordem'] ?? '').toString(),
+      );
 }

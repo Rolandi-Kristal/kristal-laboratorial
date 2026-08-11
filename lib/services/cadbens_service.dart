@@ -173,7 +173,8 @@ class CadbensService {
     ]);
 
     return <String, dynamic>{
-      'id': 'CADBENS-${cpf.isNotEmpty ? cpf : DateTime.now().microsecondsSinceEpoch}',
+      'id':
+          'CADBENS-${cpf.isNotEmpty ? cpf : DateTime.now().microsecondsSinceEpoch}',
       'pacienteId': '',
       'pacienteNome': _pick(raw, <String>['nome', 'paciente', 'beneficiario']),
       'cpf': cpf,

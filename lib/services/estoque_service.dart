@@ -8,7 +8,8 @@ class EstoqueService {
 
   final LabRepository _repo = LabRepository();
 
-  Future<void> salvarMaterial(Map<String, dynamic> material, {String usuario = 'SISTEMA'}) async {
+  Future<void> salvarMaterial(Map<String, dynamic> material,
+      {String usuario = 'SISTEMA'}) async {
     await _repo.upsert('materiais', material);
 
     await AuditService.instance.registrar(
@@ -20,7 +21,8 @@ class EstoqueService {
     );
   }
 
-  Future<void> salvarLote(Map<String, dynamic> lote, {String usuario = 'SISTEMA'}) async {
+  Future<void> salvarLote(Map<String, dynamic> lote,
+      {String usuario = 'SISTEMA'}) async {
     await _repo.upsert('estoque', lote);
 
     await AuditService.instance.registrar(
@@ -45,7 +47,8 @@ class EstoqueService {
     final List<Map<String, dynamic>> rows = await lotes();
 
     return rows.where((Map<String, dynamic> row) {
-      final DateTime? validade = DateTime.tryParse(row['validade']?.toString() ?? '');
+      final DateTime? validade =
+          DateTime.tryParse(row['validade']?.toString() ?? '');
       if (validade == null) return false;
       return validade.isBefore(limite);
     }).toList();

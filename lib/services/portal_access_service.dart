@@ -17,7 +17,11 @@ class PortalAccessService {
     required String pedidoId,
   }) {
     final String base = '$cpf|$pedidoId|KRISTAL_PORTAL';
-    return sha256.convert(utf8.encode(base)).toString().substring(0, 12).toUpperCase();
+    return sha256
+        .convert(utf8.encode(base))
+        .toString()
+        .substring(0, 12)
+        .toUpperCase();
   }
 
   Future<List<Map<String, dynamic>>> consultarLaudosLiberados({

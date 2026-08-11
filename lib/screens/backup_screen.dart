@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../services/auth_service.dart';
 import '../services/backup_restore_service.dart';
 import '../services/backup_scheduler_service.dart';
 import '../services/backup_service.dart';
+import '../services/log_service.dart';
 
 class BackupScreen extends StatefulWidget {
   final AuthSession session;
@@ -19,7 +23,8 @@ class BackupScreen extends StatefulWidget {
 
 class _BackupScreenState extends State<BackupScreen> {
   final TextEditingController restorePath = TextEditingController();
-  final TextEditingController intervaloHoras = TextEditingController(text: '24');
+  final TextEditingController intervaloHoras =
+      TextEditingController(text: '24');
 
   bool automatico = BackupSchedulerService.instance.enabled;
   String mensagem = 'Nenhum backup executado nesta sessão.';
@@ -66,7 +71,20 @@ class _BackupScreenState extends State<BackupScreen> {
       if (!mounted) return;
 
       setState(() => mensagem = 'Backup restaurado com sucesso.');
-    } catch (e) {
+    } on FileSystemException catch (e, stackTrace) {
+      await LogService.instance.error('BACKUP_RESTORE_FILE', e, stackTrace);
+      if (!mounted) return;
+      setState(() => mensagem = 'Falha ao restaurar: $e');
+    } on FormatException catch (e, stackTrace) {
+      await LogService.instance.error('BACKUP_RESTORE_FORMAT', e, stackTrace);
+      if (!mounted) return;
+      setState(() => mensagem = 'Falha ao restaurar: $e');
+    } on DatabaseException catch (e, stackTrace) {
+      await LogService.instance.error('BACKUP_RESTORE_DATABASE', e, stackTrace);
+      if (!mounted) return;
+      setState(() => mensagem = 'Falha ao restaurar: $e');
+    } on StateError catch (e, stackTrace) {
+      await LogService.instance.error('BACKUP_RESTORE_STATE', e, stackTrace);
       if (!mounted) return;
 
       setState(() => mensagem = 'Falha ao restaurar: $e');
@@ -112,7 +130,8 @@ class _BackupScreenState extends State<BackupScreen> {
                   const SizedBox(height: 12),
                   SwitchListTile(
                     title: const Text('Backup automático'),
-                    subtitle: const Text('Executa cópias criptografadas em segundo plano enquanto o app estiver aberto.'),
+                    subtitle: const Text(
+                        'Executa cópias criptografadas em segundo plano enquanto o app estiver aberto.'),
                     value: automatico,
                     onChanged: _toggleAutomatico,
                   ),

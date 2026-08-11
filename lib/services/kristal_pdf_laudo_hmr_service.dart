@@ -130,7 +130,8 @@ class KristalPdfLaudoHmrService {
     final String safeFileName = fileName ??
         'laudo_${patient.name.replaceAll(RegExp(r"[^a-zA-Z0-9]+"), "_")}_${DateTime.now().millisecondsSinceEpoch}.pdf';
 
-    final File file = File('$outputDirectory${Platform.pathSeparator}$safeFileName');
+    final File file =
+        File('$outputDirectory${Platform.pathSeparator}$safeFileName');
     await file.writeAsBytes(await document.save());
     return file;
   }
@@ -284,8 +285,7 @@ class KristalPdfLaudoHmrService {
     required ProfessionalSignatureModel signature,
     required pw.MemoryImage? signatureImage,
   }) {
-    if (signature.professionalName.trim().isEmpty &&
-        signatureImage == null) {
+    if (signature.professionalName.trim().isEmpty && signatureImage == null) {
       return pw.SizedBox(height: 62);
     }
 
@@ -294,7 +294,8 @@ class KristalPdfLaudoHmrService {
         mainAxisSize: pw.MainAxisSize.min,
         children: <pw.Widget>[
           if (signatureImage != null)
-            pw.Image(signatureImage, width: 120, height: 58, fit: pw.BoxFit.contain)
+            pw.Image(signatureImage,
+                width: 120, height: 58, fit: pw.BoxFit.contain)
           else
             pw.SizedBox(height: 58),
           pw.Container(width: 170, height: 0.6, color: PdfColors.black),
@@ -403,7 +404,8 @@ class KristalPdfLaudoHmrService {
       );
     }
 
-    return pw.Image(image, width: width, height: height, fit: pw.BoxFit.contain);
+    return pw.Image(image,
+        width: width, height: height, fit: pw.BoxFit.contain);
   }
 
   Future<pw.MemoryImage?> _loadImage(String path) async {

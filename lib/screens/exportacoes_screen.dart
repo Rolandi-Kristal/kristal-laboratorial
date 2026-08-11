@@ -1,7 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../services/auth_service.dart';
 import '../services/export_csv_service.dart';
+import '../services/log_service.dart';
 
 class ExportacoesScreen extends StatefulWidget {
   final AuthSession session;
@@ -51,12 +56,22 @@ class _ExportacoesScreenState extends State<ExportacoesScreen> {
       setState(() {
         mensagem = 'Arquivo CSV exportado em: $path';
       });
-    } catch (e) {
+    } on FileSystemException catch (e, stackTrace) {
+      await LogService.instance.error('CSV_EXPORT_FILE', e, stackTrace);
       if (!mounted) return;
-
-      setState(() {
-        mensagem = 'Erro ao exportar: $e';
-      });
+      setState(() => mensagem = 'Erro ao exportar: $e');
+    } on DatabaseException catch (e, stackTrace) {
+      await LogService.instance.error('CSV_EXPORT_DATABASE', e, stackTrace);
+      if (!mounted) return;
+      setState(() => mensagem = 'Erro ao exportar: $e');
+    } on ArgumentError catch (e, stackTrace) {
+      await LogService.instance.error('CSV_EXPORT_INPUT', e, stackTrace);
+      if (!mounted) return;
+      setState(() => mensagem = 'Erro ao exportar: $e');
+    } on MissingPluginException catch (e, stackTrace) {
+      await LogService.instance.error('CSV_EXPORT_PLUGIN', e, stackTrace);
+      if (!mounted) return;
+      setState(() => mensagem = 'Erro ao exportar: $e');
     } finally {
       if (mounted) {
         setState(() => exporting = false);

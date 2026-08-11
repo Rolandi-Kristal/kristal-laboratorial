@@ -22,26 +22,27 @@ class EstoqueItemModel {
   });
 
   Map<String, dynamic> toMap() => {
-    'id': id,
-    'nome': nome,
-    'categoria': categoria,
-    'lote': lote,
-    'validade': validade,
-    'quantidade': quantidade,
-    'minimo': minimo,
-    'unidade': unidade,
-    'fornecedor': fornecedor,
-  };
+        'id': id,
+        'nome': nome,
+        'categoria': categoria,
+        'lote': lote,
+        'validade': validade,
+        'quantidade': quantidade,
+        'minimo': minimo,
+        'unidade': unidade,
+        'fornecedor': fornecedor,
+      };
 
-  factory EstoqueItemModel.fromMap(Map<String, dynamic> map) => EstoqueItemModel(
-    id: (map['id'] ?? '').toString(),
-    nome: (map['nome'] ?? '').toString(),
-    categoria: (map['categoria'] ?? '').toString(),
-    lote: (map['lote'] ?? '').toString(),
-    validade: (map['validade'] ?? '').toString(),
-    quantidade: (map['quantidade'] ?? '').toString(),
-    minimo: (map['minimo'] ?? '').toString(),
-    unidade: (map['unidade'] ?? '').toString(),
-    fornecedor: (map['fornecedor'] ?? '').toString(),
-  );
+  factory EstoqueItemModel.fromMap(Map<String, dynamic> map) =>
+      EstoqueItemModel(
+        id: (map['id'] ?? '').toString(),
+        nome: (map['nome'] ?? '').toString(),
+        categoria: (map['categoria'] ?? '').toString(),
+        lote: (map['lote'] ?? '').toString(),
+        validade: (map['validade'] ?? '').toString(),
+        quantidade: (map['quantidade'] ?? '').toString(),
+        minimo: (map['minimo'] ?? '').toString(),
+        unidade: (map['unidade'] ?? '').toString(),
+        fornecedor: (map['fornecedor'] ?? '').toString(),
+      );
 }

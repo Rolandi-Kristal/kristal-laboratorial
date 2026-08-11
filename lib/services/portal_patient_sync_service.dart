@@ -22,7 +22,8 @@ class PortalPatientSyncService {
   static final PortalPatientSyncService instance = PortalPatientSyncService._();
 
   String get portalDbPath {
-    return p.join(Directory.current.path, 'portal_web', 'data', 'kristal_portal.db');
+    return p.join(
+        Directory.current.path, 'portal_web', 'data', 'kristal_portal.db');
   }
 
   String gerarCodigoAcesso() {

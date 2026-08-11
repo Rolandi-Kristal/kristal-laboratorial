@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 import '../core/kristal_operational_rules.dart';
 
 import 'package:flutter/services.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../core/app_constants.dart';
 import '../services/auth_service.dart';
+import '../services/log_service.dart';
 import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -95,32 +97,40 @@ class _LoginScreenState extends State<LoginScreen> with WindowListener {
       final bool maximized = await windowManager.isMaximized();
       if (!mounted) return;
       setState(() => _isMaximized = maximized);
-    } catch (_) {
-      // Mantém a tela funcional mesmo se a API nativa de janela não responder.
+    } on PlatformException catch (error, stackTrace) {
+      unawaited(LogService.instance.error('WINDOW_STATE', error, stackTrace));
+    } on MissingPluginException catch (error, stackTrace) {
+      unawaited(LogService.instance.error('WINDOW_STATE', error, stackTrace));
     }
   }
 
   Future<void> _minimizarJanela() async {
     try {
       await windowManager.minimize();
-    } catch (_) {
-      // Proteção para execução em ambiente sem suporte ao window_manager.
+    } on PlatformException catch (error, stackTrace) {
+      unawaited(
+          LogService.instance.error('WINDOW_MINIMIZE', error, stackTrace));
+    } on MissingPluginException catch (error, stackTrace) {
+      unawaited(
+          LogService.instance.error('WINDOW_MINIMIZE', error, stackTrace));
     }
   }
 
   Future<void> _maximizarOuRestaurarJanela() async {
     try {
       final bool maximized = await windowManager.isMaximized();
-
       if (maximized) {
         await windowManager.unmaximize();
       } else {
         await windowManager.maximize();
       }
-
       await _sincronizarEstadoJanela();
-    } catch (_) {
-      // Proteção para execução em ambiente sem suporte ao window_manager.
+    } on PlatformException catch (error, stackTrace) {
+      unawaited(
+          LogService.instance.error('WINDOW_MAXIMIZE', error, stackTrace));
+    } on MissingPluginException catch (error, stackTrace) {
+      unawaited(
+          LogService.instance.error('WINDOW_MAXIMIZE', error, stackTrace));
     }
   }
 
@@ -155,7 +165,12 @@ class _LoginScreenState extends State<LoginScreen> with WindowListener {
 
     try {
       await windowManager.close();
-    } catch (_) {
+    } on PlatformException catch (error, stackTrace) {
+      unawaited(LogService.instance.error('WINDOW_CLOSE', error, stackTrace));
+      if (!mounted) return;
+      SystemNavigator.pop();
+    } on MissingPluginException catch (error, stackTrace) {
+      unawaited(LogService.instance.error('WINDOW_CLOSE', error, stackTrace));
       if (!mounted) return;
       SystemNavigator.pop();
     }
@@ -246,15 +261,23 @@ class _LoginScreenState extends State<LoginScreen> with WindowListener {
         login: usuario,
         password: senha,
       );
-    } catch (e) {
+    } on DatabaseException catch (e, stackTrace) {
+      await LogService.instance.error('LOGIN_DATABASE', e, stackTrace);
       if (!mounted) return;
-
       setState(() {
         _carregando = false;
         _erro = 'Falha ao validar acesso: $e';
         _status = 'Erro de autenticação.';
       });
-
+      return;
+    } on StateError catch (e, stackTrace) {
+      await LogService.instance.error('LOGIN_STATE', e, stackTrace);
+      if (!mounted) return;
+      setState(() {
+        _carregando = false;
+        _erro = 'Falha ao validar acesso: $e';
+        _status = 'Erro de autenticação.';
+      });
       return;
     }
 

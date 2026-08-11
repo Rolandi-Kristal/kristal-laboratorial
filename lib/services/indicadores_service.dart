@@ -16,7 +16,8 @@ class IndicadoresService {
     final int laudos = await _repo.count('laudos');
     final int equipamentos = await _repo.count('equipamentos');
 
-    final List<Map<String, dynamic>> resultadosRows = await _repo.all('resultados');
+    final List<Map<String, dynamic>> resultadosRows =
+        await _repo.all('resultados');
     final int criticos = resultadosRows
         .where(
           (Map<String, dynamic> r) =>

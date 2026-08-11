@@ -64,7 +64,8 @@ class KristalIntegrationManifestService {
     return jsonDecode(content) as Map<String, dynamic>;
   }
 
-  Future<List<KristalIntegrationProfile>> listProfiles(String projectRoot) async {
+  Future<List<KristalIntegrationProfile>> listProfiles(
+      String projectRoot) async {
     final Map<String, dynamic> manifest = await readManifest(projectRoot);
     final Object? raw = manifest['modules'];
 
@@ -74,7 +75,8 @@ class KristalIntegrationManifestService {
 
     return raw
         .whereType<Map>()
-        .map((Map item) => KristalIntegrationProfile.fromMap(item.cast<String, dynamic>()))
+        .map((Map item) =>
+            KristalIntegrationProfile.fromMap(item.cast<String, dynamic>()))
         .toList();
   }
 }

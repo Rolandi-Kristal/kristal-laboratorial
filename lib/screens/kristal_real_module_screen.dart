@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-
 import '../core/app_constants.dart';
 import '../models/kristal_operational_record.dart';
 import '../services/kristal_operational_store_service.dart';
@@ -44,7 +43,8 @@ class KristalRealModuleScreen extends StatefulWidget {
   final String actionLabel;
 
   @override
-  State<KristalRealModuleScreen> createState() => _KristalRealModuleScreenState();
+  State<KristalRealModuleScreen> createState() =>
+      _KristalRealModuleScreenState();
 }
 
 class _KristalRealModuleScreenState extends State<KristalRealModuleScreen> {
@@ -162,7 +162,8 @@ class _KristalRealModuleScreenState extends State<KristalRealModuleScreen> {
     }
 
     setState(() {
-      _status = 'Registro movido para histórico permanente sem exclusão física.';
+      _status =
+          'Registro movido para histórico permanente sem exclusão física.';
     });
   }
 
@@ -297,15 +298,15 @@ class _KristalRealModuleScreenState extends State<KristalRealModuleScreen> {
             child: SingleChildScrollView(
               child: Column(
                 children: <Widget>[
-                  for (final KristalModuleField field in widget.fields) ...<Widget>[
+                  for (final KristalModuleField field
+                      in widget.fields) ...<Widget>[
                     TextField(
                       controller: _controllers[field.key],
                       maxLines: field.maxLines,
                       style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
-                        labelText: field.required
-                            ? '${field.label} *'
-                            : field.label,
+                        labelText:
+                            field.required ? '${field.label} *' : field.label,
                         prefixIcon: Icon(field.icon),
                         filled: true,
                         fillColor: const Color(0xFF071827),

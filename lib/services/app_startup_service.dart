@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'backup_scheduler_service.dart';
 import 'config_service.dart';
 import 'log_service.dart';
@@ -23,35 +26,42 @@ class AppStartupService {
 
     try {
       await SchemaMigrationService.instance.ensureSchema();
-
       await LogService.instance.info(
         'STARTUP',
         'Migração/verificação de schema concluída.',
       );
-    } catch (e, s) {
-      await LogService.instance.error('STARTUP_SCHEMA', e, s);
+    } on DatabaseException catch (error, stackTrace) {
+      await LogService.instance.error('STARTUP_SCHEMA', error, stackTrace);
+      rethrow;
+    } on FileSystemException catch (error, stackTrace) {
+      await LogService.instance.error('STARTUP_SCHEMA', error, stackTrace);
+      rethrow;
     }
 
     try {
       await SeedService.instance.instalarBaseInicial();
-
       await LogService.instance.info(
         'STARTUP',
         'Base inicial verificada/instalada.',
       );
-    } catch (e, s) {
-      await LogService.instance.error('STARTUP_SEED', e, s);
+    } on DatabaseException catch (error, stackTrace) {
+      await LogService.instance.error('STARTUP_SEED', error, stackTrace);
+      rethrow;
+    } on FileSystemException catch (error, stackTrace) {
+      await LogService.instance.error('STARTUP_SEED', error, stackTrace);
+      rethrow;
     }
 
     try {
       await ServerSyncService.instance.iniciar(usuario: 'SISTEMA');
-
       await LogService.instance.info(
         'STARTUP',
         'Sincronização corporativa em tempo real iniciada.',
       );
-    } catch (e, s) {
-      await LogService.instance.error('STARTUP_SYNC', e, s);
+    } on DatabaseException catch (error, stackTrace) {
+      await LogService.instance.error('STARTUP_SYNC', error, stackTrace);
+    } on FileSystemException catch (error, stackTrace) {
+      await LogService.instance.error('STARTUP_SYNC', error, stackTrace);
     }
 
     try {
@@ -63,13 +73,16 @@ class AppStartupService {
         enabled: true,
         horario: horarioBackup,
       );
-
       await LogService.instance.info(
         'STARTUP',
         'Backup automático diário ativado.',
       );
-    } catch (e, s) {
-      await LogService.instance.error('STARTUP_BACKUP', e, s);
+    } on DatabaseException catch (error, stackTrace) {
+      await LogService.instance.error('STARTUP_BACKUP', error, stackTrace);
+    } on FileSystemException catch (error, stackTrace) {
+      await LogService.instance.error('STARTUP_BACKUP', error, stackTrace);
+    } on FormatException catch (error, stackTrace) {
+      await LogService.instance.error('STARTUP_BACKUP', error, stackTrace);
     }
   }
 }

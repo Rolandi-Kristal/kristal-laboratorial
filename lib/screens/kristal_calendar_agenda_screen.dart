@@ -382,7 +382,9 @@ class _KristalCalendarAgendaScreenState
         ),
         Expanded(
           child: Text(
-            DateFormat('MMMM yyyy', 'pt_BR').format(_visibleMonth).toUpperCase(),
+            DateFormat('MMMM yyyy', 'pt_BR')
+                .format(_visibleMonth)
+                .toUpperCase(),
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: Colors.white,
@@ -451,8 +453,9 @@ class _KristalCalendarAgendaScreenState
               borderRadius: BorderRadius.circular(12),
               child: Container(
                 decoration: BoxDecoration(
-                  color:
-                      selected ? const Color(0xFF1F527C) : const Color(0xFF071827),
+                  color: selected
+                      ? const Color(0xFF1F527C)
+                      : const Color(0xFF071827),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: count > 0

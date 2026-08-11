@@ -1,7 +1,10 @@
-﻿import 'package:flutter/material.dart';
+import 'dart:io';
+
+import 'package:flutter/material.dart';
 
 import '../models/hematology_driver_profile.dart';
 import '../services/hematology_driver_registry_service.dart';
+import '../services/log_service.dart';
 import '../services/hematology_protocol_adapter_service.dart';
 
 class HematologyDriverCompatibilityScreen extends StatefulWidget {
@@ -42,16 +45,30 @@ class _HematologyDriverCompatibilityScreenState
 
     try {
       final List<HematologyDriverProfile> rows = await registry.loadProfiles();
-      final Map<String, Object?> validation = await registry.validateDriverPack();
+      final Map<String, Object?> validation =
+          await registry.validateDriverPack();
 
       if (!mounted) return;
 
       setState(() {
         profiles = rows;
         status =
-            'Perfis: ${rows.length}. Pacote copiado: ${validation['driverPackCopied']}. ExtraÃ­do: ${validation['driverPackExtracted']}.';
+            'Perfis: ${rows.length}. Pacote copiado: ${validation['driverPackCopied']}. Extraído: ${validation['driverPackExtracted']}.';
       });
-    } catch (error) {
+    } on FileSystemException catch (error, stackTrace) {
+      await LogService.instance.error(
+        'HEMATOLOGY_DRIVER_FILE',
+        error,
+        stackTrace,
+      );
+      if (!mounted) return;
+      setState(() => status = 'Falha ao carregar perfis: $error');
+    } on FormatException catch (error, stackTrace) {
+      await LogService.instance.error(
+        'HEMATOLOGY_DRIVER_FORMAT',
+        error,
+        stackTrace,
+      );
       if (!mounted) return;
       setState(() => status = 'Falha ao carregar perfis: $error');
     } finally {
@@ -81,7 +98,8 @@ class _HematologyDriverCompatibilityScreenState
             color: const Color(0xFF18344F),
             child: const Row(
               children: <Widget>[
-                Icon(Icons.bloodtype_rounded, color: Color(0xFF73D7FF), size: 34),
+                Icon(Icons.bloodtype_rounded,
+                    color: Color(0xFF73D7FF), size: 34),
                 SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -89,9 +107,15 @@ class _HematologyDriverCompatibilityScreenState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text('Compatibilidade Hematologia',
-                          style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900)),
-                      Text('Drivers 5100, 5180, 5300, 5380, ASTM, HL7, TCP/IP, COM e pasta monitorada',
-                          style: TextStyle(color: Color(0xFFB7D7F1), fontWeight: FontWeight.w700)),
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.w900)),
+                      Text(
+                          'Drivers 5100, 5180, 5300, 5380, ASTM, HL7, TCP/IP, COM e pasta monitorada',
+                          style: TextStyle(
+                              color: Color(0xFFB7D7F1),
+                              fontWeight: FontWeight.w700)),
                     ],
                   ),
                 ),
@@ -108,7 +132,8 @@ class _HematologyDriverCompatibilityScreenState
                         child: ListView.separated(
                           padding: const EdgeInsets.all(18),
                           itemCount: profiles.length,
-                          separatorBuilder: (_, __) => const SizedBox(height: 10),
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 10),
                           itemBuilder: (BuildContext context, int index) {
                             return profileCard(profiles[index]);
                           },
@@ -126,7 +151,8 @@ class _HematologyDriverCompatibilityScreenState
                                 maxLines: 14,
                                 style: const TextStyle(color: Colors.white),
                                 decoration: const InputDecoration(
-                                  labelText: 'Mensagem ASTM / HL7 / TXT / CSV do equipamento',
+                                  labelText:
+                                      'Mensagem ASTM / HL7 / TXT / CSV do equipamento',
                                   alignLabelWithHint: true,
                                   filled: true,
                                   fillColor: Color(0xFF071827),
@@ -136,7 +162,8 @@ class _HematologyDriverCompatibilityScreenState
                               const SizedBox(height: 12),
                               ElevatedButton.icon(
                                 onPressed: parseMessage,
-                                icon: const Icon(Icons.integration_instructions),
+                                icon:
+                                    const Icon(Icons.integration_instructions),
                                 label: const Text('Testar leitura da mensagem'),
                               ),
                               const SizedBox(height: 12),
@@ -147,12 +174,17 @@ class _HematologyDriverCompatibilityScreenState
                                   decoration: BoxDecoration(
                                     color: const Color(0xFF0D2033),
                                     borderRadius: BorderRadius.circular(14),
-                                    border: Border.all(color: const Color(0xFF244B6D)),
+                                    border: Border.all(
+                                        color: const Color(0xFF244B6D)),
                                   ),
                                   child: SingleChildScrollView(
                                     child: SelectableText(
-                                      parseResult.isEmpty ? 'Resultado do parser aparecerÃ¡ aqui.' : parseResult,
-                                      style: const TextStyle(color: Color(0xFFB7D7F1), fontFamily: 'monospace'),
+                                      parseResult.isEmpty
+                                          ? 'Resultado do parser aparecerá aqui.'
+                                          : parseResult,
+                                      style: const TextStyle(
+                                          color: Color(0xFFB7D7F1),
+                                          fontFamily: 'monospace'),
                                     ),
                                   ),
                                 ),
@@ -168,8 +200,10 @@ class _HematologyDriverCompatibilityScreenState
             width: double.infinity,
             padding: const EdgeInsets.all(8),
             color: const Color(0xFF06111D),
-            child: Text(status, textAlign: TextAlign.center,
-                style: const TextStyle(color: Color(0xFFFFC857), fontWeight: FontWeight.w800)),
+            child: Text(status,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    color: Color(0xFFFFC857), fontWeight: FontWeight.w800)),
           ),
         ],
       ),
@@ -188,10 +222,14 @@ class _HematologyDriverCompatibilityScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(profile.nome,
-              style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w900)),
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w900)),
           const SizedBox(height: 6),
           Text('Modelo: ${profile.modelo} | Setor: ${profile.setor}',
-              style: const TextStyle(color: Color(0xFFB7D7F1), fontWeight: FontWeight.w700)),
+              style: const TextStyle(
+                  color: Color(0xFFB7D7F1), fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
           Wrap(
             spacing: 6,

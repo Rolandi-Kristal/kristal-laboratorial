@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../models/historico_exame_paciente.dart';
 import '../services/auth_service.dart';
 import '../services/historico_exames_service.dart';
+import '../services/log_service.dart';
 
 class ConsultaExamesPacienteScreen extends StatefulWidget {
   final AuthSession session;
@@ -70,7 +72,12 @@ class _ConsultaExamesPacienteScreenState
         loading = false;
         status = '${result.length} exame(s) encontrado(s) no histórico.';
       });
-    } catch (e) {
+    } on DatabaseException catch (e, stackTrace) {
+      await LogService.instance.error(
+        'HISTORICO_EXAMES_CONSULTA',
+        e,
+        stackTrace,
+      );
       if (!mounted) return;
 
       setState(() {

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 import '../core/app_constants.dart';
 
 class DesenvolvedorSistemaScreen extends StatelessWidget {
@@ -14,7 +13,8 @@ class DesenvolvedorSistemaScreen extends StatelessWidget {
         children: <Widget>[
           _Header(
             title: 'Desenvolvedor / Sistema',
-            subtitle: 'Créditos, identidade, versão e dados técnicos do KRISTAL',
+            subtitle:
+                'Créditos, identidade, versão e dados técnicos do KRISTAL',
             icon: Icons.developer_board_rounded,
           ),
           Expanded(
@@ -45,16 +45,27 @@ class DesenvolvedorSistemaScreen extends StatelessWidget {
                           title: 'Dados do sistema',
                         ),
                         SizedBox(height: 14),
-                        _InfoRow(label: 'Sistema', value: 'KRISTAL LABORATORIAL'),
+                        _InfoRow(
+                            label: 'Sistema', value: 'KRISTAL LABORATORIAL'),
                         _InfoRow(
                           label: 'Descrição',
-                          value: 'Sistema Avançado Adaptativo para Laboratório de Análises Clínicas',
+                          value:
+                              'Sistema Avançado Adaptativo para Laboratório de Análises Clínicas',
                         ),
-                        _InfoRow(label: 'Instituição', value: 'Hospital Militar de Resende'),
+                        _InfoRow(
+                            label: 'Instituição',
+                            value: 'Hospital Militar de Resende'),
                         _InfoRow(label: 'Versão', value: '1.0.0+1'),
-                        _InfoRow(label: 'Plataforma principal', value: 'Windows'),
-                        _InfoRow(label: 'Modo operacional', value: 'Local, nuvem, portal e integrações por servidor'),
-                        _InfoRow(label: 'Retenção de dados', value: 'Permanente, com arquivamento lógico sem exclusão física'),
+                        _InfoRow(
+                            label: 'Plataforma principal', value: 'Windows'),
+                        _InfoRow(
+                            label: 'Modo operacional',
+                            value:
+                                'Local, nuvem, portal e integrações por servidor'),
+                        _InfoRow(
+                            label: 'Retenção de dados',
+                            value:
+                                'Permanente, com arquivamento lógico sem exclusão física'),
                       ],
                     ),
                   ),
@@ -68,11 +79,16 @@ class DesenvolvedorSistemaScreen extends StatelessWidget {
                           title: 'Princípios técnicos fixos',
                         ),
                         SizedBox(height: 14),
-                        _Bullet('Todos os dados clínicos e laboratoriais devem ser preservados permanentemente.'),
-                        _Bullet('Registros antigos devem ir para histórico, sem exclusão física.'),
-                        _Bullet('Rotas de servidor local, nuvem, portal e SIRE devem permanecer separadas.'),
-                        _Bullet('Menus e botões devem abrir telas reais e executar ações reais.'),
-                        _Bullet('Assinatura profissional e responsável técnico devem constar nos laudos quando cadastrados.'),
+                        _Bullet(
+                            'Todos os dados clínicos e laboratoriais devem ser preservados permanentemente.'),
+                        _Bullet(
+                            'Registros antigos devem ir para histórico, sem exclusão física.'),
+                        _Bullet(
+                            'Rotas de servidor local, nuvem, portal e SIRE devem permanecer separadas.'),
+                        _Bullet(
+                            'Menus e botões devem abrir telas reais e executar ações reais.'),
+                        _Bullet(
+                            'Assinatura profissional e responsável técnico devem constar nos laudos quando cadastrados.'),
                       ],
                     ),
                   ),
@@ -304,7 +320,8 @@ class _Bullet extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Icon(Icons.check_circle_rounded, color: Color(0xFF34D399), size: 18),
+          const Icon(Icons.check_circle_rounded,
+              color: Color(0xFF34D399), size: 18),
           const SizedBox(width: 8),
           Expanded(
             child: Text(

@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
 import '../services/server_config_service.dart';
 import '../services/server_connection_service.dart';
 import '../services/server_sync_service.dart';
+import '../services/log_service.dart';
+import '../services/windows_data_protection_service.dart';
 
 class ServidorConfigScreen extends StatefulWidget {
   final AuthSession session;
@@ -106,9 +110,13 @@ class _ServidorConfigScreenState extends State<ServidorConfigScreen> {
       if (!mounted) return;
 
       setState(() => status = 'Configuração do servidor salva.');
-    } catch (e) {
+    } on FileSystemException catch (e, stackTrace) {
+      await LogService.instance.error('SERVER_CONFIG_FILE', e, stackTrace);
       if (!mounted) return;
-
+      setState(() => status = 'Erro ao salvar: $e');
+    } on WindowsDataProtectionException catch (e, stackTrace) {
+      await LogService.instance.error('SERVER_CONFIG_DPAPI', e, stackTrace);
+      if (!mounted) return;
       setState(() => status = 'Erro ao salvar: $e');
     }
   }

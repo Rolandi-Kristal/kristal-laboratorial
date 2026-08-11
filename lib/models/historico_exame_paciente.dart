@@ -184,7 +184,8 @@ class HistoricoExamePaciente {
       coletadoEm: coletadoEm ?? this.coletadoEm,
       liberadoEm: liberadoEm ?? this.liberadoEm,
       medicoResponsavel: medicoResponsavel ?? this.medicoResponsavel,
-      profissionalResponsavel: profissionalResponsavel ?? this.profissionalResponsavel,
+      profissionalResponsavel:
+          profissionalResponsavel ?? this.profissionalResponsavel,
       equipamento: equipamento ?? this.equipamento,
       origem: origem ?? this.origem,
       loteBackup: loteBackup ?? this.loteBackup,

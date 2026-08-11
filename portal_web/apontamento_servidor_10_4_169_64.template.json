@@ -1,5 +1,5 @@
 {
-  "servidor_operacional_url": "http://10.4.169.64",
+  "servidor_operacional_url": "https://10.4.169.64",
   "kristal_laboratorial_url": "https://10.4.169.64:8787",
   "portal_paciente_url": "https://10.4.169.64:8787",
   "api_status_url": "https://10.4.169.64:8787/api/server/status",

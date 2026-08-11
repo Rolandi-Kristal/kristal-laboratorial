@@ -20,24 +20,24 @@ class CalibracaoModel {
   });
 
   Map<String, dynamic> toMap() => {
-    'id': id,
-    'equipamentoId': equipamentoId,
-    'tipo': tipo,
-    'resultado': resultado,
-    'responsavel': responsavel,
-    'realizadaEm': realizadaEm,
-    'proximaEm': proximaEm,
-    'observacao': observacao,
-  };
+        'id': id,
+        'equipamentoId': equipamentoId,
+        'tipo': tipo,
+        'resultado': resultado,
+        'responsavel': responsavel,
+        'realizadaEm': realizadaEm,
+        'proximaEm': proximaEm,
+        'observacao': observacao,
+      };
 
   factory CalibracaoModel.fromMap(Map<String, dynamic> map) => CalibracaoModel(
-    id: (map['id'] ?? '').toString(),
-    equipamentoId: (map['equipamentoId'] ?? '').toString(),
-    tipo: (map['tipo'] ?? '').toString(),
-    resultado: (map['resultado'] ?? '').toString(),
-    responsavel: (map['responsavel'] ?? '').toString(),
-    realizadaEm: (map['realizadaEm'] ?? '').toString(),
-    proximaEm: (map['proximaEm'] ?? '').toString(),
-    observacao: (map['observacao'] ?? '').toString(),
-  );
+        id: (map['id'] ?? '').toString(),
+        equipamentoId: (map['equipamentoId'] ?? '').toString(),
+        tipo: (map['tipo'] ?? '').toString(),
+        resultado: (map['resultado'] ?? '').toString(),
+        responsavel: (map['responsavel'] ?? '').toString(),
+        realizadaEm: (map['realizadaEm'] ?? '').toString(),
+        proximaEm: (map['proximaEm'] ?? '').toString(),
+        observacao: (map['observacao'] ?? '').toString(),
+      );
 }

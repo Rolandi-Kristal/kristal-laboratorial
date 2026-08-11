@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../services/atendimento_service.dart';
 import '../services/auth_service.dart';
 import '../services/lab_repository.dart';
+import '../services/log_service.dart';
 
 class NovoAtendimentoScreen extends StatefulWidget {
   final AuthSession session;
@@ -294,7 +296,16 @@ class _NovoAtendimentoScreenState extends State<NovoAtendimentoScreen> {
       );
       if (!mounted) return;
       _msg('Atendimento salvo com paciente, agendamento e pedido.');
-    } catch (e) {
+    } on DatabaseException catch (e, stackTrace) {
+      await LogService.instance.error('ATENDIMENTO_DATABASE', e, stackTrace);
+      if (!mounted) return;
+      _msg('Erro ao salvar atendimento: $e');
+    } on StateError catch (e, stackTrace) {
+      await LogService.instance.error('ATENDIMENTO_STATE', e, stackTrace);
+      if (!mounted) return;
+      _msg('Erro ao salvar atendimento: $e');
+    } on ArgumentError catch (e, stackTrace) {
+      await LogService.instance.error('ATENDIMENTO_INPUT', e, stackTrace);
       if (!mounted) return;
       _msg('Erro ao salvar atendimento: $e');
     } finally {

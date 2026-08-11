@@ -20,24 +20,25 @@ class ReagenteLoteModel {
   });
 
   Map<String, dynamic> toMap() => {
-    'id': id,
-    'nome': nome,
-    'fabricante': fabricante,
-    'lote': lote,
-    'validade': validade,
-    'abertoEm': abertoEm,
-    'quantidade': quantidade,
-    'status': status,
-  };
+        'id': id,
+        'nome': nome,
+        'fabricante': fabricante,
+        'lote': lote,
+        'validade': validade,
+        'abertoEm': abertoEm,
+        'quantidade': quantidade,
+        'status': status,
+      };
 
-  factory ReagenteLoteModel.fromMap(Map<String, dynamic> map) => ReagenteLoteModel(
-    id: (map['id'] ?? '').toString(),
-    nome: (map['nome'] ?? '').toString(),
-    fabricante: (map['fabricante'] ?? '').toString(),
-    lote: (map['lote'] ?? '').toString(),
-    validade: (map['validade'] ?? '').toString(),
-    abertoEm: (map['abertoEm'] ?? '').toString(),
-    quantidade: (map['quantidade'] ?? '').toString(),
-    status: (map['status'] ?? '').toString(),
-  );
+  factory ReagenteLoteModel.fromMap(Map<String, dynamic> map) =>
+      ReagenteLoteModel(
+        id: (map['id'] ?? '').toString(),
+        nome: (map['nome'] ?? '').toString(),
+        fabricante: (map['fabricante'] ?? '').toString(),
+        lote: (map['lote'] ?? '').toString(),
+        validade: (map['validade'] ?? '').toString(),
+        abertoEm: (map['abertoEm'] ?? '').toString(),
+        quantidade: (map['quantidade'] ?? '').toString(),
+        status: (map['status'] ?? '').toString(),
+      );
 }

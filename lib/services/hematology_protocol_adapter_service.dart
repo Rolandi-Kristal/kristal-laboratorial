@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 
 class HematologyProtocolAdapterService {
   HematologyProtocolAdapterService._();
@@ -10,7 +10,11 @@ class HematologyProtocolAdapterService {
     final String message = raw.trim();
 
     if (message.isEmpty) {
-      return <String, Object?>{'ok': false, 'tipo': 'VAZIO', 'erro': 'Mensagem vazia.'};
+      return <String, Object?>{
+        'ok': false,
+        'tipo': 'VAZIO',
+        'erro': 'Mensagem vazia.'
+      };
     }
 
     if (message.contains('MSH|') || message.contains('OBX|')) {
@@ -24,7 +28,9 @@ class HematologyProtocolAdapterService {
       return _parseAstm(message);
     }
 
-    if (message.contains(';') || message.contains(',') || message.contains('\t')) {
+    if (message.contains(';') ||
+        message.contains(',') ||
+        message.contains('\t')) {
       return _parseDelimited(message);
     }
 
@@ -54,7 +60,12 @@ class HematologyProtocolAdapterService {
       }
     }
 
-    return <String, Object?>{'ok': true, 'tipo': 'HL7', 'resultados': results, 'conteudoBruto': raw};
+    return <String, Object?>{
+      'ok': true,
+      'tipo': 'HL7',
+      'resultados': results,
+      'conteudoBruto': raw
+    };
   }
 
   Map<String, Object?> _parseAstm(String raw) {
@@ -83,11 +94,20 @@ class HematologyProtocolAdapterService {
       }
     }
 
-    return <String, Object?>{'ok': true, 'tipo': 'ASTM', 'resultados': results, 'conteudoBruto': raw};
+    return <String, Object?>{
+      'ok': true,
+      'tipo': 'ASTM',
+      'resultados': results,
+      'conteudoBruto': raw
+    };
   }
 
   Map<String, Object?> _parseDelimited(String raw) {
-    final String separator = raw.contains(';') ? ';' : raw.contains('\t') ? '\t' : ',';
+    final String separator = raw.contains(';')
+        ? ';'
+        : raw.contains('\t')
+            ? '\t'
+            : ',';
     final List<Map<String, Object?>> results = <Map<String, Object?>>[];
 
     for (final String line in raw.split(RegExp(r'\r?\n'))) {
@@ -104,7 +124,12 @@ class HematologyProtocolAdapterService {
       }
     }
 
-    return <String, Object?>{'ok': true, 'tipo': 'DELIMITADO', 'resultados': results, 'conteudoBruto': raw};
+    return <String, Object?>{
+      'ok': true,
+      'tipo': 'DELIMITADO',
+      'resultados': results,
+      'conteudoBruto': raw
+    };
   }
 
   String toJson(Map<String, Object?> message) {

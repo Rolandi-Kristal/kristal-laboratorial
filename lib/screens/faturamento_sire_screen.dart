@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../services/auth_service.dart';
 import '../services/faturamento_sire_service.dart';
+import '../services/log_service.dart';
 
 class FaturamentoSireScreen extends StatefulWidget {
   final AuthSession session;
@@ -61,7 +65,8 @@ class _FaturamentoSireScreenState extends State<FaturamentoSireScreen> {
         loading = false;
         status = 'Integração carregada.';
       });
-    } catch (e) {
+    } on DatabaseException catch (e, stackTrace) {
+      await LogService.instance.error('FATURAMENTO_SIRE_LOAD', e, stackTrace);
       if (!mounted) return;
       setState(() {
         loading = false;
@@ -116,13 +121,13 @@ class _FaturamentoSireScreenState extends State<FaturamentoSireScreen> {
         processing = false;
         status = 'Executável localizado: $encontrado';
       });
-    } catch (e) {
-      if (!mounted) return;
-
-      setState(() {
-        processing = false;
-        status = 'Erro ao localizar executável: $e';
-      });
+    } on FileSystemException catch (e, stackTrace) {
+      await _processingFailure(
+        'LOCATE_FILE',
+        e,
+        stackTrace,
+        'Erro ao localizar executável',
+      );
     }
   }
 
@@ -179,13 +184,20 @@ class _FaturamentoSireScreenState extends State<FaturamentoSireScreen> {
         processing = false;
         status = 'Configuração do Faturamento SIRE salva com sucesso.';
       });
-    } catch (e) {
-      if (!mounted) return;
-
-      setState(() {
-        processing = false;
-        status = 'Erro ao salvar configuração: $e';
-      });
+    } on StateError catch (e, stackTrace) {
+      await _processingFailure(
+        'SAVE_STATE',
+        e,
+        stackTrace,
+        'Erro ao salvar configuração',
+      );
+    } on DatabaseException catch (e, stackTrace) {
+      await _processingFailure(
+        'SAVE_DATABASE',
+        e,
+        stackTrace,
+        'Erro ao salvar configuração',
+      );
     }
   }
 
@@ -206,13 +218,34 @@ class _FaturamentoSireScreenState extends State<FaturamentoSireScreen> {
         processing = false;
         status = 'Faturamento SIRE aberto.';
       });
-    } catch (e) {
-      if (!mounted) return;
-
-      setState(() {
-        processing = false;
-        status = 'Erro ao abrir Faturamento SIRE: $e';
-      });
+    } on StateError catch (e, stackTrace) {
+      await _processingFailure(
+        'OPEN_STATE',
+        e,
+        stackTrace,
+        'Erro ao abrir Faturamento SIRE',
+      );
+    } on DatabaseException catch (e, stackTrace) {
+      await _processingFailure(
+        'OPEN_DATABASE',
+        e,
+        stackTrace,
+        'Erro ao abrir Faturamento SIRE',
+      );
+    } on ProcessException catch (e, stackTrace) {
+      await _processingFailure(
+        'OPEN_PROCESS',
+        e,
+        stackTrace,
+        'Erro ao abrir Faturamento SIRE',
+      );
+    } on FileSystemException catch (e, stackTrace) {
+      await _processingFailure(
+        'OPEN_FILE',
+        e,
+        stackTrace,
+        'Erro ao abrir Faturamento SIRE',
+      );
     }
   }
 
@@ -262,6 +295,24 @@ class _FaturamentoSireScreenState extends State<FaturamentoSireScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _processingFailure(
+    String operation,
+    Object error,
+    StackTrace stackTrace,
+    String message,
+  ) async {
+    await LogService.instance.error(
+      'FATURAMENTO_SIRE_$operation',
+      error,
+      stackTrace,
+    );
+    if (!mounted) return;
+    setState(() {
+      processing = false;
+      status = '$message: $error';
+    });
   }
 
   @override

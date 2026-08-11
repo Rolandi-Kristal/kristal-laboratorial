@@ -1,4 +1,4 @@
-﻿class HematologyDriverProfile {
+class HematologyDriverProfile {
   const HematologyDriverProfile({
     required this.id,
     required this.nome,

@@ -24,5 +24,5 @@ run_server.bat
 ```
 
 Acesso:
-- Paciente: http://127.0.0.1:8787
-- Admin: http://127.0.0.1:8787/admin.html
+- Paciente: https://127.0.0.1:8787
+- Admin: https://127.0.0.1:8787/admin.html

@@ -240,7 +240,8 @@ class _AgendamentosScreenState extends State<AgendamentosScreen> {
               alignment: Alignment.centerLeft,
               child: Text(
                 'Agenda de ${_brDate(data)}',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -248,7 +249,8 @@ class _AgendamentosScreenState extends State<AgendamentosScreen> {
             child: loading
                 ? const Center(child: CircularProgressIndicator())
                 : doDia.isEmpty
-                    ? const Center(child: Text('Nenhum horario agendado nesta data.'))
+                    ? const Center(
+                        child: Text('Nenhum horario agendado nesta data.'))
                     : ListView.builder(
                         itemCount: doDia.length,
                         itemBuilder: (BuildContext context, int index) {

@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../models/lab_exam_definition.dart';
 import '../services/auth_service.dart';
 import '../services/lab_exam_catalog_service.dart';
+import '../services/log_service.dart';
 import '../widgets/kristal_shell.dart';
 
 class CatalogoExamesCompletoScreen extends StatefulWidget {
@@ -92,8 +96,21 @@ class _CatalogoExamesCompletoScreenState
       _setStatus(
         '${imported.message} Registros integrados: ${imported.importedCount}. SHA256: ${imported.sha256}',
       );
-    } on Object catch (error) {
-      _setStatus('Falha na importação: $error');
+    } on FileSystemException catch (error, stackTrace) {
+      await _catalogFailure(
+          'IMPORT_FILE', error, stackTrace, 'Falha na importação');
+    } on FormatException catch (error, stackTrace) {
+      await _catalogFailure(
+          'IMPORT_FORMAT', error, stackTrace, 'Falha na importação');
+    } on ArgumentError catch (error, stackTrace) {
+      await _catalogFailure(
+          'IMPORT_INPUT', error, stackTrace, 'Falha na importação');
+    } on StateError catch (error, stackTrace) {
+      await _catalogFailure(
+          'IMPORT_STATE', error, stackTrace, 'Falha na importação');
+    } on DatabaseException catch (error, stackTrace) {
+      await _catalogFailure(
+          'IMPORT_DATABASE', error, stackTrace, 'Falha na importação');
     }
   }
 
@@ -116,8 +133,21 @@ class _CatalogoExamesCompletoScreenState
       await _service.salvar(exam: edited, session: session);
       await _load();
       _setStatus('Exame salvo no catálogo permanente: ${edited.code}.');
-    } on Object catch (error) {
-      _setStatus('Falha ao salvar exame: $error');
+    } on FileSystemException catch (error, stackTrace) {
+      await _catalogFailure(
+          'SAVE_FILE', error, stackTrace, 'Falha ao salvar exame');
+    } on FormatException catch (error, stackTrace) {
+      await _catalogFailure(
+          'SAVE_FORMAT', error, stackTrace, 'Falha ao salvar exame');
+    } on ArgumentError catch (error, stackTrace) {
+      await _catalogFailure(
+          'SAVE_INPUT', error, stackTrace, 'Falha ao salvar exame');
+    } on StateError catch (error, stackTrace) {
+      await _catalogFailure(
+          'SAVE_STATE', error, stackTrace, 'Falha ao salvar exame');
+    } on DatabaseException catch (error, stackTrace) {
+      await _catalogFailure(
+          'SAVE_DATABASE', error, stackTrace, 'Falha ao salvar exame');
     }
   }
 
@@ -136,8 +166,18 @@ class _CatalogoExamesCompletoScreenState
         _setStatus('Exame reativado: ${exam.code}.');
       }
       await _load();
-    } on Object catch (error) {
-      _setStatus('Falha ao alterar status: $error');
+    } on FileSystemException catch (error, stackTrace) {
+      await _catalogFailure(
+          'STATUS_FILE', error, stackTrace, 'Falha ao alterar status');
+    } on FormatException catch (error, stackTrace) {
+      await _catalogFailure(
+          'STATUS_FORMAT', error, stackTrace, 'Falha ao alterar status');
+    } on StateError catch (error, stackTrace) {
+      await _catalogFailure(
+          'STATUS_STATE', error, stackTrace, 'Falha ao alterar status');
+    } on DatabaseException catch (error, stackTrace) {
+      await _catalogFailure(
+          'STATUS_DATABASE', error, stackTrace, 'Falha ao alterar status');
     }
   }
 
@@ -174,9 +214,33 @@ class _CatalogoExamesCompletoScreenState
       await _load();
       _setStatus(
           'Exame excluído logicamente pelo SUPER_USUARIO: ${exam.code}.');
-    } on Object catch (error) {
-      _setStatus('Falha ao excluir exame: $error');
+    } on FileSystemException catch (error, stackTrace) {
+      await _catalogFailure(
+          'ARCHIVE_FILE', error, stackTrace, 'Falha ao excluir exame');
+    } on FormatException catch (error, stackTrace) {
+      await _catalogFailure(
+          'ARCHIVE_FORMAT', error, stackTrace, 'Falha ao excluir exame');
+    } on StateError catch (error, stackTrace) {
+      await _catalogFailure(
+          'ARCHIVE_STATE', error, stackTrace, 'Falha ao excluir exame');
+    } on DatabaseException catch (error, stackTrace) {
+      await _catalogFailure(
+          'ARCHIVE_DATABASE', error, stackTrace, 'Falha ao excluir exame');
     }
+  }
+
+  Future<void> _catalogFailure(
+    String operation,
+    Object error,
+    StackTrace stackTrace,
+    String message,
+  ) async {
+    await LogService.instance.error(
+      'CATALOG_$operation',
+      error,
+      stackTrace,
+    );
+    _setStatus('$message: $error');
   }
 
   void _setStatus(String message) {

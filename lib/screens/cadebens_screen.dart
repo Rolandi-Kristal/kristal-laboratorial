@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../services/auth_service.dart';
 import '../services/cadbens_service.dart';
+import '../services/log_service.dart';
 
 class CadebensScreen extends StatefulWidget {
   final AuthSession session;
@@ -77,7 +81,17 @@ class _CadebensScreenState extends State<CadebensScreen> {
       final int total = await action();
       mensagem = '$total cadastro(s) CADBENS/FUSEx importado(s).';
       await _load();
-    } catch (e) {
+    } on FileSystemException catch (e, stackTrace) {
+      await LogService.instance.error('CADBENS_IMPORT_FILE', e, stackTrace);
+      mensagem = 'Erro ao importar CADBENS/FUSEx: $e';
+    } on FormatException catch (e, stackTrace) {
+      await LogService.instance.error('CADBENS_IMPORT_FORMAT', e, stackTrace);
+      mensagem = 'Erro ao importar CADBENS/FUSEx: $e';
+    } on DatabaseException catch (e, stackTrace) {
+      await LogService.instance.error('CADBENS_IMPORT_DATABASE', e, stackTrace);
+      mensagem = 'Erro ao importar CADBENS/FUSEx: $e';
+    } on ArgumentError catch (e, stackTrace) {
+      await LogService.instance.error('CADBENS_IMPORT_INPUT', e, stackTrace);
       mensagem = 'Erro ao importar CADBENS/FUSEx: $e';
     } finally {
       if (mounted) setState(() => loading = false);
@@ -98,7 +112,9 @@ class _CadebensScreenState extends State<CadebensScreen> {
     );
 
     setState(() {
-      rows = found == null ? <Map<String, dynamic>>[] : <Map<String, dynamic>>[found];
+      rows = found == null
+          ? <Map<String, dynamic>>[]
+          : <Map<String, dynamic>>[found];
       mensagem = found == null
           ? 'Nenhum beneficiario encontrado.'
           : 'Beneficiario encontrado no CADBENS/FUSEx.';
@@ -196,7 +212,8 @@ class _CadebensScreenState extends State<CadebensScreen> {
                   child: loading
                       ? const Center(child: CircularProgressIndicator())
                       : rows.isEmpty
-                          ? const Center(child: Text('Nenhum cadastro importado.'))
+                          ? const Center(
+                              child: Text('Nenhum cadastro importado.'))
                           : ListView.builder(
                               itemCount: rows.length,
                               itemBuilder: (BuildContext context, int index) {

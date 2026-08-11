@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../core/app_constants.dart';
 import 'database_service.dart';
@@ -28,10 +30,19 @@ class SystemHealthService {
   Future<List<SystemHealthStatus>> check() async {
     final List<SystemHealthStatus> status = <SystemHealthStatus>[];
 
+    void addFailure(String item, Object error) {
+      status.add(
+        SystemHealthStatus(
+          item: item,
+          ok: false,
+          detalhe: error.toString(),
+        ),
+      );
+    }
+
     try {
       await DatabaseService.instance.database;
       final String dbPath = await DatabaseService.instance.databasePath();
-
       status.add(
         SystemHealthStatus(
           item: 'Banco de dados',
@@ -39,14 +50,10 @@ class SystemHealthService {
           detalhe: dbPath,
         ),
       );
-    } catch (e) {
-      status.add(
-        SystemHealthStatus(
-          item: 'Banco de dados',
-          ok: false,
-          detalhe: e.toString(),
-        ),
-      );
+    } on DatabaseException catch (error) {
+      addFailure('Banco de dados', error);
+    } on FileSystemException catch (error) {
+      addFailure('Banco de dados', error);
     }
 
     try {
@@ -58,14 +65,10 @@ class SystemHealthService {
           detalhe: support.path,
         ),
       );
-    } catch (e) {
-      status.add(
-        SystemHealthStatus(
-          item: 'Diretório de suporte',
-          ok: false,
-          detalhe: e.toString(),
-        ),
-      );
+    } on MissingPluginException catch (error) {
+      addFailure('Diretório de suporte', error);
+    } on FileSystemException catch (error) {
+      addFailure('Diretório de suporte', error);
     }
 
     try {
@@ -88,7 +91,6 @@ class SystemHealthService {
         'manutencoes',
         'controle_qualidade',
       ];
-
       for (final String table in tables) {
         final int total = await _repo.count(table);
         status.add(
@@ -99,14 +101,8 @@ class SystemHealthService {
           ),
         );
       }
-    } catch (e) {
-      status.add(
-        SystemHealthStatus(
-          item: 'Tabelas do sistema',
-          ok: false,
-          detalhe: e.toString(),
-        ),
-      );
+    } on DatabaseException catch (error) {
+      addFailure('Tabelas do sistema', error);
     }
 
     status.add(
@@ -117,7 +113,6 @@ class SystemHealthService {
         detalhe: AppConstants.developerCredit,
       ),
     );
-
     return status;
   }
 }

@@ -35,7 +35,8 @@ class _AlertasEstoqueScreenState extends State<AlertasEstoqueScreen> {
     });
   }
 
-  Widget _section(String title, List<Map<String, dynamic>> rows, IconData icon) {
+  Widget _section(
+      String title, List<Map<String, dynamic>> rows, IconData icon) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(14),

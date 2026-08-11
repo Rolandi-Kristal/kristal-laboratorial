@@ -8,8 +8,7 @@ class LaudoHashService {
   static String gerarHash(Map<String, dynamic> dados) {
     final String normalized = jsonEncode(
       Map<String, dynamic>.fromEntries(
-        dados.entries.toList()
-          ..sort((a, b) => a.key.compareTo(b.key)),
+        dados.entries.toList()..sort((a, b) => a.key.compareTo(b.key)),
       ),
     );
 

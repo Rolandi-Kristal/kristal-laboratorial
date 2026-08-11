@@ -1,7 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../services/auth_service.dart';
 import '../services/lab_repository.dart';
+import '../services/log_service.dart';
 import '../services/report_pdf_service.dart';
 
 class RelatoriosScreen extends StatefulWidget {
@@ -58,12 +63,18 @@ class _RelatoriosScreenState extends State<RelatoriosScreen> {
       setState(() {
         mensagem = 'Relatório gerado para a tabela $tabela.';
       });
-    } catch (e) {
+    } on DatabaseException catch (e, stackTrace) {
+      await LogService.instance.error('REPORT_DATABASE', e, stackTrace);
       if (!mounted) return;
-
-      setState(() {
-        mensagem = 'Erro ao gerar relatório: $e';
-      });
+      setState(() => mensagem = 'Erro ao gerar relatório: $e');
+    } on PlatformException catch (e, stackTrace) {
+      await LogService.instance.error('REPORT_PRINT', e, stackTrace);
+      if (!mounted) return;
+      setState(() => mensagem = 'Erro ao gerar relatório: $e');
+    } on FileSystemException catch (e, stackTrace) {
+      await LogService.instance.error('REPORT_FILE', e, stackTrace);
+      if (!mounted) return;
+      setState(() => mensagem = 'Erro ao gerar relatório: $e');
     } finally {
       if (mounted) setState(() => loading = false);
     }

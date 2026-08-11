@@ -20,24 +20,24 @@ class WorklistModel {
   });
 
   Map<String, dynamic> toMap() => {
-    'id': id,
-    'pedidoId': pedidoId,
-    'amostraCodigo': amostraCodigo,
-    'equipamentoId': equipamentoId,
-    'exames': exames,
-    'status': status,
-    'enviadoEm': enviadoEm,
-    'protocolo': protocolo,
-  };
+        'id': id,
+        'pedidoId': pedidoId,
+        'amostraCodigo': amostraCodigo,
+        'equipamentoId': equipamentoId,
+        'exames': exames,
+        'status': status,
+        'enviadoEm': enviadoEm,
+        'protocolo': protocolo,
+      };
 
   factory WorklistModel.fromMap(Map<String, dynamic> map) => WorklistModel(
-    id: (map['id'] ?? '').toString(),
-    pedidoId: (map['pedidoId'] ?? '').toString(),
-    amostraCodigo: (map['amostraCodigo'] ?? '').toString(),
-    equipamentoId: (map['equipamentoId'] ?? '').toString(),
-    exames: (map['exames'] ?? '').toString(),
-    status: (map['status'] ?? '').toString(),
-    enviadoEm: (map['enviadoEm'] ?? '').toString(),
-    protocolo: (map['protocolo'] ?? '').toString(),
-  );
+        id: (map['id'] ?? '').toString(),
+        pedidoId: (map['pedidoId'] ?? '').toString(),
+        amostraCodigo: (map['amostraCodigo'] ?? '').toString(),
+        equipamentoId: (map['equipamentoId'] ?? '').toString(),
+        exames: (map['exames'] ?? '').toString(),
+        status: (map['status'] ?? '').toString(),
+        enviadoEm: (map['enviadoEm'] ?? '').toString(),
+        protocolo: (map['protocolo'] ?? '').toString(),
+      );
 }

@@ -73,22 +73,32 @@ class LogService {
 
   Future<void> _cleanupOldLogs() async {
     final Directory dir = await _logDir();
-
     final List<FileSystemEntity> entities = await dir.list().toList();
-
     final List<File> files = entities.whereType<File>().toList()
       ..sort(
         (File a, File b) =>
             b.statSync().modified.compareTo(a.statSync().modified),
       );
-
     if (files.length <= maxFiles) return;
 
+    final Directory archive = Directory(p.join(dir.path, 'archive'));
+    if (!await archive.exists()) {
+      await archive.create(recursive: true);
+    }
     for (final File file in files.skip(maxFiles)) {
+      final String destination = p.join(
+        archive.path,
+        '${p.basename(file.path)}.'
+        '${DateTime.now().microsecondsSinceEpoch}.archived',
+      );
       try {
-        await file.rename('.archived_');
-      } catch (_) {
-        // Não interrompe o sistema por falha de limpeza de log.
+        await file.rename(destination);
+      } on FileSystemException catch (error, stackTrace) {
+        stderr.writeln(
+          '[${DateTime.now().toIso8601String()}][ERROR][LOG_ARCHIVE] '
+          '${error.message} path=${error.path ?? ''} '
+          'destination=$destination stack=$stackTrace',
+        );
       }
     }
   }

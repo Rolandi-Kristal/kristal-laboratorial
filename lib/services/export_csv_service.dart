@@ -44,7 +44,9 @@ class ExportCsvService {
 
       for (final Map<String, dynamic> row in rows) {
         buffer.writeln(
-          headers.map((String h) => _escapeCsv(row[h]?.toString() ?? '')).join(';'),
+          headers
+              .map((String h) => _escapeCsv(row[h]?.toString() ?? ''))
+              .join(';'),
         );
       }
 

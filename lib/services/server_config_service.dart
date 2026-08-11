@@ -255,6 +255,12 @@ class ServerConfigService {
           final String protectedApiKey =
               decoded['apiKeyProtegida']?.toString().trim() ?? '';
           if (protectedApiKey.isEmpty) {
+            final String legacyApiKey = config.cloudApiToken.trim().isNotEmpty
+                ? config.cloudApiToken.trim()
+                : config.nuvemApiKey.trim();
+            if (legacyApiKey.isNotEmpty) {
+              await _persistToFile(file, config);
+            }
             return config;
           }
           try {
@@ -300,9 +306,29 @@ class ServerConfigService {
     required ServerConfig config,
   }) async {
     final File file = File(AppConstants.serverConfigPath());
+    await _persistToFile(file, config);
+  }
+
+  Map<String, Object> buildPersistedPayload(ServerConfig config) {
+    final Map<String, Object> persisted = config.toJson();
+    final String apiKey = config.cloudApiToken.trim().isNotEmpty
+        ? config.cloudApiToken.trim()
+        : config.nuvemApiKey.trim();
+    persisted['cloudApiToken'] = '';
+    persisted['nuvemApiKey'] = '';
+    if (apiKey.isNotEmpty) {
+      persisted['apiKeyProtegida'] =
+          WindowsDataProtectionService.protectMachineSecret(apiKey);
+    }
+    return persisted;
+  }
+
+  Future<void> _persistToFile(File file, ServerConfig config) async {
+    final Map<String, Object> persisted = buildPersistedPayload(config);
     await file.parent.create(recursive: true);
     await file.writeAsString(
-      const JsonEncoder.withIndent('  ').convert(config.toJson()),
+      const JsonEncoder.withIndent('  ').convert(persisted),
+      flush: true,
     );
   }
 

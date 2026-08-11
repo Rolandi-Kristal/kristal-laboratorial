@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -21,8 +22,14 @@ Future<void> main() async {
 
   try {
     await _configureWindowsWindow();
-  } on Object catch (error, stackTrace) {
-    LogService.instance.error(
+  } on PlatformException catch (error, stackTrace) {
+    await LogService.instance.error(
+      'WINDOW_MANAGER_ERROR',
+      error,
+      stackTrace,
+    );
+  } on MissingPluginException catch (error, stackTrace) {
+    await LogService.instance.error(
       'WINDOW_MANAGER_ERROR',
       error,
       stackTrace,

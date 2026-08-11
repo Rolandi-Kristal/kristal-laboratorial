@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import '../services/log_service.dart';
 import '../services/portal_paciente_service.dart';
 
 class PortalPacienteConfigScreen extends StatefulWidget {
@@ -50,7 +52,9 @@ class _PortalPacienteConfigScreenState
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Portal atualizado.')),
       );
-    } catch (error) {
+    } on DatabaseException catch (error, stackTrace) {
+      await LogService.instance
+          .error('PORTAL_CONFIG_DATABASE', error, stackTrace);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Falha ao salvar o portal: $error')),

@@ -20,24 +20,24 @@ class PedidoModel {
   });
 
   Map<String, dynamic> toMap() => {
-    'id': id,
-    'pacienteId': pacienteId,
-    'medico': medico,
-    'convenio': convenio,
-    'prioridade': prioridade,
-    'status': status,
-    'observacao': observacao,
-    'criadoEm': criadoEm,
-  };
+        'id': id,
+        'pacienteId': pacienteId,
+        'medico': medico,
+        'convenio': convenio,
+        'prioridade': prioridade,
+        'status': status,
+        'observacao': observacao,
+        'criadoEm': criadoEm,
+      };
 
   factory PedidoModel.fromMap(Map<String, dynamic> map) => PedidoModel(
-    id: (map['id'] ?? '').toString(),
-    pacienteId: (map['pacienteId'] ?? '').toString(),
-    medico: (map['medico'] ?? '').toString(),
-    convenio: (map['convenio'] ?? '').toString(),
-    prioridade: (map['prioridade'] ?? '').toString(),
-    status: (map['status'] ?? '').toString(),
-    observacao: (map['observacao'] ?? '').toString(),
-    criadoEm: (map['criadoEm'] ?? '').toString(),
-  );
+        id: (map['id'] ?? '').toString(),
+        pacienteId: (map['pacienteId'] ?? '').toString(),
+        medico: (map['medico'] ?? '').toString(),
+        convenio: (map['convenio'] ?? '').toString(),
+        prioridade: (map['prioridade'] ?? '').toString(),
+        status: (map['status'] ?? '').toString(),
+        observacao: (map['observacao'] ?? '').toString(),
+        criadoEm: (map['criadoEm'] ?? '').toString(),
+      );
 }

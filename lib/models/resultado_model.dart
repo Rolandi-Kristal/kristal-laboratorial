@@ -26,30 +26,30 @@ class ResultadoModel {
   });
 
   Map<String, dynamic> toMap() => {
-    'id': id,
-    'pedidoId': pedidoId,
-    'exameId': exameId,
-    'amostraId': amostraId,
-    'valor': valor,
-    'unidade': unidade,
-    'referencia': referencia,
-    'status': status,
-    'critico': critico,
-    'liberadoPor': liberadoPor,
-    'liberadoEm': liberadoEm,
-  };
+        'id': id,
+        'pedidoId': pedidoId,
+        'exameId': exameId,
+        'amostraId': amostraId,
+        'valor': valor,
+        'unidade': unidade,
+        'referencia': referencia,
+        'status': status,
+        'critico': critico,
+        'liberadoPor': liberadoPor,
+        'liberadoEm': liberadoEm,
+      };
 
   factory ResultadoModel.fromMap(Map<String, dynamic> map) => ResultadoModel(
-    id: (map['id'] ?? '').toString(),
-    pedidoId: (map['pedidoId'] ?? '').toString(),
-    exameId: (map['exameId'] ?? '').toString(),
-    amostraId: (map['amostraId'] ?? '').toString(),
-    valor: (map['valor'] ?? '').toString(),
-    unidade: (map['unidade'] ?? '').toString(),
-    referencia: (map['referencia'] ?? '').toString(),
-    status: (map['status'] ?? '').toString(),
-    critico: (map['critico'] ?? '').toString(),
-    liberadoPor: (map['liberadoPor'] ?? '').toString(),
-    liberadoEm: (map['liberadoEm'] ?? '').toString(),
-  );
+        id: (map['id'] ?? '').toString(),
+        pedidoId: (map['pedidoId'] ?? '').toString(),
+        exameId: (map['exameId'] ?? '').toString(),
+        amostraId: (map['amostraId'] ?? '').toString(),
+        valor: (map['valor'] ?? '').toString(),
+        unidade: (map['unidade'] ?? '').toString(),
+        referencia: (map['referencia'] ?? '').toString(),
+        status: (map['status'] ?? '').toString(),
+        critico: (map['critico'] ?? '').toString(),
+        liberadoPor: (map['liberadoPor'] ?? '').toString(),
+        liberadoEm: (map['liberadoEm'] ?? '').toString(),
+      );
 }

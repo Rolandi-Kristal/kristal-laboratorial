@@ -105,7 +105,9 @@ class KristalOperationalStoreService {
 
     await file.writeAsString(
       const JsonEncoder.withIndent('  ').convert(
-        records.map((KristalOperationalRecord record) => record.toJson()).toList(),
+        records
+            .map((KristalOperationalRecord record) => record.toJson())
+            .toList(),
       ),
       encoding: utf8,
     );
@@ -136,7 +138,9 @@ class KristalOperationalStoreService {
     final File file = await _fileForModule(module);
     await file.writeAsString(
       const JsonEncoder.withIndent('  ').convert(
-        records.map((KristalOperationalRecord record) => record.toJson()).toList(),
+        records
+            .map((KristalOperationalRecord record) => record.toJson())
+            .toList(),
       ),
       encoding: utf8,
     );
@@ -151,9 +155,6 @@ class KristalOperationalStoreService {
   }
 
   String _safeName(String module) {
-    return module
-        .trim()
-        .toLowerCase()
-        .replaceAll(RegExp(r'[^a-z0-9_]+'), '_');
+    return module.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9_]+'), '_');
   }
 }

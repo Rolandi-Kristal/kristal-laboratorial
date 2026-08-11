@@ -20,24 +20,24 @@ class AmostraModel {
   });
 
   Map<String, dynamic> toMap() => {
-    'id': id,
-    'pedidoId': pedidoId,
-    'codigo': codigo,
-    'material': material,
-    'status': status,
-    'coletador': coletador,
-    'coletadoEm': coletadoEm,
-    'observacao': observacao,
-  };
+        'id': id,
+        'pedidoId': pedidoId,
+        'codigo': codigo,
+        'material': material,
+        'status': status,
+        'coletador': coletador,
+        'coletadoEm': coletadoEm,
+        'observacao': observacao,
+      };
 
   factory AmostraModel.fromMap(Map<String, dynamic> map) => AmostraModel(
-    id: (map['id'] ?? '').toString(),
-    pedidoId: (map['pedidoId'] ?? '').toString(),
-    codigo: (map['codigo'] ?? '').toString(),
-    material: (map['material'] ?? '').toString(),
-    status: (map['status'] ?? '').toString(),
-    coletador: (map['coletador'] ?? '').toString(),
-    coletadoEm: (map['coletadoEm'] ?? '').toString(),
-    observacao: (map['observacao'] ?? '').toString(),
-  );
+        id: (map['id'] ?? '').toString(),
+        pedidoId: (map['pedidoId'] ?? '').toString(),
+        codigo: (map['codigo'] ?? '').toString(),
+        material: (map['material'] ?? '').toString(),
+        status: (map['status'] ?? '').toString(),
+        coletador: (map['coletador'] ?? '').toString(),
+        coletadoEm: (map['coletadoEm'] ?? '').toString(),
+        observacao: (map['observacao'] ?? '').toString(),
+      );
 }

@@ -14,18 +14,19 @@ class MaterialColetaModel {
   });
 
   Map<String, dynamic> toMap() => {
-    'id': id,
-    'nome': nome,
-    'recipiente': recipiente,
-    'conservacao': conservacao,
-    'ativo': ativo,
-  };
+        'id': id,
+        'nome': nome,
+        'recipiente': recipiente,
+        'conservacao': conservacao,
+        'ativo': ativo,
+      };
 
-  factory MaterialColetaModel.fromMap(Map<String, dynamic> map) => MaterialColetaModel(
-    id: (map['id'] ?? '').toString(),
-    nome: (map['nome'] ?? '').toString(),
-    recipiente: (map['recipiente'] ?? '').toString(),
-    conservacao: (map['conservacao'] ?? '').toString(),
-    ativo: (map['ativo'] ?? '').toString(),
-  );
+  factory MaterialColetaModel.fromMap(Map<String, dynamic> map) =>
+      MaterialColetaModel(
+        id: (map['id'] ?? '').toString(),
+        nome: (map['nome'] ?? '').toString(),
+        recipiente: (map['recipiente'] ?? '').toString(),
+        conservacao: (map['conservacao'] ?? '').toString(),
+        ativo: (map['ativo'] ?? '').toString(),
+      );
 }

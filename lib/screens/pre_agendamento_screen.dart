@@ -6,11 +6,11 @@ class PreAgendamentoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const AgendaFormScreen(
-      titulo: 'PrÃ©-agendamento',
-      subtitulo: 'SolicitaÃ§Ãµes pendentes, confirmaÃ§Ã£o e preservaÃ§Ã£o histÃ³rica',
+      titulo: 'Pré-agendamento',
+      subtitulo: 'Solicitações pendentes, confirmação e preservação histórica',
       icone: Icons.event_note_rounded,
-      botaoSalvar: 'Salvar prÃ©-agendamento',
-      mensagemSalvo: 'PrÃ©-agendamento registrado com retenÃ§Ã£o permanente.',
+      botaoSalvar: 'Salvar pré-agendamento',
+      mensagemSalvo: 'Pré-agendamento registrado com retenção permanente.',
     );
   }
 }
@@ -64,7 +64,7 @@ class _AgendaFormScreenState extends State<AgendaFormScreen> {
         exames.text.trim().isEmpty ||
         horario.text.trim().isEmpty) {
       setState(() {
-        status = 'Preencha paciente, exame/procedimento e horÃ¡rio.';
+        status = 'Preencha paciente, exame/procedimento e horário.';
       });
       return;
     }
@@ -132,13 +132,18 @@ class _AgendaFormScreenState extends State<AgendaFormScreen> {
                     const SizedBox(height: 10),
                     _campo(telefone, 'Telefone', Icons.phone_rounded),
                     const SizedBox(height: 10),
-                    _campo(exames, 'Exames / Procedimentos *', Icons.biotech_rounded),
+                    _campo(exames, 'Exames / Procedimentos *',
+                        Icons.biotech_rounded),
                     const SizedBox(height: 10),
                     Row(
                       children: <Widget>[
-                        Expanded(child: _campo(data, 'Data', Icons.calendar_month_rounded)),
+                        Expanded(
+                            child: _campo(
+                                data, 'Data', Icons.calendar_month_rounded)),
                         const SizedBox(width: 10),
-                        Expanded(child: _campo(horario, 'HorÃ¡rio *', Icons.schedule_rounded)),
+                        Expanded(
+                            child: _campo(
+                                horario, 'Horário *', Icons.schedule_rounded)),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -156,9 +161,12 @@ class _AgendaFormScreenState extends State<AgendaFormScreen> {
                         border: OutlineInputBorder(),
                       ),
                       items: const <DropdownMenuItem<String>>[
-                        DropdownMenuItem<String>(value: 'Normal', child: Text('Normal')),
-                        DropdownMenuItem<String>(value: 'PrioritÃ¡rio', child: Text('PrioritÃ¡rio')),
-                        DropdownMenuItem<String>(value: 'Urgente', child: Text('Urgente')),
+                        DropdownMenuItem<String>(
+                            value: 'Normal', child: Text('Normal')),
+                        DropdownMenuItem<String>(
+                            value: 'Prioritário', child: Text('Prioritário')),
+                        DropdownMenuItem<String>(
+                            value: 'Urgente', child: Text('Urgente')),
                       ],
                       onChanged: (String? value) {
                         if (value == null) {
@@ -168,7 +176,8 @@ class _AgendaFormScreenState extends State<AgendaFormScreen> {
                       },
                     ),
                     const SizedBox(height: 10),
-                    _campo(observacoes, 'ObservaÃ§Ãµes', Icons.notes_rounded, maxLines: 3),
+                    _campo(observacoes, 'Observações', Icons.notes_rounded,
+                        maxLines: 3),
                     const SizedBox(height: 14),
                     ElevatedButton.icon(
                       onPressed: salvar,

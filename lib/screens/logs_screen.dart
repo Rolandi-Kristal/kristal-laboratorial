@@ -82,7 +82,9 @@ class _LogsScreenState extends State<LogsScreen> {
                             return Card(
                               child: ListTile(
                                 leading: const Icon(Icons.description),
-                                title: Text(file.path.split(Platform.pathSeparator).last),
+                                title: Text(file.path
+                                    .split(Platform.pathSeparator)
+                                    .last),
                                 subtitle: Text(
                                   'Alterado: ${file.statSync().modified}',
                                 ),

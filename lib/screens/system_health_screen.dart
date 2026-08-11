@@ -75,9 +75,8 @@ class _SystemHealthScreenState extends State<SystemHealthScreen> {
                         child: ListTile(
                           leading: Icon(
                             item.ok ? Icons.check_circle : Icons.error,
-                            color: item.ok
-                                ? Colors.greenAccent
-                                : Colors.redAccent,
+                            color:
+                                item.ok ? Colors.greenAccent : Colors.redAccent,
                           ),
                           title: Text(item.item),
                           subtitle: Text(item.detalhe),

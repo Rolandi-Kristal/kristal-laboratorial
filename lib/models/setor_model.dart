@@ -12,16 +12,16 @@ class SetorModel {
   });
 
   Map<String, dynamic> toMap() => {
-    'id': id,
-    'nome': nome,
-    'descricao': descricao,
-    'ativo': ativo,
-  };
+        'id': id,
+        'nome': nome,
+        'descricao': descricao,
+        'ativo': ativo,
+      };
 
   factory SetorModel.fromMap(Map<String, dynamic> map) => SetorModel(
-    id: (map['id'] ?? '').toString(),
-    nome: (map['nome'] ?? '').toString(),
-    descricao: (map['descricao'] ?? '').toString(),
-    ativo: (map['ativo'] ?? '').toString(),
-  );
+        id: (map['id'] ?? '').toString(),
+        nome: (map['nome'] ?? '').toString(),
+        descricao: (map['descricao'] ?? '').toString(),
+        ativo: (map['ativo'] ?? '').toString(),
+      );
 }

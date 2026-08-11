@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -5,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../core/app_constants.dart';
 import '../models/lab_exam_definition.dart';
 import '../services/lab_exam_catalog_service.dart';
+import '../services/log_service.dart';
 import '../services/sire_integration_service.dart';
 import '../widgets/kristal_shell.dart';
 
@@ -124,8 +126,27 @@ class _FinanceiroSireScreenState extends State<FinanceiroSireScreen> {
         _status = 'Beneficiário SIRE ${result.beneficiarioId} localizado. '
             'PIs: ${result.planosInternos.map((SirePlanoInterno pi) => '${pi.id}/${pi.sigla}').join(', ')}';
       });
-    } catch (error) {
-      setState(() => _status = 'Erro na consulta SIRE: $error');
+    } on ArgumentError catch (error, stackTrace) {
+      await _sireFailure(
+          'CONSULT_INPUT', error, stackTrace, 'Erro na consulta SIRE');
+    } on StateError catch (error, stackTrace) {
+      await _sireFailure(
+          'CONSULT_STATE', error, stackTrace, 'Erro na consulta SIRE');
+    } on SocketException catch (error, stackTrace) {
+      await _sireFailure(
+          'CONSULT_NETWORK', error, stackTrace, 'Erro na consulta SIRE');
+    } on HandshakeException catch (error, stackTrace) {
+      await _sireFailure(
+          'CONSULT_TLS', error, stackTrace, 'Erro na consulta SIRE');
+    } on HttpException catch (error, stackTrace) {
+      await _sireFailure(
+          'CONSULT_HTTP', error, stackTrace, 'Erro na consulta SIRE');
+    } on FormatException catch (error, stackTrace) {
+      await _sireFailure(
+          'CONSULT_FORMAT', error, stackTrace, 'Erro na consulta SIRE');
+    } on TimeoutException catch (error, stackTrace) {
+      await _sireFailure(
+          'CONSULT_TIMEOUT', error, stackTrace, 'Erro na consulta SIRE');
     }
   }
 
@@ -148,9 +169,39 @@ class _FinanceiroSireScreenState extends State<FinanceiroSireScreen> {
         _status = 'CDM SIRE retornado. ID: ${result.cdmId}. '
             'Sucesso: ${result.success}. ${result.message}';
       });
-    } catch (error) {
-      setState(() => _status = 'Erro ao enviar CDM ao SIRE: $error');
+    } on ArgumentError catch (error, stackTrace) {
+      await _sireFailure(
+          'CDM_INPUT', error, stackTrace, 'Erro ao enviar CDM ao SIRE');
+    } on StateError catch (error, stackTrace) {
+      await _sireFailure(
+          'CDM_STATE', error, stackTrace, 'Erro ao enviar CDM ao SIRE');
+    } on SocketException catch (error, stackTrace) {
+      await _sireFailure(
+          'CDM_NETWORK', error, stackTrace, 'Erro ao enviar CDM ao SIRE');
+    } on HandshakeException catch (error, stackTrace) {
+      await _sireFailure(
+          'CDM_TLS', error, stackTrace, 'Erro ao enviar CDM ao SIRE');
+    } on HttpException catch (error, stackTrace) {
+      await _sireFailure(
+          'CDM_HTTP', error, stackTrace, 'Erro ao enviar CDM ao SIRE');
+    } on FormatException catch (error, stackTrace) {
+      await _sireFailure(
+          'CDM_FORMAT', error, stackTrace, 'Erro ao enviar CDM ao SIRE');
+    } on TimeoutException catch (error, stackTrace) {
+      await _sireFailure(
+          'CDM_TIMEOUT', error, stackTrace, 'Erro ao enviar CDM ao SIRE');
     }
+  }
+
+  Future<void> _sireFailure(
+    String operation,
+    Object error,
+    StackTrace stackTrace,
+    String message,
+  ) async {
+    await LogService.instance.error('SIRE_$operation', error, stackTrace);
+    if (!mounted) return;
+    setState(() => _status = '$message: $error');
   }
 
   Future<void> _exportCsv() async {

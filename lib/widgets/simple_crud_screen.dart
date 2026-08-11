@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 import '../services/lab_repository.dart';
 import '../services/result_validation_service.dart';
 
@@ -66,7 +65,8 @@ class _SimpleCrudScreenState extends State<SimpleCrudScreen> {
     filtered = query.isEmpty
         ? List<Map<String, dynamic>>.of(rows)
         : rows.where((Map<String, dynamic> row) {
-            return row.values.any((Object? value) => value.toString().toLowerCase().contains(query));
+            return row.values.any((Object? value) =>
+                value.toString().toLowerCase().contains(query));
           }).toList();
 
     if (mounted) {
@@ -106,7 +106,8 @@ class _SimpleCrudScreenState extends State<SimpleCrudScreen> {
   }
 
   Future<void> addOrEdit([Map<String, dynamic>? row]) async {
-    final Map<String, TextEditingController> controllers = <String, TextEditingController>{
+    final Map<String, TextEditingController> controllers =
+        <String, TextEditingController>{
       for (final String field in widget.fields)
         field: TextEditingController(text: row?[field]?.toString() ?? ''),
     };
@@ -134,7 +135,9 @@ class _SimpleCrudScreenState extends State<SimpleCrudScreen> {
               child: Wrap(
                 spacing: 12,
                 runSpacing: 10,
-                children: widget.fields.where((String field) => field != 'id').map((String field) {
+                children: widget.fields
+                    .where((String field) => field != 'id')
+                    .map((String field) {
                   return SizedBox(
                     width: 350,
                     child: TextField(
@@ -147,7 +150,9 @@ class _SimpleCrudScreenState extends State<SimpleCrudScreen> {
             ),
           ),
           actions: <Widget>[
-            TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
+            TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancelar')),
             ElevatedButton.icon(
               onPressed: () => Navigator.pop(context, true),
               icon: const Icon(Icons.save_rounded),
@@ -160,7 +165,8 @@ class _SimpleCrudScreenState extends State<SimpleCrudScreen> {
 
     if (confirmed == true) {
       final Map<String, dynamic> data = <String, dynamic>{
-        for (final String field in widget.fields) field: controllers[field]!.text.trim(),
+        for (final String field in widget.fields)
+          field: controllers[field]!.text.trim(),
       };
 
       if (widget.table == 'resultados') {
@@ -172,7 +178,9 @@ class _SimpleCrudScreenState extends State<SimpleCrudScreen> {
             : (data['critico']?.toString().isEmpty ?? true)
                 ? 'NÃO'
                 : data['critico'];
-        data['status'] = (data['status']?.toString().trim().isEmpty ?? true) ? 'DIGITADO' : data['status'];
+        data['status'] = (data['status']?.toString().trim().isEmpty ?? true)
+            ? 'DIGITADO'
+            : data['status'];
       }
 
       await repo.upsert(widget.table, data);
@@ -193,10 +201,14 @@ class _SimpleCrudScreenState extends State<SimpleCrudScreen> {
                 : 'Esta ação será registrada em auditoria.',
           ),
           actions: <Widget>[
-            TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
+            TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancelar')),
             ElevatedButton.icon(
               onPressed: () => Navigator.pop(context, true),
-              icon: Icon(protected ? Icons.archive_rounded : Icons.delete_outline_rounded),
+              icon: Icon(protected
+                  ? Icons.archive_rounded
+                  : Icons.delete_outline_rounded),
               label: Text(protected ? 'Arquivar' : 'Remover'),
             ),
           ],
@@ -235,8 +247,14 @@ class _SimpleCrudScreenState extends State<SimpleCrudScreen> {
       appBar: AppBar(
         title: Text(widget.title),
         actions: <Widget>[
-          IconButton(tooltip: 'Atualizar', onPressed: load, icon: const Icon(Icons.refresh_rounded)),
-          IconButton(tooltip: 'Novo', onPressed: () => addOrEdit(), icon: const Icon(Icons.add_rounded)),
+          IconButton(
+              tooltip: 'Atualizar',
+              onPressed: load,
+              icon: const Icon(Icons.refresh_rounded)),
+          IconButton(
+              tooltip: 'Novo',
+              onPressed: () => addOrEdit(),
+              icon: const Icon(Icons.add_rounded)),
         ],
       ),
       body: Row(
@@ -245,14 +263,20 @@ class _SimpleCrudScreenState extends State<SimpleCrudScreen> {
             table: widget.table,
             onNew: () => addOrEdit(),
             onRefresh: load,
-            onPrint: () => _showInfo('Impressão', 'Use o módulo Laudos PDF ou relatórios para impressão oficial.'),
-            onExport: () => _showInfo('Exportação', 'Exportação direcionada ao módulo Relatórios/CSV.'),
+            onPrint: () => _showInfo('Impressão',
+                'Use o módulo Laudos PDF ou relatórios para impressão oficial.'),
+            onExport: () => _showInfo('Exportação',
+                'Exportação direcionada ao módulo Relatórios/CSV.'),
             onExit: () => Navigator.maybePop(context),
           ),
           Expanded(
             child: Column(
               children: <Widget>[
-                _ScreenHeader(title: widget.title, table: widget.table, total: rows.length, filtered: filtered.length),
+                _ScreenHeader(
+                    title: widget.title,
+                    table: widget.table,
+                    total: rows.length,
+                    filtered: filtered.length),
                 _FilterBar(controller: filter),
                 _Tabs(
                   tabs: tabs,
@@ -271,9 +295,16 @@ class _SimpleCrudScreenState extends State<SimpleCrudScreen> {
                         onEdit: addOrEdit,
                         onArchive: archiveOrRemove,
                       ),
-                      _IndividualView(rows: filtered, visibleFields: widget.visibleFields, labelFor: labelFor),
+                      _IndividualView(
+                          rows: filtered,
+                          visibleFields: widget.visibleFields,
+                          labelFor: labelFor),
                       _ReportView(rows: filtered, title: widget.title),
-                      const _PlaceholderOperationalTab(icon: Icons.attach_file_rounded, title: 'Anexos', subtitle: 'Área preparada para documentos, imagens e PDFs vinculados ao registro selecionado.'),
+                      const _PlaceholderOperationalTab(
+                          icon: Icons.attach_file_rounded,
+                          title: 'Anexos',
+                          subtitle:
+                              'Área preparada para documentos, imagens e PDFs vinculados ao registro selecionado.'),
                       _HistoryView(table: widget.table, rows: rows),
                     ],
                   ),
@@ -294,7 +325,9 @@ class _SimpleCrudScreenState extends State<SimpleCrudScreen> {
           title: Text(title),
           content: Text(message),
           actions: <Widget>[
-            ElevatedButton(onPressed: () => Navigator.pop(context), child: const Text('OK')),
+            ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK')),
           ],
         );
       },
@@ -325,7 +358,11 @@ class _LegacyActionPanel extends StatelessWidget {
       width: 142,
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: <Color>[Color(0xFF02A8B5), Color(0xFF047C8D), Color(0xFF073552)],
+          colors: <Color>[
+            Color(0xFF02A8B5),
+            Color(0xFF047C8D),
+            Color(0xFF073552)
+          ],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
@@ -337,38 +374,69 @@ class _LegacyActionPanel extends StatelessWidget {
           _ActionSection(
             title: 'Operações',
             buttons: <_ActionButtonData>[
-              _ActionButtonData(icon: Icons.add_circle_outline_rounded, label: 'Novo', onTap: onNew),
-              _ActionButtonData(icon: Icons.refresh_rounded, label: 'Atualizar', onTap: onRefresh),
-              _ActionButtonData(icon: Icons.check_circle_outline_rounded, label: 'Confirmar', onTap: onRefresh),
+              _ActionButtonData(
+                  icon: Icons.add_circle_outline_rounded,
+                  label: 'Novo',
+                  onTap: onNew),
+              _ActionButtonData(
+                  icon: Icons.refresh_rounded,
+                  label: 'Atualizar',
+                  onTap: onRefresh),
+              _ActionButtonData(
+                  icon: Icons.check_circle_outline_rounded,
+                  label: 'Confirmar',
+                  onTap: onRefresh),
             ],
           ),
           _ActionSection(
             title: 'Relatório',
             buttons: <_ActionButtonData>[
-              _ActionButtonData(icon: Icons.print_rounded, label: 'Imprimir', onTap: onPrint),
-              _ActionButtonData(icon: Icons.description_rounded, label: 'Resumo', onTap: onPrint),
+              _ActionButtonData(
+                  icon: Icons.print_rounded, label: 'Imprimir', onTap: onPrint),
+              _ActionButtonData(
+                  icon: Icons.description_rounded,
+                  label: 'Resumo',
+                  onTap: onPrint),
             ],
           ),
           _ActionSection(
             title: 'Exportar',
             buttons: <_ActionButtonData>[
-              _ActionButtonData(icon: Icons.file_download_rounded, label: 'CSV', onTap: onExport),
-              _ActionButtonData(icon: Icons.picture_as_pdf_rounded, label: 'PDF', onTap: onPrint),
+              _ActionButtonData(
+                  icon: Icons.file_download_rounded,
+                  label: 'CSV',
+                  onTap: onExport),
+              _ActionButtonData(
+                  icon: Icons.picture_as_pdf_rounded,
+                  label: 'PDF',
+                  onTap: onPrint),
             ],
           ),
           _ActionSection(
             title: 'Arquivos',
             buttons: <_ActionButtonData>[
-              _ActionButtonData(icon: Icons.attach_file_rounded, label: 'Anexos', onTap: onRefresh),
-              _ActionButtonData(icon: Icons.local_offer_rounded, label: 'Etiqueta', onTap: onPrint),
+              _ActionButtonData(
+                  icon: Icons.attach_file_rounded,
+                  label: 'Anexos',
+                  onTap: onRefresh),
+              _ActionButtonData(
+                  icon: Icons.local_offer_rounded,
+                  label: 'Etiqueta',
+                  onTap: onPrint),
             ],
           ),
           const SizedBox(height: 12),
           _ActionSection(
             title: 'Outras opções',
             buttons: <_ActionButtonData>[
-              _ActionButtonData(icon: Icons.help_outline_rounded, label: 'Ajuda', onTap: _empty),
-              _ActionButtonData(icon: Icons.exit_to_app_rounded, label: 'Sair', onTap: onExit),
+              _ActionButtonData(
+                  icon: Icons.help_outline_rounded,
+                  label: 'Ajuda',
+                  onTap: _empty),
+              _ActionButtonData(
+                  icon: Icons.exit_to_app_rounded,
+                  label: 'Sair',
+                  onTap: onExit),
             ],
           ),
         ],
@@ -397,7 +465,11 @@ class _ActionSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Text(title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: Colors.white)),
+          Text(title,
+              style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white)),
           const SizedBox(height: 6),
           for (final _ActionButtonData button in buttons)
             Padding(
@@ -407,9 +479,11 @@ class _ActionSection extends StatelessWidget {
                 icon: Icon(button.icon, size: 16),
                 label: Text(button.label, overflow: TextOverflow.ellipsis),
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 9),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 9),
                   alignment: Alignment.centerLeft,
-                  textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800),
+                  textStyle: const TextStyle(
+                      fontSize: 12, fontWeight: FontWeight.w800),
                 ),
               ),
             ),
@@ -425,7 +499,11 @@ class _ScreenHeader extends StatelessWidget {
   final int total;
   final int filtered;
 
-  const _ScreenHeader({required this.title, required this.table, required this.total, required this.filtered});
+  const _ScreenHeader(
+      {required this.title,
+      required this.table,
+      required this.total,
+      required this.filtered});
 
   @override
   Widget build(BuildContext context) {
@@ -433,17 +511,26 @@ class _ScreenHeader extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
       decoration: const BoxDecoration(
-        gradient: LinearGradient(colors: <Color>[Color(0xFF0CB7BD), Color(0xFF0A6B83)]),
+        gradient: LinearGradient(
+            colors: <Color>[Color(0xFF0CB7BD), Color(0xFF0A6B83)]),
       ),
       child: Row(
         children: <Widget>[
           Expanded(
             child: Text(
               title,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.white, shadows: <Shadow>[Shadow(offset: Offset(1, 1), blurRadius: 2)]),
+              style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                  shadows: <Shadow>[
+                    Shadow(offset: Offset(1, 1), blurRadius: 2)
+                  ]),
             ),
           ),
-          Text('Tabela: $table • Total: $total • Exibindo: $filtered', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+          Text('Tabela: $table • Total: $total • Exibindo: $filtered',
+              style: const TextStyle(
+                  color: Colors.white, fontWeight: FontWeight.w800)),
         ],
       ),
     );
@@ -463,7 +550,8 @@ class _FilterBar extends StatelessWidget {
         controller: controller,
         decoration: const InputDecoration(
           prefixIcon: Icon(Icons.search_rounded),
-          labelText: 'Pesquisar por paciente, exame, código, pedido ou qualquer dado da tabela',
+          labelText:
+              'Pesquisar por paciente, exame, código, pedido ou qualquer dado da tabela',
         ),
       ),
     );
@@ -475,7 +563,10 @@ class _Tabs extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onChanged;
 
-  const _Tabs({required this.tabs, required this.selectedIndex, required this.onChanged});
+  const _Tabs(
+      {required this.tabs,
+      required this.selectedIndex,
+      required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -492,7 +583,9 @@ class _Tabs extends StatelessWidget {
             onSelected: (_) => onChanged(index),
             selectedColor: const Color(0xFF123D63),
             backgroundColor: const Color(0xFF09233D),
-            labelStyle: TextStyle(color: selected ? Colors.white : const Color(0xFFBFD7EA), fontWeight: FontWeight.w800),
+            labelStyle: TextStyle(
+                color: selected ? Colors.white : const Color(0xFFBFD7EA),
+                fontWeight: FontWeight.w800),
             side: const BorderSide(color: Color(0xFF1B5E8F)),
           );
         },
@@ -528,7 +621,10 @@ class _RecordsTable extends StatelessWidget {
 
     final List<String> tableFields = <String>[
       ...visibleFields,
-      ...fields.where((String field) => !visibleFields.contains(field) && field != 'id').take(5),
+      ...fields
+          .where(
+              (String field) => !visibleFields.contains(field) && field != 'id')
+          .take(5),
     ];
 
     return Scrollbar(
@@ -543,7 +639,8 @@ class _RecordsTable extends StatelessWidget {
               headingRowColor: WidgetStateProperty.all(const Color(0xFF0A2A4E)),
               columns: <DataColumn>[
                 const DataColumn(label: Text('Ações')),
-                for (final String field in tableFields) DataColumn(label: Text(labelFor(field))),
+                for (final String field in tableFields)
+                  DataColumn(label: Text(labelFor(field))),
               ],
               rows: rows.map((Map<String, dynamic> row) {
                 return DataRow(
@@ -565,7 +662,8 @@ class _RecordsTable extends StatelessWidget {
                       ),
                     ),
                     for (final String field in tableFields)
-                      DataCell(Text(row[field]?.toString() ?? '', maxLines: 1, overflow: TextOverflow.ellipsis)),
+                      DataCell(Text(row[field]?.toString() ?? '',
+                          maxLines: 1, overflow: TextOverflow.ellipsis)),
                   ],
                 );
               }).toList(),
@@ -582,7 +680,10 @@ class _IndividualView extends StatelessWidget {
   final List<String> visibleFields;
   final String Function(String field) labelFor;
 
-  const _IndividualView({required this.rows, required this.visibleFields, required this.labelFor});
+  const _IndividualView(
+      {required this.rows,
+      required this.visibleFields,
+      required this.labelFor});
 
   @override
   Widget build(BuildContext context) {
@@ -600,7 +701,9 @@ class _IndividualView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                const Text('Visualização individual', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
+                const Text('Visualização individual',
+                    style:
+                        TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
                 const SizedBox(height: 12),
                 Wrap(
                   spacing: 12,
@@ -609,7 +712,8 @@ class _IndividualView extends StatelessWidget {
                     return SizedBox(
                       width: 290,
                       child: InputDecorator(
-                        decoration: InputDecoration(labelText: labelFor(entry.key)),
+                        decoration:
+                            InputDecoration(labelText: labelFor(entry.key)),
                         child: Text(entry.value?.toString() ?? ''),
                       ),
                     );
@@ -641,13 +745,18 @@ class _ReportView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text('Relatório: $title', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
+                Text('Relatório: $title',
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.w900)),
                 const SizedBox(height: 12),
-                Text('Total de registros filtrados: ${rows.length}', style: const TextStyle(color: Color(0xFFBFD7EA))),
+                Text('Total de registros filtrados: ${rows.length}',
+                    style: const TextStyle(color: Color(0xFFBFD7EA))),
                 const SizedBox(height: 16),
                 LinearProgressIndicator(value: rows.isEmpty ? 0 : 1),
                 const SizedBox(height: 16),
-                const Text('Área preparada para emissão oficial em PDF/CSV e integração com relatórios gerenciais.', style: TextStyle(color: Color(0xFFE6F4FF))),
+                const Text(
+                    'Área preparada para emissão oficial em PDF/CSV e integração com relatórios gerenciais.',
+                    style: TextStyle(color: Color(0xFFE6F4FF))),
               ],
             ),
           ),
@@ -670,9 +779,11 @@ class _HistoryView extends StatelessWidget {
       children: <Widget>[
         Card(
           child: ListTile(
-            leading: const Icon(Icons.history_rounded, color: Color(0xFF79D7FF)),
+            leading:
+                const Icon(Icons.history_rounded, color: Color(0xFF79D7FF)),
             title: const Text('Histórico permanente'),
-            subtitle: Text('Tabela $table • ${rows.length} registro(s) preservado(s). Dados clínicos/laboratoriais não devem ser excluídos fisicamente.'),
+            subtitle: Text(
+                'Tabela $table • ${rows.length} registro(s) preservado(s). Dados clínicos/laboratoriais não devem ser excluídos fisicamente.'),
           ),
         ),
       ],
@@ -685,7 +796,8 @@ class _PlaceholderOperationalTab extends StatelessWidget {
   final String title;
   final String subtitle;
 
-  const _PlaceholderOperationalTab({required this.icon, required this.title, required this.subtitle});
+  const _PlaceholderOperationalTab(
+      {required this.icon, required this.title, required this.subtitle});
 
   @override
   Widget build(BuildContext context) {
@@ -698,9 +810,15 @@ class _PlaceholderOperationalTab extends StatelessWidget {
             children: <Widget>[
               Icon(icon, size: 54, color: const Color(0xFF79D7FF)),
               const SizedBox(height: 12),
-              Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
+              Text(title,
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.w900)),
               const SizedBox(height: 8),
-              SizedBox(width: 460, child: Text(subtitle, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFFBFD7EA)))),
+              SizedBox(
+                  width: 460,
+                  child: Text(subtitle,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Color(0xFFBFD7EA)))),
             ],
           ),
         ),
@@ -714,5 +832,6 @@ class _ActionButtonData {
   final String label;
   final VoidCallback onTap;
 
-  const _ActionButtonData({required this.icon, required this.label, required this.onTap});
+  const _ActionButtonData(
+      {required this.icon, required this.label, required this.onTap});
 }

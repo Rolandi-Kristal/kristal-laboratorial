@@ -9,19 +9,19 @@ class KristalOperationalRules {
   static const List<String> prohibitedSimulationTerms = <String>[
     'real',
     'real',
-    'pendÃªncia operacional',
-    'mÃ³dulo operacional',
-    'implementaÃ§Ã£o operacional obrigatÃ³ria',
-    'implementaÃ§Ã£o operacional obrigatÃ³ria',
+    'pendência operacional',
+    'módulo operacional',
+    'implementação operacional obrigatória',
+    'implementação operacional obrigatória',
     'teste visual',
   ];
 
   static const String realOperationPolicy =
-      'Todas as rotas, menus, botÃµes, integraÃ§Ãµes e persistÃªncias devem executar aÃ§Ã£o real. '
-      'NÃ£o Ã© permitido fluxo real, pendÃªncia operacional ou botÃ£o sem aÃ§Ã£o.';
+      'Todas as rotas, menus, botões, integrações e persistências devem executar ação real. '
+      'Não é permitido fluxo real, pendência operacional ou botão sem ação.';
 
   static const String permanentRetentionPolicy =
-      'Dados clÃ­nicos, laboratoriais, laudos, resultados, amostras, pacientes, auditoria, '
-      'equipamentos e faturamento nÃ£o podem ser excluÃ­dos fisicamente. '
-      'Usar arquivamento lÃ³gico com rastreabilidade.';
+      'Dados clínicos, laboratoriais, laudos, resultados, amostras, pacientes, auditoria, '
+      'equipamentos e faturamento não podem ser excluídos fisicamente. '
+      'Usar arquivamento lógico com rastreabilidade.';
 }

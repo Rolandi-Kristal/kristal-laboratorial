@@ -1,7 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../services/auth_service.dart';
 import '../services/database_export_snapshot_service.dart';
+import '../services/log_service.dart';
 
 class SnapshotScreen extends StatefulWidget {
   final AuthSession session;
@@ -33,8 +38,8 @@ class _SnapshotScreenState extends State<SnapshotScreen> {
     });
 
     try {
-      final String path =
-          await DatabaseExportSnapshotService.instance.exportarSnapshotCriptografado(
+      final String path = await DatabaseExportSnapshotService.instance
+          .exportarSnapshotCriptografado(
         usuario: widget.session.login,
       );
 
@@ -43,12 +48,22 @@ class _SnapshotScreenState extends State<SnapshotScreen> {
       setState(() {
         mensagem = 'Snapshot criptografado criado em: $path';
       });
-    } catch (e) {
+    } on FileSystemException catch (e, stackTrace) {
+      await LogService.instance.error('SNAPSHOT_FILE', e, stackTrace);
       if (!mounted) return;
-
-      setState(() {
-        mensagem = 'Erro ao exportar snapshot: $e';
-      });
+      setState(() => mensagem = 'Erro ao exportar snapshot: $e');
+    } on DatabaseException catch (e, stackTrace) {
+      await LogService.instance.error('SNAPSHOT_DATABASE', e, stackTrace);
+      if (!mounted) return;
+      setState(() => mensagem = 'Erro ao exportar snapshot: $e');
+    } on StateError catch (e, stackTrace) {
+      await LogService.instance.error('SNAPSHOT_CRYPTO', e, stackTrace);
+      if (!mounted) return;
+      setState(() => mensagem = 'Erro ao exportar snapshot: $e');
+    } on MissingPluginException catch (e, stackTrace) {
+      await LogService.instance.error('SNAPSHOT_PLUGIN', e, stackTrace);
+      if (!mounted) return;
+      setState(() => mensagem = 'Erro ao exportar snapshot: $e');
     } finally {
       if (mounted) setState(() => running = false);
     }

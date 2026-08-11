@@ -108,8 +108,7 @@ class KristalAppointmentStoreService {
     final List<KristalAppointmentRecord> preAppointments =
         await loadAll('pre_agendamento');
 
-    final KristalAppointmentRecord preAppointment =
-        preAppointments.firstWhere(
+    final KristalAppointmentRecord preAppointment = preAppointments.firstWhere(
       (KristalAppointmentRecord record) => record.id == preAppointmentId,
       orElse: () => throw const FileSystemException(
         'Pré-agendamento não encontrado.',
@@ -188,7 +187,8 @@ class KristalAppointmentStoreService {
     await directory.create(recursive: true);
 
     final File file = File(
-      p.join(directory.path, '${type}_${DateTime.now().millisecondsSinceEpoch}.json'),
+      p.join(directory.path,
+          '${type}_${DateTime.now().millisecondsSinceEpoch}.json'),
     );
 
     await file.writeAsString(
@@ -234,7 +234,9 @@ class KristalAppointmentStoreService {
     final File file = await _fileForType(type);
     await file.writeAsString(
       const JsonEncoder.withIndent('  ').convert(
-        records.map((KristalAppointmentRecord record) => record.toJson()).toList(),
+        records
+            .map((KristalAppointmentRecord record) => record.toJson())
+            .toList(),
       ),
       encoding: utf8,
     );

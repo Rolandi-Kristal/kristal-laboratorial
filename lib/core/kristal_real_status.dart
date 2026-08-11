@@ -1,4 +1,4 @@
-﻿class KristalRealStatus {
+class KristalRealStatus {
   const KristalRealStatus._();
 
   static String loaded({required int total}) {
@@ -10,11 +10,11 @@
   }
 
   static String exported(String path) {
-    return 'ExportaÃ§Ã£o concluÃ­da: $path';
+    return 'Exportação concluída: $path';
   }
 
   static String updated({required int total}) {
-    return 'AtualizaÃ§Ã£o concluÃ­da. Registros carregados: $total.';
+    return 'Atualização concluída. Registros carregados: $total.';
   }
 
   static String error(Object error) {

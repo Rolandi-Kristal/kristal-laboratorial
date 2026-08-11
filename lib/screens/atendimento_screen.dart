@@ -13,11 +13,36 @@ class AtendimentoScreen extends StatelessWidget {
       icon: Icons.assignment_rounded,
       module: 'atendimento',
       fields: <KristalModuleField>[
-    KristalModuleField(key: 'paciente', label: 'Paciente', icon: Icons.person_rounded, maxLines: 1, required: true),
-    KristalModuleField(key: 'pedido', label: 'Pedido / Atendimento', icon: Icons.numbers_rounded, maxLines: 1, required: true),
-    KristalModuleField(key: 'convenio', label: 'Convênio', icon: Icons.apartment_rounded, maxLines: 1, required: true),
-    KristalModuleField(key: 'prioridade', label: 'Prioridade', icon: Icons.priority_high_rounded, maxLines: 1, required: true),
-    KristalModuleField(key: 'exames', label: 'Exames solicitados', icon: Icons.biotech_rounded, maxLines: 3, required: true),
+        KristalModuleField(
+            key: 'paciente',
+            label: 'Paciente',
+            icon: Icons.person_rounded,
+            maxLines: 1,
+            required: true),
+        KristalModuleField(
+            key: 'pedido',
+            label: 'Pedido / Atendimento',
+            icon: Icons.numbers_rounded,
+            maxLines: 1,
+            required: true),
+        KristalModuleField(
+            key: 'convenio',
+            label: 'Convênio',
+            icon: Icons.apartment_rounded,
+            maxLines: 1,
+            required: true),
+        KristalModuleField(
+            key: 'prioridade',
+            label: 'Prioridade',
+            icon: Icons.priority_high_rounded,
+            maxLines: 1,
+            required: true),
+        KristalModuleField(
+            key: 'exames',
+            label: 'Exames solicitados',
+            icon: Icons.biotech_rounded,
+            maxLines: 3,
+            required: true),
       ],
       primaryColumns: <String>['paciente', 'pedido', 'convenio', 'prioridade'],
     );
