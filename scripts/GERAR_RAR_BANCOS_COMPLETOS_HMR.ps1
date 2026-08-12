@@ -69,6 +69,50 @@ function Assert-ManifestDatabase {
   }
 }
 
+function Assert-OperationalEntitiesManifest {
+  param(
+    [Parameter(Mandatory = $true)][psobject]$Validation,
+    [Parameter(Mandatory = $true)][string]$DatabasePath
+  )
+  if ([IO.Path]::GetFullPath([string]$Validation.database) -ine [IO.Path]::GetFullPath($DatabasePath)) {
+    throw 'Manifesto de entidades aponta para banco diferente do arquivo de exportacao.'
+  }
+  if ([long]$Validation.database_bytes -ne (Get-Item -LiteralPath $DatabasePath).Length) {
+    throw 'Manifesto de entidades rejeitado: tamanho do banco divergente.'
+  }
+  $requiredTables = @(
+    'pacientes',
+    'exames',
+    'pedidos',
+    'amostras',
+    'resultados',
+    'legacy_operational_manifest'
+  )
+  $tableCounts = @{}
+  foreach ($table in @($Validation.tables)) {
+    $tableCounts[[string]$table.table] = [long]$table.rows
+  }
+  foreach ($requiredTable in $requiredTables) {
+    if (-not $tableCounts.ContainsKey($requiredTable) -or [long]$tableCounts[$requiredTable] -lt 1) {
+      throw "Manifesto de entidades rejeitado: tabela ausente ou vazia: $requiredTable"
+    }
+    if ([long]$Validation.empty_ids.$requiredTable -ne 0) {
+      throw "Manifesto de entidades rejeitado: IDs vazios em $requiredTable."
+    }
+  }
+  foreach ($orphanProperty in @(
+    'orphan_orders',
+    'orphan_samples_patients',
+    'orphan_samples_orders',
+    'orphan_results_patients',
+    'orphan_results_orders',
+    'orphan_results_samples'
+  )) {
+    if ([long]$Validation.$orphanProperty -ne 0) {
+      throw "Manifesto de entidades rejeitado: relacionamento orfao em $orphanProperty."
+    }
+  }
+}
 if (-not (Test-Administrator)) {
   throw 'Execute este gerador como Administrador na maquina de desenvolvimento.'
 }
@@ -81,8 +125,9 @@ $output = [IO.Path]::GetFullPath($OutputRoot)
 $operationalDb = Join-Path $sourceRoot 'kristal_laboratorial.db'
 $corporateDb = Join-Path $sourceRoot 'kristal_corporativo.db'
 $operationalManifest = Join-Path $sourceRoot 'MANIFESTO_INTEGRIDADE_BANCO_PRODUCAO.json'
+$entitiesManifest = Join-Path $sourceRoot 'MANIFESTO_ENTIDADES_OPERACIONAIS.json'
 $corporateManifest = Join-Path $sourceRoot 'MANIFESTO_INTEGRIDADE_BANCO_CORPORATIVO.json'
-foreach ($required in @($operationalDb, $corporateDb, $operationalManifest, $corporateManifest, $RarExe)) {
+foreach ($required in @($operationalDb, $corporateDb, $operationalManifest, $entitiesManifest, $corporateManifest, $RarExe)) {
   if (-not (Test-Path -LiteralPath $required -PathType Leaf)) {
     throw "Arquivo obrigatorio ausente: $required"
   }
@@ -97,8 +142,10 @@ foreach ($database in @($operationalDb, $corporateDb)) {
 }
 
 $operationalValidation = Get-Content -LiteralPath $operationalManifest -Raw | ConvertFrom-Json
+$entitiesValidation = Get-Content -LiteralPath $entitiesManifest -Raw | ConvertFrom-Json
 $corporateValidation = Get-Content -LiteralPath $corporateManifest -Raw | ConvertFrom-Json
 Assert-ManifestDatabase -Validation $operationalValidation -DatabasePath $operationalDb -Kind operacional
+Assert-OperationalEntitiesManifest -Validation $entitiesValidation -DatabasePath $operationalDb
 Assert-ManifestDatabase -Validation $corporateValidation -DatabasePath $corporateDb -Kind corporativo
 
 $rarItem = Get-Item -LiteralPath $RarExe
@@ -142,12 +189,14 @@ try {
     }
   }
   Copy-Item -LiteralPath $operationalManifest -Destination (Join-Path $stage 'MANIFESTO_INTEGRIDADE_BANCO_PRODUCAO.json')
+  Copy-Item -LiteralPath $entitiesManifest -Destination (Join-Path $stage 'MANIFESTO_ENTIDADES_OPERACIONAIS.json')
   Copy-Item -LiteralPath $corporateManifest -Destination (Join-Path $stage 'MANIFESTO_INTEGRIDADE_BANCO_CORPORATIVO.json')
   foreach ($scriptName in @(
     'instalar_bancos_seed_servidor.ps1',
     'INSTALAR_BANCOS_COMPLETOS_SERVIDOR.ps1',
     'checkpoint_sqlite_kristal.py',
     'validar_banco_producao_kristal.py',
+    'validar_entidades_operacionais_kristal.py',
     'validar_banco_corporativo_kristal.py'
   )) {
     $scriptSource = Join-Path $PSScriptRoot $scriptName
@@ -196,6 +245,7 @@ Nao copie os arquivos diretamente sobre D:\kristal_laboratorial\data.
     fontes_legadas = [long]$operationalValidation.completed_sources
     tabelas_legadas = [long]$operationalValidation.distinct_legacy_tables
     linhas_legadas = [long]$operationalValidation.total_rows
+    entidades_operacionais = @($entitiesValidation.tables).Count
     registros_corporativos = [long]$corporateValidation.current_records
     versao_corporativa = [long]$corporateValidation.current_version
     quick_check_operacional = [string]$operationalValidation.quick_check

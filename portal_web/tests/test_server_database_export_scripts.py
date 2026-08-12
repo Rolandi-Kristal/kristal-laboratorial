@@ -22,12 +22,25 @@ class ServerDatabaseExportScriptTests(unittest.TestCase):
             "kristal_laboratorial.db",
             "kristal_corporativo.db",
             "MANIFESTO_INTEGRIDADE_BANCO_PRODUCAO.json",
+            "MANIFESTO_ENTIDADES_OPERACIONAIS.json",
             "MANIFESTO_INTEGRIDADE_BANCO_CORPORATIVO.json",
             "quick_check",
             "integrity_check",
             "35385785",
         ):
             self.assertIn(required, self.generator)
+
+    def test_package_and_installer_require_materialized_entities(self) -> None:
+        for content in (self.generator, self.installer):
+            for required in (
+                "MANIFESTO_ENTIDADES_OPERACIONAIS.json",
+                "legacy_operational_manifest",
+                "orphan_orders",
+                "orphan_results_samples",
+                "empty_ids",
+            ):
+                self.assertIn(required, content)
+        self.assertIn("validar_entidades_operacionais_kristal.py", self.generator)
 
     def test_generator_encrypts_data_and_headers_without_embedded_password(self) -> None:
         self.assertIn("-hp", self.generator)

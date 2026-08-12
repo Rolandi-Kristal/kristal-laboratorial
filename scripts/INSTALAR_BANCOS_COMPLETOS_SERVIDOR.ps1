@@ -52,6 +52,51 @@ function Assert-ValidationManifest {
   }
 }
 
+function Assert-OperationalEntitiesManifest {
+  param(
+    [Parameter(Mandatory = $true)][string]$ManifestPath,
+    [Parameter(Mandatory = $true)][string]$DatabasePath
+  )
+  if (-not (Test-Path -LiteralPath $ManifestPath -PathType Leaf)) {
+    throw "Manifesto de entidades operacionais ausente: $ManifestPath"
+  }
+  $validation = Get-Content -LiteralPath $ManifestPath -Raw | ConvertFrom-Json
+  if ([long]$validation.database_bytes -ne (Get-Item -LiteralPath $DatabasePath).Length) {
+    throw 'Manifesto de entidades rejeitado: tamanho do banco divergente.'
+  }
+  $requiredTables = @(
+    'pacientes',
+    'exames',
+    'pedidos',
+    'amostras',
+    'resultados',
+    'legacy_operational_manifest'
+  )
+  $tableCounts = @{}
+  foreach ($table in @($validation.tables)) {
+    $tableCounts[[string]$table.table] = [long]$table.rows
+  }
+  foreach ($requiredTable in $requiredTables) {
+    if (-not $tableCounts.ContainsKey($requiredTable) -or [long]$tableCounts[$requiredTable] -lt 1) {
+      throw "Manifesto de entidades rejeitado: tabela ausente ou vazia: $requiredTable"
+    }
+    if ([long]$validation.empty_ids.$requiredTable -ne 0) {
+      throw "Manifesto de entidades rejeitado: IDs vazios em $requiredTable."
+    }
+  }
+  foreach ($orphanProperty in @(
+    'orphan_orders',
+    'orphan_samples_patients',
+    'orphan_samples_orders',
+    'orphan_results_patients',
+    'orphan_results_orders',
+    'orphan_results_samples'
+  )) {
+    if ([long]$validation.$orphanProperty -ne 0) {
+      throw "Manifesto de entidades rejeitado: relacionamento orfao em $orphanProperty."
+    }
+  }
+}
 if (-not (Test-Administrator)) {
   throw 'Execute este instalador como Administrador no servidor KRISTAL.'
 }
@@ -64,6 +109,7 @@ $dataSeed = Join-Path $packageRoot 'data_seed'
 $operationalDb = Join-Path $dataSeed 'kristal_laboratorial.db'
 $corporateDb = Join-Path $dataSeed 'kristal_corporativo.db'
 $operationalManifest = Join-Path $packageRoot 'MANIFESTO_INTEGRIDADE_BANCO_PRODUCAO.json'
+$entitiesManifest = Join-Path $packageRoot 'MANIFESTO_ENTIDADES_OPERACIONAIS.json'
 $corporateManifest = Join-Path $packageRoot 'MANIFESTO_INTEGRIDADE_BANCO_CORPORATIVO.json'
 $packageManifest = Join-Path $packageRoot 'MANIFESTO_SHA256.json'
 $seedInstaller = Join-Path $PSScriptRoot 'instalar_bancos_seed_servidor.ps1'
@@ -72,6 +118,7 @@ foreach ($required in @(
   $operationalDb,
   $corporateDb,
   $operationalManifest,
+  $entitiesManifest,
   $corporateManifest,
   $packageManifest,
   $seedInstaller,
@@ -82,6 +129,7 @@ foreach ($required in @(
   }
 }
 Assert-ValidationManifest -ManifestPath $operationalManifest -Kind operacional
+Assert-OperationalEntitiesManifest -ManifestPath $entitiesManifest -DatabasePath $operationalDb
 Assert-ValidationManifest -ManifestPath $corporateManifest -Kind corporativo
 
 $serverUri = $null
@@ -165,6 +213,7 @@ try {
   }
 
   Copy-Item -LiteralPath $operationalManifest -Destination (Join-Path $destinationData 'MANIFESTO_INTEGRIDADE_BANCO_PRODUCAO.json') -Force
+  Copy-Item -LiteralPath $entitiesManifest -Destination (Join-Path $destinationData 'MANIFESTO_ENTIDADES_OPERACIONAIS.json') -Force
   Copy-Item -LiteralPath $corporateManifest -Destination (Join-Path $destinationData 'MANIFESTO_INTEGRIDADE_BANCO_CORPORATIVO.json') -Force
   $rollbackRequired = $false
 } finally {
