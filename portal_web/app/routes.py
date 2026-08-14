@@ -1779,7 +1779,9 @@ def _validate_api_key(*, settings: Settings, api_key: str | None) -> None:
     provided = (api_key or "").strip()
     if not expected:
         raise HTTPException(status_code=503, detail="KRISTAL_API_KEY não configurada no servidor.")
-    if not provided or not SecurityService.constant_time_compare(provided, expected):
+    if not provided:
+        raise HTTPException(status_code=401, detail="Chave API ausente.")
+    if not SecurityService.constant_time_compare(provided, expected):
         raise HTTPException(status_code=403, detail="Chave API inválida.")
 
 

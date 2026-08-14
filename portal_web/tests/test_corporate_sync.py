@@ -6,6 +6,7 @@ import sys
 import tempfile
 import unittest
 from contextlib import closing
+from types import SimpleNamespace
 from pathlib import Path
 
 from fastapi import HTTPException
@@ -23,10 +24,37 @@ from app.routes import (
     _normalize_brl_or_400,
     _read_backup_schedule,
     _reject_machine_tombstones,
+    _validate_api_key,
     _validate_backup_time,
     _write_backup_schedule,
 )
 from scripts.preparar_banco_corporativo_kristal import seed
+
+
+class ApiKeyValidationTests(unittest.TestCase):
+    def test_rejects_missing_key_as_unauthenticated(self) -> None:
+        with self.assertRaises(HTTPException) as raised:
+            _validate_api_key(
+                settings=SimpleNamespace(api_key="a" * 32),
+                api_key=None,
+            )
+        self.assertEqual(raised.exception.status_code, 401)
+
+    def test_rejects_wrong_key_as_forbidden(self) -> None:
+        with self.assertRaises(HTTPException) as raised:
+            _validate_api_key(
+                settings=SimpleNamespace(api_key="a" * 32),
+                api_key="b" * 32,
+            )
+        self.assertEqual(raised.exception.status_code, 403)
+
+    def test_rejects_unconfigured_server_key(self) -> None:
+        with self.assertRaises(HTTPException) as raised:
+            _validate_api_key(
+                settings=SimpleNamespace(api_key=""),
+                api_key="a" * 32,
+            )
+        self.assertEqual(raised.exception.status_code, 503)
 
 
 class CorporateSyncStoreTests(unittest.TestCase):

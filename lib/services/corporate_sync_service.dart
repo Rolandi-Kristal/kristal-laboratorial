@@ -19,6 +19,35 @@ class CorporateSyncResult {
   final int pulled;
 }
 
+class CorporateInitialSyncDecision {
+  const CorporateInitialSyncDecision._({required this.initialPullRequired});
+
+  factory CorporateInitialSyncDecision.fromStoredValue(String? value) {
+    return CorporateInitialSyncDecision._(
+      initialPullRequired: value?.trim() != '1',
+    );
+  }
+
+  final bool initialPullRequired;
+}
+
+class CorporateInitialSyncOutboxPolicy {
+  const CorporateInitialSyncOutboxPolicy._();
+
+  static bool suppressAsPreexisting({
+    required int queueId,
+    required int initialWatermark,
+  }) =>
+      queueId <= initialWatermark;
+}
+
+class _CorporatePullResult {
+  const _CorporatePullResult({required this.total, required this.hasMore});
+
+  final int total;
+  final bool hasMore;
+}
+
 class CorporateSyncService {
   CorporateSyncService._();
   static final instance = CorporateSyncService._();
@@ -107,10 +136,40 @@ class CorporateSyncService {
         return const CorporateSyncResult(false, 'Chave API não configurada.');
       }
       final base = _base(cfg), client = await _client();
-      final pushed = await _push(base, key, client),
-          pulled = await _pull(base, key, client);
+      final db = await DatabaseService.instance.database;
+      final initialDecision = CorporateInitialSyncDecision.fromStoredValue(
+        await _state(db, 'initial_pull_complete'),
+      );
+      if (initialDecision.initialPullRequired) {
+        final initialWatermark = await _initialPullOutboxWatermark(db);
+        final initialPull = await _pull(base, key, client);
+        if (!initialPull.hasMore) {
+          await db.transaction((txn) async {
+            await _set(
+              txn,
+              'outbox_suppressed_through',
+              '$initialWatermark',
+            );
+            await _set(txn, 'initial_pull_complete', '1');
+            await _set(
+              txn,
+              'initial_pull_completed_at',
+              DateTime.now().toUtc().toIso8601String(),
+            );
+          });
+        }
+        return CorporateSyncResult(
+          true,
+          initialPull.hasMore
+              ? 'Carga inicial do servidor em andamento; envio local bloqueado até a conclusão.'
+              : 'Carga inicial do servidor concluída; sincronização bidirecional liberada.',
+          pulled: initialPull.total,
+        );
+      }
+      final pushed = await _push(base, key, client);
+      final pull = await _pull(base, key, client);
       return CorporateSyncResult(true, 'Sincronização concluída.',
-          pushed: pushed, pulled: pulled);
+          pushed: pushed, pulled: pull.total);
     } on SocketException catch (e) {
       return CorporateSyncResult(
           false, 'Servidor indisponível; fila preservada: ${e.message}');
@@ -130,10 +189,16 @@ class CorporateSyncService {
 
   Future<int> _push(Uri base, String key, String client) async {
     final db = await DatabaseService.instance.database;
+    final suppressedThrough = int.tryParse(
+          await _state(db, 'outbox_suppressed_through') ?? '',
+        ) ??
+        0;
     final rows = await db.rawQuery(
         'SELECT o.* FROM corporate_sync_outbox o INNER JOIN '
-        '(SELECT entity,record_id,MAX(id) max_id FROM corporate_sync_outbox GROUP BY '
-        'entity,record_id)x ON x.max_id=o.id ORDER BY o.id LIMIT 200');
+        '(SELECT entity,record_id,MAX(id) max_id FROM corporate_sync_outbox '
+        'WHERE id>? GROUP BY entity,record_id)x ON x.max_id=o.id '
+        'ORDER BY o.id LIMIT 200',
+        [suppressedThrough]);
     if (rows.isEmpty) return 0;
     final records = <Map<String, Object?>>[], pending = <String, int>{};
     for (final row in rows) {
@@ -220,10 +285,12 @@ class CorporateSyncService {
     return confirmed.length;
   }
 
-  Future<int> _pull(Uri base, String key, String client) async {
+  Future<_CorporatePullResult> _pull(
+      Uri base, String key, String client) async {
     final db = await DatabaseService.instance.database;
     var version = int.tryParse(await _state(db, 'server_version') ?? '') ?? 0,
         total = 0;
+    var hasMore = false;
     for (var page = 0; page < 20; page++) {
       final answer = await _http(base, '/api/server/sync/pull', key, query: {
         'client_id': client,
@@ -232,6 +299,11 @@ class CorporateSyncService {
       });
       final records = answer['records'];
       if (records is! List) throw const FormatException('Alterações ausentes.');
+      hasMore = answer['has_more'] == true;
+      if (hasMore && records.isEmpty) {
+        throw const FormatException(
+            'Servidor informou continuação sem retornar registros.');
+      }
       await db.transaction((txn) async {
         await _set(txn, 'applying_remote', '1');
         try {
@@ -247,9 +319,9 @@ class CorporateSyncService {
         }
       });
       total += records.length;
-      if (answer['has_more'] != true || records.isEmpty) break;
+      if (!hasMore || records.isEmpty) break;
     }
-    return total;
+    return _CorporatePullResult(total: total, hasMore: hasMore);
   }
 
   Future<void> _apply(
@@ -355,6 +427,19 @@ class CorporateSyncService {
     final rows = await db.query('corporate_sync_state',
         columns: ['value'], where: 'key=?', whereArgs: [key], limit: 1);
     return rows.isEmpty ? null : rows.first['value']?.toString();
+  }
+
+  Future<int> _initialPullOutboxWatermark(Database db) async {
+    final saved = int.tryParse(
+      await _state(db, 'initial_pull_outbox_watermark') ?? '',
+    );
+    if (saved != null && saved >= 0) return saved;
+    final rows = await db.rawQuery(
+      'SELECT COALESCE(MAX(id),0) AS max_id FROM corporate_sync_outbox',
+    );
+    final watermark = (rows.first['max_id'] as num?)?.toInt() ?? 0;
+    await _set(db, 'initial_pull_outbox_watermark', '$watermark');
+    return watermark;
   }
 
   Future<void> _set(DatabaseExecutor db, String key, String value) =>
